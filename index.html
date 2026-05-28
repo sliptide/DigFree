@@ -116,11 +116,11 @@
   .btn.ghost:hover { border-color: var(--ink); }
   .btn.danger { color: var(--press) !important; border-color: var(--press) !important; }
   .btn.danger:hover { background: rgba(217,0,24,0.06) !important; }
-  .press-btn { font-family: 'Space Mono', monospace; font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; background: none; border: 1px solid var(--rule); color: var(--mid); padding: 12px 26px; cursor: pointer; transition: all 0.12s; }
+  .press-btn { font-family: 'Space Mono', monospace; font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; background: none; border: 1px solid var(--rule); color: var(--mid); padding: 12px 26px; cursor: pointer; transition: all 0.12s; text-decoration: none; display: inline-block; }
   .press-btn:hover { color: var(--ink); border-color: var(--ink); }
   .press-btn.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
   .press-btn.primary:hover { background: #2a2a2a; }
-  .btn-sm { font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; background: none; border: 1px solid var(--rule); color: var(--mid); padding: 7px 16px; cursor: pointer; transition: all 0.12s; }
+  .btn-sm { font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; background: none; border: 1px solid var(--rule); color: var(--mid); padding: 7px 16px; cursor: pointer; transition: all 0.12s; text-decoration: none; display: inline-block; }
   .btn-sm:hover { color: var(--ink); border-color: var(--ink); }
   .btn-sm.active, .btn-sm.amber { background: var(--ink); color: var(--paper); border-color: var(--ink); }
   .btn-row { display: flex; gap: 8px; }
@@ -1539,6 +1539,7 @@ function renderAlbumCard({ pick, rating, tracklist, imgDataUrl, take, facts, hig
       : '';
     footerButtons = `
       <button class="press-btn" onclick="showView('browse')">← Back to Collection</button>
+      ${pick.id ? `<a class="press-btn" href="https://www.discogs.com/release/${pick.id}" target="_blank" rel="noopener noreferrer">↗ Discogs</a>` : ''}
       ${aiBtn}`;
   } else {
     const todayEntry = history[0];
@@ -2066,6 +2067,7 @@ function filterBrowse() {
         </div>
         <div class="browse-actions">
           <button class="btn-sm" onclick="addToHistory(${r.id})" title="Add to listen history">+ History</button>
+          <a class="btn-sm" href="https://www.discogs.com/release/${r.id}" target="_blank" rel="noopener noreferrer" title="View on Discogs">↗ Discogs</a>
           ${lastAdded}
         </div>
       </div>`;
