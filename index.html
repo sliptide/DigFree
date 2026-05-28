@@ -5,1400 +5,385 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dig Free · Album of the Day</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Source+Serif+4:ital,opsz,wght@0,8..60,300;0,8..60,400;0,8..60,600;1,8..60,300;1,8..60,400;1,8..60,600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --black:    #0e0d0b;
-    --wax:      #161410;
-    --groove:   #1f1d19;
-    --amber:    #c8922a;
-    --amber-lt: #e8b84b;
-    --cream:    #ede8dc;
-    --muted:    #7a7368;
-    --label:    #3a3530;
-    --red:      #b84040;
-    --green:    #4a8c5c;
-    --radius:   12px;
-    --gap:      24px;
-  }
+/* ═══════════════════════════════════════════════════════
+   THE MUSIC PRESS — Design System
+═══════════════════════════════════════════════════════ */
+:root {
+  --paper: #faf8f5;
+  --white: #ffffff;
+  --ink:   #0c0c0c;
+  --press: #d90018;
+  --mid:   #787470;
+  --rule:  #e0ddd8;
+  --lift:  #f3f1ee;
+  /* chart colours kept from v1 */
+  --green: #4a8c5c;
+  --red:   #b84040;
+  --amber: #c8922a;
+}
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+  html, body { height: 100%; background: var(--paper); }
+
   body {
-    background: var(--black);
-    color: var(--cream);
-    font-family: 'Lora', Georgia, serif;
-    min-height: 100vh;
-    overflow-x: hidden;
+    color: var(--ink);
+    font-family: 'Source Serif 4', serif;
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 1.7;
   }
-
-  /* Subtle noise texture overlay */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 9999;
-    opacity: 0.4;
-  }
-
-  /* ── HEADER ── */
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px 32px;
-    border-bottom: 1px solid var(--label);
-    position: sticky;
-    top: 0;
-    background: rgba(14,13,11,0.92);
-    backdrop-filter: blur(12px);
-    z-index: 100;
-  }
-
-  .logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.4rem;
-    font-weight: 900;
-    letter-spacing: -0.02em;
-    color: var(--amber);
-  }
-  .logo span { color: var(--cream); font-weight: 400; font-style: italic; }
-
-  nav { display: flex; gap: 4px; }
-  .nav-btn {
-    background: none;
-    border: 1px solid transparent;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.72rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 6px 14px;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .nav-btn:hover { color: var(--cream); border-color: var(--label); }
-  .nav-btn.active { color: var(--amber); border-color: var(--amber); background: rgba(200,146,42,0.08); }
 
   /* ── VIEWS ── */
-  .view { display: none; padding: 40px 32px; max-width: 900px; margin: 0 auto; }
+  .view { display: none; }
   .view.active { display: block; }
 
-  /* ── SETUP VIEW ── */
-  .setup-card {
-    background: var(--wax);
-    border: 1px solid var(--label);
-    border-radius: var(--radius);
-    padding: 48px;
-    max-width: 520px;
-    margin: 60px auto 0;
+  /* ── MASTHEAD / NAV ── */
+  .press-masthead { position: sticky; top: 0; z-index: 100; background: var(--ink); }
+  .press-masthead-top {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 40px; height: 54px; border-bottom: 3px solid var(--press);
   }
-  .setup-card h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin-bottom: 8px;
+  .press-logo { font-family: 'Bebas Neue', sans-serif; font-size: 1.9rem; letter-spacing: 0.08em; color: var(--paper); line-height: 1; cursor: pointer; }
+  .press-logo em { color: var(--press); font-style: normal; }
+  .press-masthead-right { font-family: 'Space Mono', monospace; font-size: 0.55rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(250,248,245,0.4); }
+  .press-nav { display: flex; background: var(--press); }
+  .press-nav button {
+    font-family: 'Space Mono', monospace; font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(250,248,245,0.75); background: none; border: none; border-right: 1px solid rgba(255,255,255,0.12);
+    padding: 9px 20px; cursor: pointer; transition: background 0.12s, color 0.12s;
   }
-  .setup-card p {
-    color: var(--muted);
-    font-size: 0.9rem;
-    line-height: 1.6;
-    margin-bottom: 32px;
-  }
-  .setup-card a { color: var(--amber); }
+  .press-nav button:hover { background: rgba(0,0,0,0.15); color: var(--paper); }
+  .press-nav button.active { background: rgba(0,0,0,0.2); color: var(--paper); font-weight: 700; }
 
-  label {
-    display: block;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.68rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 6px;
+  /* ── BOOT LOADER ── */
+  #boot-loader {
+    position: fixed; inset: 0; background: var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    flex-direction: column; gap: 16px; z-index: 9998; transition: opacity 0.3s;
   }
-  input[type="text"], input[type="password"] {
-    width: 100%;
-    background: var(--groove);
-    border: 1px solid var(--label);
-    border-radius: 8px;
-    color: var(--cream);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.85rem;
-    padding: 12px 14px;
-    margin-bottom: 20px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  input:focus { border-color: var(--amber); }
+  #boot-loader.hidden { opacity: 0; pointer-events: none; }
+  #boot-loader .boot-logo { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; letter-spacing: 0.08em; color: var(--paper); }
+  #boot-loader .boot-logo em { color: var(--press); font-style: normal; }
 
-  .btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--amber);
-    color: var(--black);
-    border: none;
-    border-radius: 8px;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.8rem;
-    font-weight: 500;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 12px 24px;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-    width: 100%;
-    justify-content: center;
-  }
-  .btn:hover { background: var(--amber-lt); }
-  .btn:active { transform: scale(0.98); }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .btn.secondary {
-    background: var(--groove);
-    color: var(--cream);
-    border: 1px solid var(--label);
-  }
-  .btn.secondary:hover { background: var(--label); }
-  .btn.ghost {
-    background: transparent;
-    color: var(--amber);
-    border: 1px solid var(--amber);
-  }
-  .btn.ghost:hover { background: rgba(200,146,42,0.1); }
-
-  /* ── TODAY VIEW ── */
-  .status-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 28px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--label);
-  }
-  .status-info {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--muted);
-    letter-spacing: 0.05em;
-  }
-  .status-info strong { color: var(--cream); }
-  .btn-row { display: flex; gap: 10px; }
-  .btn-sm {
-    background: var(--groove);
-    border: 1px solid var(--label);
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.68rem;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    padding: 7px 14px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .btn-sm:hover { color: var(--cream); border-color: var(--muted); }
-  .btn-sm.amber { color: var(--amber); border-color: var(--amber); background: rgba(200,146,42,0.08); }
-
-  /* ── ALBUM CARD ── */
-  .album-card {
-    background: var(--wax);
-    border: 1px solid var(--label);
-    border-radius: var(--radius);
-    overflow: hidden;
-    animation: fadeUp 0.4s ease;
-  }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  .card-header {
-    display: flex;
-    gap: 28px;
-    padding: 32px;
-    background: linear-gradient(135deg, var(--groove) 0%, var(--wax) 100%);
-    border-bottom: 1px solid var(--label);
-    position: relative;
-  }
-
-  .card-badge {
-    position: absolute;
-    top: 20px; right: 24px;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--amber);
-    opacity: 0.8;
-  }
-
-  .album-art-wrap {
-    flex-shrink: 0;
-    width: 180px;
-    height: 180px;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 8px 8px 32px rgba(0,0,0,0.6);
-    position: relative;
-  }
-  .album-art-wrap img {
-    width: 100%; height: 100%;
-    object-fit: cover;
-    display: block;
-  }
-  .art-placeholder {
-    width: 100%; height: 100%;
-    background: var(--label);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .vinyl-svg { width: 100px; height: 100px; opacity: 0.4; }
-
-  .card-meta { flex: 1; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
-
-  .card-artist {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.6rem;
-    font-weight: 900;
-    line-height: 1.1;
-    margin-bottom: 6px;
-    color: var(--cream);
-  }
-  .card-title {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    font-size: 1.15rem;
-    color: var(--amber-lt);
-    margin-bottom: 16px;
-  }
-  .card-pills {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 16px;
-  }
-  .pill {
-    background: var(--label);
-    border-radius: 20px;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 4px 10px;
-    color: var(--muted);
-  }
-  .pill.year { color: var(--amber); background: rgba(200,146,42,0.12); }
-
-  .rating-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.75rem;
-    color: var(--muted);
-  }
-  .stars { color: var(--amber); letter-spacing: -2px; }
-
-  /* ── CARD SECTIONS ── */
-  .card-section {
-    padding: 24px 32px;
-    border-bottom: 1px solid var(--label);
-  }
-  .card-section:last-child { border-bottom: none; }
-
-  .section-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    color: var(--amber);
-    margin-bottom: 12px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  .section-label::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: var(--label);
-  }
-
-  .take-text {
-    font-size: 0.95rem;
-    line-height: 1.8;
-    color: var(--cream);
-    font-style: italic;
-  }
-
-  .facts-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
-  .facts-list li {
-    display: flex;
-    gap: 12px;
-    font-size: 0.88rem;
-    line-height: 1.6;
-    color: var(--cream);
-    opacity: 0.85;
-  }
-  .facts-list li::before {
-    content: '◆';
-    color: var(--amber);
-    font-size: 0.5rem;
-    margin-top: 6px;
-    flex-shrink: 0;
-  }
-
-  .tracks-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
-  .tracks-list li { display: flex; gap: 16px; align-items: baseline; }
-  .track-name {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.78rem;
-    color: var(--amber-lt);
-    flex-shrink: 0;
-    max-width: 220px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .track-note {
-    font-size: 0.85rem;
-    color: var(--muted);
-    line-height: 1.5;
-  }
-
-  .card-footer {
-    padding: 20px 32px;
-    display: flex;
-    gap: 12px;
-    background: rgba(0,0,0,0.2);
-  }
-
-  /* ── LOADING STATE ── */
-  .loading-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 80px 20px;
-    gap: 20px;
-  }
-  .spinner {
-    width: 48px; height: 48px;
-    border-radius: 50%;
-    border: 3px solid var(--label);
-    border-top-color: var(--amber);
-    animation: spin 0.8s linear infinite;
-  }
+  /* ── SPINNER ── */
+  .spinner { width: 36px; height: 36px; border-radius: 50%; border: 2px solid rgba(250,248,245,0.2); border-top-color: var(--press); animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .loading-text {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.75rem;
-    letter-spacing: 0.08em;
-    color: var(--muted);
-    text-transform: uppercase;
-  }
+  .loading-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 80px 20px; gap: 16px; }
+  .loading-text { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mid); }
 
   /* ── ERROR ── */
-  .error-box {
-    background: rgba(184,64,64,0.1);
-    border: 1px solid rgba(184,64,64,0.3);
-    border-radius: 8px;
-    padding: 16px 20px;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.8rem;
-    color: #e08080;
-    margin-bottom: 20px;
-  }
-
-  /* ── HISTORY VIEW ── */
-  .history-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    margin-bottom: 28px;
-  }
-  .history-header h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.6rem;
-    font-weight: 700;
-  }
-  .history-count {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--muted);
-    display: block;
-    margin-top: 2px;
-  }
-  .history-filters { display: flex; gap: 6px; flex-shrink: 0; }
-
-  .hist-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 4px;
-  }
-  .hist-remove {
-    background: none;
-    border: none;
-    color: transparent;
-    font-size: 1rem;
-    line-height: 1;
-    padding: 0 2px;
-    cursor: pointer;
-    transition: color 0.15s;
-    flex-shrink: 0;
-  }
-  .hist-card:hover .hist-remove { color: var(--muted); }
-  .hist-remove:hover { color: var(--red) !important; }
-
-  .hist-source {
-    display: inline-block;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.58rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 2px 8px;
-    border-radius: 10px;
-  }
-  .hist-source.daily { color: var(--amber);  background: rgba(200,146,42,0.12); }
-  .hist-source.user  { color: var(--green);  background: rgba(74,140,92,0.15);  }
-
-  /* WordPress publish controls */
-  .hist-wp { display:flex; align-items:center; gap:6px; margin-top:6px; }
-  .hist-wp-btn {
-    background: none;
-    border: 1px solid var(--label);
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.6rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 3px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: color 0.15s, border-color 0.15s;
-  }
-  .hist-wp-btn:hover { color: var(--amber); border-color: var(--amber); }
-  .hist-wp-btn.danger:hover { color: var(--red); border-color: rgba(184,64,64,0.4); }
-  .hist-published {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.6rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--green);
-    opacity: 0.85;
-  }
-
-  .history-empty {
-    text-align: center;
-    padding: 80px 20px;
-    color: var(--muted);
-    font-style: italic;
-  }
-
-  .history-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 16px;
-  }
-  .hist-card {
-    background: var(--wax);
-    border: 1px solid var(--label);
-    border-radius: 10px;
-    overflow: hidden;
-    transition: border-color 0.2s, transform 0.2s;
-    cursor: default;
-  }
-  .hist-card:hover { border-color: var(--amber); transform: translateY(-2px); }
-  .hist-art-link {
-    display: block;
-    width: 100%; aspect-ratio: 1;
-    overflow: hidden;
-    position: relative;
-  }
-  .hist-art-link::after {
-    content: '↗';
-    position: absolute;
-    top: 8px; right: 8px;
-    background: rgba(0,0,0,0.65);
-    color: var(--amber);
-    font-size: 0.7rem;
-    width: 22px; height: 22px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.2s;
-  }
-  .hist-art-link:hover::after { opacity: 1; }
-  .hist-art-nolink {
-    display: block;
-    width: 100%; aspect-ratio: 1;
-    overflow: hidden;
-  }
-  .hist-art {
-    width: 100%; height: 100%;
-    background: var(--groove);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-  }
-  .hist-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .hist-info { padding: 12px 14px; }
-  .hist-artist {
-    font-family: 'Playfair Display', serif;
-    font-weight: 700;
-    font-size: 0.9rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .hist-title {
-    font-size: 0.8rem;
-    font-style: italic;
-    color: var(--amber-lt);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: 6px;
-  }
-  /* "Picked on:" date line + inline edit UI */
-  .hist-picked-on {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    color: var(--muted);
-    letter-spacing: 0.03em;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    margin-top: 5px;
-  }
-  .hist-edit-btn {
-    background: none;
-    border: none;
-    color: var(--label);
-    cursor: pointer;
-    font-size: 0.72rem;
-    padding: 0 2px;
-    line-height: 1;
-    transition: color 0.15s;
-    flex-shrink: 0;
-  }
-  .hist-edit-btn:hover { color: var(--amber); }
-
-  /* Note */
-  .hist-note {
-    font-size: 0.78rem;
-    color: var(--muted);
-    font-style: italic;
-    line-height: 1.4;
-    margin-top: 5px;
-    display: flex;
-    align-items: flex-start;
-    gap: 4px;
-  }
-  .hist-note-add {
-    background: none;
-    border: none;
-    color: var(--label);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.62rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    cursor: pointer;
-    padding: 4px 0;
-    margin-top: 3px;
-    display: block;
-    transition: color 0.15s;
-  }
-  .hist-note-add:hover { color: var(--muted); }
-
-  /* Inline edit row (date & note) */
-  .hist-edit-row { display: flex; align-items: center; gap: 5px; margin-top: 5px; }
-  .hist-date-input {
-    background: var(--groove);
-    border: 1px solid var(--label);
-    border-radius: 4px;
-    color: var(--cream);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.68rem;
-    padding: 4px 6px;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .hist-date-input:focus { border-color: var(--amber); }
-  .hist-note-wrap { margin-top: 5px; }
-  .hist-note-input {
-    width: 100%;
-    background: var(--groove);
-    border: 1px solid var(--label);
-    border-radius: 4px;
-    color: var(--cream);
-    font-family: 'Lora', serif;
-    font-size: 0.78rem;
-    line-height: 1.5;
-    padding: 6px 8px;
-    outline: none;
-    resize: vertical;
-    min-height: 52px;
-    transition: border-color 0.2s;
-  }
-  .hist-note-input:focus { border-color: var(--amber); }
-  .hist-edit-action {
-    background: var(--groove);
-    border: 1px solid var(--label);
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.6rem;
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    padding: 3px 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: color 0.15s, border-color 0.15s;
-    white-space: nowrap;
-  }
-  .hist-edit-action:hover { color: var(--cream); border-color: var(--muted); }
-
-  /* ── SETTINGS VIEW ── */
-  .settings-card {
-    background: var(--wax);
-    border: 1px solid var(--label);
-    border-radius: var(--radius);
-    padding: 36px;
-    max-width: 480px;
-  }
-  .settings-card h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.4rem;
-    margin-bottom: 28px;
-    padding-bottom: 16px;
-    border-bottom: 1px solid var(--label);
-  }
-  .setting-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--label);
-  }
-  .setting-row:last-child { border-bottom: none; }
-  .setting-label { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; }
-  .setting-val { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--cream); }
-  .danger { color: var(--red) !important; border-color: rgba(184,64,64,0.4) !important; }
-  .danger:hover { background: rgba(184,64,64,0.1) !important; }
-
-  .settings-section {
-    border: 1px solid var(--label);
-    border-radius: 10px;
-    padding: 22px 24px;
-    margin-bottom: 16px;
-  }
-  .settings-section:last-child { margin-bottom: 0; }
-  .settings-section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 12px;
-  }
+  .error-box { background: rgba(217,0,24,0.06); border: 1px solid rgba(217,0,24,0.25); padding: 12px 16px; font-family: 'Space Mono', monospace; font-size: 0.72rem; color: var(--press); margin-bottom: 20px; }
 
   /* ── PROGRESS ── */
   .progress-wrap { margin-top: 16px; }
-  .progress-bar-bg {
-    height: 4px;
-    background: var(--label);
-    border-radius: 2px;
-    overflow: hidden;
-    margin-bottom: 8px;
+  .progress-bar-bg { height: 3px; background: var(--rule); overflow: hidden; margin-bottom: 8px; }
+  .progress-bar-fill { height: 100%; background: var(--press); transition: width 0.3s ease; }
+  .progress-text { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 0.08em; color: var(--mid); }
+
+  /* ── INPUTS & LABELS (global) ── */
+  label {
+    display: block; font-family: 'Space Mono', monospace; font-size: 0.56rem;
+    letter-spacing: 0.14em; text-transform: uppercase; color: var(--mid); margin-bottom: 7px;
   }
-  .progress-bar-fill {
-    height: 100%;
-    background: var(--amber);
-    border-radius: 2px;
-    transition: width 0.3s ease;
+  input[type="text"], input[type="password"] {
+    width: 100%; background: none; border: none; border-bottom: 1px solid var(--rule);
+    padding: 6px 0 9px; font-family: 'Space Mono', monospace; font-size: 0.75rem;
+    color: var(--ink); outline: none; transition: border-color 0.15s; margin-bottom: 20px;
   }
-  .progress-text {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.68rem;
-    color: var(--muted);
+  input[type="text"]:focus, input[type="password"]:focus { border-bottom-color: var(--ink); }
+  input::placeholder { color: var(--mid); opacity: 0.5; }
+  select {
+    background: none; border: none; border-bottom: 1px solid var(--rule);
+    color: var(--ink); font-family: 'Space Mono', monospace; font-size: 0.68rem;
+    padding: 6px 0; outline: none; cursor: pointer;
   }
 
-  /* ── BROWSE VIEW ── */
-  .browse-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    margin-bottom: 20px;
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 0.12em;
+    text-transform: uppercase; background: var(--ink); color: var(--paper);
+    border: 1px solid var(--ink); padding: 11px 24px; cursor: pointer; transition: background 0.12s; width: 100%;
   }
-  .browse-toolbar input {
-    flex: 1;
-    margin-bottom: 0;
-  }
-  .browse-sort {
-    background: var(--groove);
-    border: 1px solid var(--label);
-    border-radius: 8px;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.72rem;
-    letter-spacing: 0.05em;
-    padding: 12px 14px;
-    outline: none;
-    cursor: pointer;
-    transition: border-color 0.2s;
-    white-space: nowrap;
-  }
-  .browse-sort:focus { border-color: var(--amber); }
+  .btn:hover { background: #2a2a2a; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn.secondary { background: none; color: var(--mid); border-color: var(--rule); }
+  .btn.secondary:hover { color: var(--ink); border-color: var(--ink); }
+  .btn.ghost { background: none; color: var(--ink); border-color: var(--rule); }
+  .btn.ghost:hover { border-color: var(--ink); }
+  .btn.danger { color: var(--press) !important; border-color: var(--press) !important; }
+  .btn.danger:hover { background: rgba(217,0,24,0.06) !important; }
+  .press-btn { font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; background: none; border: 1px solid var(--rule); color: var(--mid); padding: 10px 22px; cursor: pointer; transition: all 0.12s; }
+  .press-btn:hover { color: var(--ink); border-color: var(--ink); }
+  .press-btn.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .press-btn.primary:hover { background: #2a2a2a; }
+  .btn-sm { font-family: 'Space Mono', monospace; font-size: 0.56rem; letter-spacing: 0.1em; text-transform: uppercase; background: none; border: 1px solid var(--rule); color: var(--mid); padding: 6px 14px; cursor: pointer; transition: all 0.12s; }
+  .btn-sm:hover { color: var(--ink); border-color: var(--ink); }
+  .btn-sm.active, .btn-sm.amber { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .btn-row { display: flex; gap: 8px; }
 
-  .browse-list { display: flex; flex-direction: column; gap: 2px; }
-
-  .browse-item {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-    padding: 10px 12px;
-    border-radius: 8px;
-    border: 1px solid transparent;
-    transition: background 0.15s, border-color 0.15s;
-    text-decoration: none;
-  }
-  .browse-item:hover {
-    background: var(--wax);
-    border-color: var(--label);
-  }
-
-  .browse-thumb {
-    flex-shrink: 0;
-    width: 68px; height: 68px;
-    border-radius: 6px;
-    overflow: hidden;
-    background: var(--groove);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .browse-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-  .browse-info { flex: 1; min-width: 0; }
-  .browse-artist {
-    font-family: 'Playfair Display', serif;
-    font-weight: 700;
-    font-size: 0.95rem;
-    color: var(--cream);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: 2px;
-  }
-  .browse-title {
-    font-style: italic;
-    color: var(--amber-lt);
-    font-size: 0.85rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: 6px;
-  }
-  .browse-pills { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 5px; }
-  .browse-sub {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    color: var(--muted);
-    letter-spacing: 0.04em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .browse-actions {
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 5px;
-  }
-  .browse-last-added {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.6rem;
-    color: var(--green);
-    letter-spacing: 0.04em;
-    white-space: nowrap;
-    opacity: 0.85;
-  }
-
-  /* Responsive */
-  @media (max-width: 600px) {
-    header { padding: 16px 20px; }
-    .view { padding: 24px 20px; }
-    .card-header { flex-direction: column; align-items: center; text-align: center; }
-    .card-pills { justify-content: center; }
-    .album-art-wrap { width: 140px; height: 140px; }
-    .card-badge { position: static; margin-bottom: 12px; }
-    .setup-card { padding: 28px 24px; }
-    .browse-toolbar { flex-direction: column; align-items: stretch; }
-    .browse-thumb { width: 54px; height: 54px; }
-    .hist-remove { color: var(--muted); } /* always visible on touch */
-    .history-filters { flex-wrap: wrap; }
-  }
-
-  /* ── ARCHIVE VIEW ── */
-  .archive-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-  .archive-header h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.6rem;
-    font-weight: 700;
-  }
-  .archive-meta {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.68rem;
-    color: var(--muted);
-    margin-top: 2px;
-  }
-  .archive-toolbar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .archive-close {
-    background: none;
-    border: 1px solid var(--label);
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.06em;
-    padding: 5px 12px;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .archive-close:hover { color: var(--cream); border-color: var(--muted); }
-  .archive-empty {
-    text-align: center;
-    color: var(--muted);
-    font-style: italic;
-    padding: 60px 20px;
-    font-size: 0.9rem;
-  }
-
-  /* ── VALUES VIEW ── */
-  .values-header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 28px;
-  }
-  .values-header h2 {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.6rem;
-    font-weight: 700;
-  }
-  .values-last-capture {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--muted);
-    margin-top: 4px;
-  }
-  .values-stats {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-bottom: 24px;
-  }
-  .values-stat {
-    background: var(--wax);
-    border: 1px solid var(--label);
-    border-radius: 10px;
-    padding: 16px;
-  }
-  .values-stat-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.62rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 6px;
-  }
-  .values-stat-value {
-    font-family: 'DM Mono', monospace;
-    font-size: 1.2rem;
-    font-weight: 500;
-    color: var(--cream);
-  }
-  .values-stat-value.hi  { color: var(--green); }
-  .values-stat-value.lo  { color: var(--red);   }
-  .values-stat-value.med { color: var(--amber);  }
-
-  .values-chart-wrap {
-    background: var(--wax);
-    border: 1px solid var(--label);
-    border-radius: 12px;
-    padding: 24px 24px 16px;
-    margin-bottom: 24px;
-    position: relative;
-  }
-  .values-chart-legend {
-    display: flex;
-    gap: 20px;
-    margin-top: 12px;
-    flex-wrap: wrap;
-  }
-  .values-chart-legend-item {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.68rem;
-    color: var(--muted);
-  }
-  .values-chart-legend-line {
-    width: 22px;
-    height: 2px;
-    border-radius: 2px;
-  }
-
-  .chart-tooltip {
-    position: absolute;
-    background: var(--groove);
-    border: 1px solid #3a3530;
-    border-radius: 8px;
-    padding: 10px 14px;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.72rem;
-    pointer-events: none;
-    opacity: 0;
-    transition: opacity 0.1s;
-    z-index: 20;
-    white-space: nowrap;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-  }
-  .chart-tooltip.visible { opacity: 1; }
-  .chart-tooltip-date {
-    color: var(--muted);
-    font-size: 0.65rem;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-  }
-  .chart-tooltip-row {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    margin-bottom: 4px;
-  }
-  .chart-tooltip-row:last-child { margin-bottom: 0; }
-  .chart-tooltip-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .chart-tooltip-lbl { color: var(--muted); min-width: 28px; }
-  .chart-tooltip-val { color: var(--cream); }
-
-  .values-log {
-    background: var(--wax);
-    border: 1px solid var(--label);
-    border-radius: 12px;
-    overflow: hidden;
-  }
-  .values-log-title {
-    padding: 14px 20px;
-    border-bottom: 1px solid var(--label);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--amber);
-  }
-  .values-log-row {
-    display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr 32px;
-    gap: 8px;
-    padding: 11px 20px;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.78rem;
-    align-items: center;
-  }
-  .values-log-row.col-head {
-    font-size: 0.62rem;
-    color: var(--muted);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    background: rgba(0,0,0,0.15);
-    padding-top: 9px;
-    padding-bottom: 9px;
-    border-bottom: 1px solid var(--label);
-  }
-  /* Each entry wraps a data row + its note area */
-  .values-log-entry {
-    border-bottom: 1px solid var(--label);
-  }
-  .values-log-entry:last-child { border-bottom: none; }
-  .values-del-btn {
-    background: none;
-    border: none;
-    color: transparent;
-    font-size: 0.9rem;
-    cursor: pointer;
-    padding: 0;
-    line-height: 1;
-    transition: color 0.15s;
-  }
-  .values-log-entry:hover .values-del-btn { color: var(--muted); }
-  .values-del-btn:hover { color: var(--red) !important; }
-
-  /* ── VALUE SPAN FILTER ── */
-  .values-span-btns {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .values-span-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    white-space: nowrap;
-  }
-
-  /* ── VALUE LOG PAGINATION ── */
-  .values-log-pagination {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 13px 20px;
-    border-top: 1px solid var(--label);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--muted);
-    flex-wrap: wrap;
-  }
-  .values-page-info {
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.68rem;
-    letter-spacing: 0.03em;
-  }
-
-  /* ── VALUE ENTRY NOTES ── */
-  .values-note-area {
-    padding: 0 20px 10px;
-  }
-  .values-note-add {
-    background: none;
-    border: none;
-    color: var(--label);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.62rem;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    cursor: pointer;
-    padding: 0;
-    transition: color 0.15s;
-  }
-  .values-note-add:hover { color: var(--muted); }
-  .values-note-text {
-    font-size: 0.8rem;
-    color: var(--muted);
-    font-style: italic;
-    line-height: 1.5;
-    display: flex;
-    align-items: flex-start;
-    gap: 6px;
-  }
-  .values-note-edit-btn {
-    background: none;
-    border: none;
-    color: var(--label);
-    font-size: 0.72rem;
-    cursor: pointer;
-    padding: 0 2px;
-    line-height: 1;
-    flex-shrink: 0;
-    margin-top: 1px;
-    transition: color 0.15s;
-  }
-  .values-note-edit-btn:hover { color: var(--amber); }
-  .values-note-input {
-    width: 100%;
-    background: var(--groove);
-    border: 1px solid var(--label);
-    border-radius: 4px;
-    color: var(--cream);
-    font-family: 'Lora', serif;
-    font-size: 0.8rem;
-    line-height: 1.5;
-    padding: 6px 8px;
-    outline: none;
-    resize: vertical;
-    min-height: 50px;
-    transition: border-color 0.2s;
-  }
-  .values-note-input:focus { border-color: var(--amber); }
-  .values-note-save-row {
-    display: flex;
-    gap: 6px;
-    margin-top: 5px;
-  }
-
-  .values-empty {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--muted);
-    font-style: italic;
-    font-size: 0.9rem;
-  }
-
-  @media (max-width: 600px) {
-    .values-stats { grid-template-columns: repeat(2, 1fr); }
-    .values-log-row { grid-template-columns: 2fr 1fr 1fr 28px; }
-    .values-log-row .vl-min { display: none; }
-  }
-
-  /* ── VALUE CSV IMPORT PREVIEW ── */
-  .values-import-panel {
-    background: var(--wax);
-    border: 1px solid var(--amber);
-    border-radius: 12px;
-    padding: 20px 24px;
-  }
-  .values-import-panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.8rem;
-    color: var(--muted);
-  }
-  .values-import-table-wrap {
-    overflow-x: auto;
-    margin-bottom: 14px;
-    border-radius: 6px;
-    border: 1px solid var(--label);
-  }
-  .values-import-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.75rem;
-  }
-  .values-import-table th {
-    background: var(--groove);
-    color: var(--muted);
-    font-size: 0.65rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 8px 14px;
-    text-align: left;
-    border-bottom: 1px solid var(--label);
-  }
-  .values-import-table td {
-    padding: 8px 14px;
-    border-bottom: 1px solid var(--label);
-    color: var(--cream);
-  }
-  .values-import-table tr:last-child td { border-bottom: none; }
-  .values-import-table tr:hover td { background: rgba(255,255,255,0.02); }
-  .values-import-dupe-notice {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.75rem;
-    color: var(--amber);
-    background: rgba(200,146,42,0.08);
-    border: 1px solid rgba(200,146,42,0.2);
-    border-radius: 6px;
-    padding: 8px 12px;
-    margin-bottom: 14px;
-  }
-  .values-import-err-notice {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.72rem;
-    color: var(--red);
-    background: rgba(184,64,64,0.08);
-    border: 1px solid rgba(184,64,64,0.2);
-    border-radius: 6px;
-    padding: 8px 12px;
-    margin-bottom: 12px;
-    line-height: 1.6;
-  }
-  .values-import-actions {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-  .values-import-actions .btn,
-  .values-import-actions .btn.secondary {
-    flex: 1;
-    margin-bottom: 0;
-    min-width: 140px;
-  }
-  .values-import-success {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.8rem;
-    color: var(--green);
-    padding: 14px 18px;
-    background: rgba(74,140,92,0.08);
-    border: 1px solid rgba(74,140,92,0.25);
-    border-radius: 8px;
-  }
-
-  /* ── ENHANCED SETUP ONBOARDING ── */
-  .setup-hero { text-align: center; margin-bottom: 32px; }
-  .setup-logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 2.4rem;
-    font-weight: 900;
-    color: var(--amber);
-    letter-spacing: -0.02em;
-    margin-bottom: 6px;
-  }
-  .setup-logo span { color: var(--cream); font-weight: 400; font-style: italic; }
-  .setup-tagline { font-size: 0.85rem; color: var(--muted); font-style: italic; }
-  .setup-step { margin-bottom: 8px; }
-  .setup-step-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--amber);
-    margin-bottom: 12px;
-    display: block;
-  }
-  .setup-hint {
-    font-size: 0.75rem;
-    color: var(--muted);
-    line-height: 1.5;
-    margin: -8px 0 16px;
-  }
-  .setup-hint a { color: var(--amber); }
-  .setup-details {
-    margin-bottom: 10px;
-    border: 1px solid var(--label);
-    border-radius: 8px;
-    overflow: hidden;
-  }
-  .setup-details summary {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 14px;
-    cursor: pointer;
-    list-style: none;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    user-select: none;
-  }
+  /* ═══════════════════════════════
+     SETUP VIEW
+  ═══════════════════════════════ */
+  .press-setup-wrap { max-width: 560px; margin: 56px auto 80px; padding: 0 40px; }
+  .press-setup-head { text-align: center; margin-bottom: 40px; }
+  .press-setup-logo { font-family: 'Bebas Neue', sans-serif; font-size: 3rem; letter-spacing: 0.08em; color: var(--ink); line-height: 1; margin-bottom: 8px; }
+  .press-setup-logo em { color: var(--press); font-style: normal; }
+  .press-setup-tagline { font-family: 'Source Serif 4', serif; font-style: italic; font-size: 0.9rem; color: var(--mid); }
+  .setup-step { margin-bottom: 12px; }
+  .setup-step-label { display: block; font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--press); margin-bottom: 14px; margin-top: 8px; }
+  .setup-hint { font-family: 'Source Serif 4', serif; font-size: 0.8rem; color: var(--mid); line-height: 1.5; margin: -10px 0 16px; }
+  .setup-hint a { color: var(--ink); }
+  .setup-details { border: 1px solid var(--rule); margin-bottom: 10px; }
+  .setup-details summary { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; cursor: pointer; list-style: none; color: var(--mid); font-family: 'Space Mono', monospace; font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; user-select: none; }
   .setup-details summary::-webkit-details-marker { display: none; }
   .setup-details summary::after { content: '+'; font-size: 1rem; line-height: 1; opacity: 0.5; }
-  .setup-details[open] summary { color: var(--amber); border-bottom: 1px solid var(--label); }
+  .setup-details[open] summary { color: var(--ink); border-bottom: 1px solid var(--rule); }
   .setup-details[open] summary::after { content: '−'; }
   .setup-details-body { padding: 16px; }
   .setup-details-body input { margin-bottom: 12px; }
-  .setup-security {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.68rem;
-    color: #5a8f6a;
-    background: rgba(74,140,92,0.08);
-    border: 1px solid rgba(74,140,92,0.18);
-    border-radius: 6px;
-    padding: 10px 14px;
-    margin: 16px 0 20px;
-    line-height: 1.5;
-  }
-  /* ── SETTINGS DETAILS (WP accordion) ── */
-  .settings-details { border: none; padding: 0; overflow: visible; }
-  .settings-details summary {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    cursor: pointer;
-    list-style: none;
-    user-select: none;
-    padding: 0;
-    margin-bottom: 0;
-  }
-  .settings-details summary::-webkit-details-marker { display: none; }
-  .settings-details-toggle {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.75rem;
-    color: var(--muted);
-    opacity: 0.5;
-  }
-  .settings-details[open] .settings-details-toggle { opacity: 1; }
-  .settings-details .settings-section-header { margin-bottom: 0; }
-  .settings-details[open] .settings-section-header { margin-bottom: 12px; }
-  /* ── STORAGE INDICATOR ── */
-  .storage-badge {
-    font-family: 'DM Mono', monospace;
-    font-size: 0.63rem;
-    letter-spacing: 0.05em;
-    color: #5a8f6a;
-    background: rgba(74,140,92,0.07);
-    border: 1px solid rgba(74,140,92,0.15);
-    border-radius: 5px;
-    padding: 5px 10px;
-    margin-top: 12px;
-    line-height: 1.4;
-  }
-  /* ── APP BOOT LOADER ── */
-  #boot-loader {
-    position: fixed; inset: 0;
-    background: var(--black);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 16px;
-    z-index: 9998;
-    transition: opacity 0.3s;
-  }
-  #boot-loader.hidden { opacity: 0; pointer-events: none; }
-  #boot-loader .boot-logo {
-    font-family: 'Playfair Display', serif;
-    font-size: 1.8rem;
-    font-weight: 900;
-    color: var(--amber);
-    letter-spacing: -0.02em;
-  }
-  #boot-loader .boot-logo span { color: var(--cream); font-weight: 400; font-style: italic; }
+  .setup-security { font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 0.08em; color: var(--mid); background: var(--lift); border-left: 3px solid var(--rule); padding: 10px 14px; margin: 16px 0 20px; line-height: 1.6; }
 
-  /* ── EXPORT / IMPORT SETTINGS ── */
-  .export-row {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-wrap: wrap;
-    margin-top: 10px;
+  /* ═══════════════════════════════
+     TODAY VIEW — PRESS REVIEW
+  ═══════════════════════════════ */
+  .press-hero { width: 100%; height: min(52vw, 480px); overflow: hidden; background: var(--ink); position: relative; }
+  .press-hero-img { width: 100%; height: 100%; object-fit: cover; object-position: center 15%; display: block; filter: brightness(0.9) contrast(1.05); }
+  .press-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, rgba(12,12,12,0.45) 80%, rgba(12,12,12,0.72) 100%); pointer-events: none; }
+  .press-hero-caption { position: absolute; bottom: 16px; left: 40px; z-index: 2; font-family: 'Space Mono', monospace; font-size: 0.52rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.45); }
+  .press-container { max-width: 900px; margin: 0 auto; padding: 0 40px; }
+  .press-status-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+  .press-status-info { font-family: 'Space Mono', monospace; font-size: 0.56rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); }
+  .press-status-info strong { color: var(--ink); }
+  .press-review-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; padding: 28px 0 22px; border-bottom: 3px solid var(--ink); }
+  .press-review-info { flex: 1; min-width: 0; }
+  .press-kicker { font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--press); margin-bottom: 10px; }
+  .press-artist { font-family: 'Bebas Neue', sans-serif; font-size: clamp(3rem,7vw,5.8rem); line-height: 0.92; letter-spacing: 0.03em; color: var(--ink); margin-bottom: 8px; }
+  .press-album-title { font-family: 'Source Serif 4', serif; font-style: italic; font-weight: 300; font-size: clamp(1.1rem,2.5vw,1.5rem); color: var(--mid); }
+  .press-score-block { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; padding: 12px 20px 10px; border: 2px solid var(--ink); min-width: 90px; }
+  .press-score-num { font-family: 'Bebas Neue', sans-serif; font-size: 3.4rem; line-height: 1; color: var(--press); letter-spacing: 0.02em; }
+  .press-score-denom { font-family: 'Space Mono', monospace; font-size: 0.55rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mid); margin-top: 2px; }
+  .press-meta-strip { display: flex; flex-wrap: wrap; gap: 0; padding: 10px 0; border-bottom: 1px solid var(--rule); margin-bottom: 32px; }
+  .press-meta-pill { font-family: 'Space Mono', monospace; font-size: 0.56rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mid); padding-right: 14px; margin-right: 14px; border-right: 1px solid var(--rule); }
+  .press-meta-pill:last-child { border-right: none; }
+  .press-review-body { display: grid; grid-template-columns: 1fr 260px; gap: 0 48px; margin-bottom: 48px; }
+  .press-body-text { font-family: 'Source Serif 4', serif; font-weight: 300; font-size: 1rem; line-height: 1.85; color: var(--ink); margin-bottom: 22px; }
+  .press-body-text:first-child::first-letter { font-family: 'Bebas Neue', sans-serif; font-size: 4.2rem; line-height: 0.78; float: left; margin-right: 8px; margin-top: 4px; color: var(--press); }
+  .press-pullquote { margin: 28px 0; padding: 18px 0; border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); }
+  .press-pullquote-text { font-family: 'Source Serif 4', serif; font-style: italic; font-size: 1.25rem; font-weight: 400; line-height: 1.55; color: var(--ink); }
+  .press-pullquote-text::before { content: '\201C'; font-size: 3rem; line-height: 0.6; vertical-align: -0.55rem; margin-right: 4px; color: var(--press); }
+  .press-side-col { border-left: 1px solid var(--rule); padding-left: 32px; }
+  .press-side-label { font-family: 'Space Mono', monospace; font-size: 0.52rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--mid); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--rule); }
+  .press-track-item { padding: 10px 0; border-bottom: 1px solid var(--rule); }
+  .press-track-id { font-family: 'Space Mono', monospace; font-size: 0.55rem; color: var(--press); text-transform: uppercase; margin-bottom: 2px; }
+  .press-track-name { font-family: 'Source Serif 4', serif; font-size: 0.88rem; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+  .press-track-note { font-family: 'Source Serif 4', serif; font-style: italic; font-size: 0.78rem; color: var(--mid); }
+  .press-lower { border-top: 2px solid var(--ink); padding-top: 28px; margin-bottom: 48px; }
+  .press-section-head { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 0.05em; color: var(--ink); margin-bottom: 18px; }
+  .press-facts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 48px; }
+  .press-fact { font-family: 'Source Serif 4', serif; font-weight: 300; font-size: 0.88rem; line-height: 1.75; color: var(--ink); padding-top: 12px; border-top: 1px solid var(--rule); }
+  .press-footer { border-top: 3px solid var(--ink); padding: 22px 0 80px; display: flex; gap: 12px; align-items: center; }
+  .press-ready { max-width: 900px; margin: 0 auto; padding: 80px 40px; text-align: center; }
+  .press-ready-head { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; letter-spacing: 0.04em; color: var(--ink); margin-bottom: 12px; }
+  .press-ready-sub { font-family: 'Source Serif 4', serif; font-style: italic; color: var(--mid); font-size: 0.95rem; margin-bottom: 32px; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .press-review-anim { animation: fadeUp 0.4s ease; }
+
+  /* ═══════════════════════════════
+     HISTORY VIEW — THE ARCHIVE
+  ═══════════════════════════════ */
+  .press-archive-page { max-width: 900px; margin: 0 auto; padding: 0 40px 100px; }
+  .press-archive-head { padding: 28px 0 20px; border-bottom: 3px solid var(--ink); display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 0; }
+  .press-archive-title { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; letter-spacing: 0.04em; line-height: 1; }
+  .press-archive-sub { font-family: 'Space Mono', monospace; font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mid); }
+  .press-filter-strip { display: flex; gap: 0; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+  .press-filter { font-family: 'Space Mono', monospace; font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; background: none; border: 1px solid var(--rule); color: var(--mid); padding: 7px 18px; margin-right: -1px; cursor: pointer; transition: all 0.1s; }
+  .press-filter:hover { color: var(--ink); border-color: var(--ink); z-index:1; position: relative; }
+  .press-filter.active { background: var(--ink); color: var(--paper); border-color: var(--ink); z-index: 1; position: relative; }
+  .press-archive-row { display: grid; grid-template-columns: 64px 1fr auto; gap: 0 20px; padding: 18px 0; border-bottom: 1px solid var(--rule); align-items: start; cursor: pointer; transition: background 0.1s; }
+  .press-archive-row:hover { background: var(--lift); margin: 0 -14px; padding-left: 14px; padding-right: 14px; }
+  .press-archive-art { width: 64px; height: 64px; flex-shrink: 0; }
+  .press-archive-art img { width: 64px; height: 64px; object-fit: cover; display: block; }
+  .press-archive-art-ph { width: 64px; height: 64px; background: var(--lift); border: 1px solid var(--rule); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: var(--mid); }
+  .press-archive-artist { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 0.04em; line-height: 1; color: var(--ink); margin-bottom: 3px; }
+  .press-archive-album { font-family: 'Source Serif 4', serif; font-style: italic; font-weight: 300; font-size: 0.88rem; color: var(--mid); }
+  .press-archive-note { font-family: 'Source Serif 4', serif; font-size: 0.78rem; color: var(--mid); margin-top: 4px; }
+  .press-archive-right { text-align: right; flex-shrink: 0; }
+  .press-archive-date { font-family: 'Space Mono', monospace; font-size: 0.56rem; letter-spacing: 0.08em; color: var(--mid); margin-bottom: 5px; }
+  .press-archive-badge { font-family: 'Space Mono', monospace; font-size: 0.5rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mid); border: 1px solid var(--rule); padding: 2px 8px; display: inline-block; }
+  .press-archive-badge.pick { color: var(--press); border-color: var(--press); }
+  .press-archive-badge.published { color: var(--green); border-color: rgba(74,140,92,0.4); }
+  .press-archive-actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; align-items: center; }
+  .press-row-btn { font-family: 'Space Mono', monospace; font-size: 0.5rem; letter-spacing: 0.1em; text-transform: uppercase; background: none; border: 1px solid var(--rule); color: var(--mid); padding: 3px 8px; cursor: pointer; transition: all 0.1s; }
+  .press-row-btn:hover { color: var(--ink); border-color: var(--ink); }
+  .press-row-btn.danger:hover { color: var(--press); border-color: var(--press); }
+  .hist-date-input { background: none; border: none; border-bottom: 1px solid var(--rule); color: var(--ink); font-family: 'Space Mono', monospace; font-size: 0.65rem; padding: 3px 0; outline: none; }
+  .hist-date-input:focus { border-bottom-color: var(--ink); }
+  .hist-note-input { width: 100%; background: none; border: none; border-bottom: 1px solid var(--rule); color: var(--ink); font-family: 'Source Serif 4', serif; font-size: 0.82rem; line-height: 1.5; padding: 4px 0; outline: none; resize: none; min-height: 44px; transition: border-color 0.15s; margin-top: 4px; }
+  .hist-note-input:focus { border-bottom-color: var(--ink); }
+  .hist-note-wrap { margin-top: 4px; }
+  .hist-edit-row { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+  .hist-edit-action { font-family: 'Space Mono', monospace; font-size: 0.5rem; letter-spacing: 0.1em; text-transform: uppercase; background: none; border: 1px solid var(--rule); color: var(--mid); padding: 3px 8px; cursor: pointer; }
+  .hist-edit-action:hover { color: var(--ink); border-color: var(--ink); }
+  .history-empty { text-align: center; padding: 80px 20px; color: var(--mid); font-style: italic; font-family: 'Source Serif 4', serif; }
+
+  /* ═══════════════════════════════
+     BROWSE VIEW
+  ═══════════════════════════════ */
+  .press-browse-page { max-width: 900px; margin: 0 auto; padding: 0 40px 100px; }
+  .press-browse-head { padding: 28px 0 20px; border-bottom: 3px solid var(--ink); display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 20px; }
+  .press-browse-title { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; letter-spacing: 0.04em; line-height: 1; }
+  .browse-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+  .browse-toolbar input[type="text"] { flex: 1; margin-bottom: 0; }
+  .browse-sort { background: none; border: none; border-bottom: 1px solid var(--rule); color: var(--mid); font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 0.06em; padding: 6px 0; outline: none; cursor: pointer; white-space: nowrap; }
+  .browse-list { display: flex; flex-direction: column; }
+  .browse-item { display: flex; gap: 16px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--rule); text-decoration: none; transition: background 0.1s; }
+  .browse-item:hover { background: var(--lift); margin: 0 -14px; padding-left: 14px; padding-right: 14px; }
+  .browse-thumb { flex-shrink: 0; width: 56px; height: 56px; overflow: hidden; background: var(--lift); border: 1px solid var(--rule); display: flex; align-items: center; justify-content: center; }
+  .browse-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .browse-info { flex: 1; min-width: 0; }
+  .browse-artist { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 0.04em; color: var(--ink); margin-bottom: 1px; }
+  .browse-title { font-family: 'Source Serif 4', serif; font-style: italic; font-weight: 300; font-size: 0.85rem; color: var(--mid); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+  .browse-sub { font-family: 'Space Mono', monospace; font-size: 0.56rem; letter-spacing: 0.05em; color: var(--mid); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .browse-pills { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
+  .pill { font-family: 'Space Mono', monospace; font-size: 0.52rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); border: 1px solid var(--rule); padding: 2px 7px; }
+  .pill.year { color: var(--ink); border-color: var(--ink); }
+  .browse-actions { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
+  .browse-last-added { font-family: 'Space Mono', monospace; font-size: 0.52rem; color: var(--mid); letter-spacing: 0.04em; }
+  .browse-count { font-family: 'Space Mono', monospace; font-size: 0.58rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mid); }
+
+  /* ═══════════════════════════════
+     ARCHIVE VIEW (exported JSON files)
+  ═══════════════════════════════ */
+  .archive-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+  .archive-header h2 { font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; letter-spacing: 0.04em; }
+  .archive-meta { font-family: 'Space Mono', monospace; font-size: 0.6rem; color: var(--mid); margin-top: 2px; }
+  .archive-toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .archive-close { background: none; border: 1px solid var(--rule); color: var(--mid); font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 0.06em; padding: 5px 12px; cursor: pointer; transition: all 0.2s; }
+  .archive-close:hover { color: var(--ink); border-color: var(--ink); }
+  .archive-empty { text-align: center; color: var(--mid); font-style: italic; padding: 60px 20px; font-family: 'Source Serif 4', serif; }
+
+  /* ═══════════════════════════════
+     VALUES VIEW
+  ═══════════════════════════════ */
+  .values-header { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 28px; }
+  .values-header h2 { font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; letter-spacing: 0.04em; }
+  .values-last-capture { font-family: 'Space Mono', monospace; font-size: 0.6rem; color: var(--mid); margin-top: 4px; }
+  .values-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 24px; }
+  .values-stat { border: 1px solid var(--rule); padding: 16px; }
+  .values-stat-label { font-family: 'Space Mono', monospace; font-size: 0.56rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mid); margin-bottom: 6px; }
+  .values-stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 0.02em; color: var(--ink); }
+  .values-stat-value.hi  { color: var(--green); }
+  .values-stat-value.lo  { color: var(--red); }
+  .values-stat-value.med { color: var(--ink); }
+  .values-chart-wrap { border: 1px solid var(--rule); padding: 20px 20px 14px; margin-bottom: 24px; position: relative; }
+  .values-chart-legend { display: flex; gap: 20px; margin-top: 12px; flex-wrap: wrap; }
+  .values-chart-legend-item { display: flex; align-items: center; gap: 7px; font-family: 'Space Mono', monospace; font-size: 0.6rem; color: var(--mid); }
+  .values-chart-legend-line { width: 22px; height: 2px; border-radius: 2px; }
+  .chart-tooltip { position: absolute; background: var(--ink); color: var(--paper); padding: 10px 14px; font-family: 'Space Mono', monospace; font-size: 0.65rem; pointer-events: none; opacity: 0; transition: opacity 0.1s; z-index: 20; white-space: nowrap; box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+  .chart-tooltip.visible { opacity: 1; }
+  .chart-tooltip-date { color: rgba(250,248,245,0.5); font-size: 0.58rem; letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 8px; }
+  .chart-tooltip-row { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
+  .chart-tooltip-row:last-child { margin-bottom: 0; }
+  .chart-tooltip-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .chart-tooltip-lbl { color: rgba(250,248,245,0.5); min-width: 28px; }
+  .chart-tooltip-val { color: var(--paper); }
+  .values-log { border: 1px solid var(--rule); overflow: hidden; }
+  .values-log-title { padding: 12px 18px; border-bottom: 1px solid var(--rule); font-family: 'Space Mono', monospace; font-size: 0.58rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mid); }
+  .values-log-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 32px; gap: 8px; padding: 10px 18px; font-family: 'Space Mono', monospace; font-size: 0.72rem; align-items: center; color: var(--ink); }
+  .values-log-row.col-head { font-size: 0.56rem; color: var(--mid); letter-spacing: 0.1em; text-transform: uppercase; background: var(--lift); border-bottom: 1px solid var(--rule); }
+  .values-log-entry { border-bottom: 1px solid var(--rule); }
+  .values-log-entry:last-child { border-bottom: none; }
+  .values-del-btn { background: none; border: none; color: transparent; font-size: 0.9rem; cursor: pointer; padding: 0; line-height: 1; transition: color 0.15s; }
+  .values-log-entry:hover .values-del-btn { color: var(--mid); }
+  .values-del-btn:hover { color: var(--press) !important; }
+  .values-span-btns { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 8px; flex-wrap: wrap; }
+  .values-span-label { font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mid); white-space: nowrap; }
+  .values-log-pagination { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 12px 18px; border-top: 1px solid var(--rule); font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--mid); flex-wrap: wrap; }
+  .values-page-info { color: var(--mid); font-size: 0.62rem; }
+  .values-note-area { padding: 0 18px 10px; }
+  .values-note-add { background: none; border: none; color: var(--mid); font-family: 'Space Mono', monospace; font-size: 0.56rem; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; padding: 0; transition: color 0.15s; opacity: 0.5; }
+  .values-note-add:hover { opacity: 1; }
+  .values-note-text { font-size: 0.82rem; color: var(--mid); font-style: italic; line-height: 1.5; display: flex; align-items: flex-start; gap: 6px; font-family: 'Source Serif 4', serif; }
+  .values-note-edit-btn { background: none; border: none; color: var(--mid); font-size: 0.7rem; cursor: pointer; padding: 0 2px; line-height: 1; flex-shrink: 0; margin-top: 1px; transition: color 0.15s; }
+  .values-note-edit-btn:hover { color: var(--ink); }
+  .values-note-input { width: 100%; background: none; border: none; border-bottom: 1px solid var(--rule); color: var(--ink); font-family: 'Source Serif 4', serif; font-size: 0.82rem; line-height: 1.5; padding: 4px 0; outline: none; resize: vertical; min-height: 44px; transition: border-color 0.2s; }
+  .values-note-input:focus { border-bottom-color: var(--ink); }
+  .values-note-save-row { display: flex; gap: 6px; margin-top: 5px; }
+  .values-empty { text-align: center; padding: 60px 20px; color: var(--mid); font-style: italic; font-family: 'Source Serif 4', serif; }
+  .values-import-panel { border: 1px solid var(--rule); padding: 20px; }
+  .values-import-panel-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; font-family: 'Space Mono', monospace; font-size: 0.72rem; color: var(--mid); }
+  .values-import-table-wrap { overflow-x: auto; margin-bottom: 14px; border: 1px solid var(--rule); }
+  .values-import-table { width: 100%; border-collapse: collapse; font-family: 'Space Mono', monospace; font-size: 0.68rem; }
+  .values-import-table th { background: var(--lift); color: var(--mid); font-size: 0.58rem; letter-spacing: 0.08em; text-transform: uppercase; padding: 7px 12px; text-align: left; border-bottom: 1px solid var(--rule); }
+  .values-import-table td { padding: 7px 12px; border-bottom: 1px solid var(--rule); color: var(--ink); }
+  .values-import-table tr:last-child td { border-bottom: none; }
+  .values-import-dupe-notice { font-family: 'Space Mono', monospace; font-size: 0.68rem; color: var(--ink); background: var(--lift); border: 1px solid var(--rule); padding: 7px 10px; margin-bottom: 12px; }
+  .values-import-err-notice { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--press); background: rgba(217,0,24,0.05); border: 1px solid rgba(217,0,24,0.2); padding: 7px 10px; margin-bottom: 12px; line-height: 1.6; }
+  .values-import-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .values-import-actions .btn, .values-import-actions .btn.secondary { flex: 1; margin-bottom: 0; min-width: 140px; }
+  .values-import-success { font-family: 'Space Mono', monospace; font-size: 0.72rem; color: var(--green); padding: 12px 16px; background: rgba(74,140,92,0.07); border: 1px solid rgba(74,140,92,0.2); }
+
+  /* ═══════════════════════════════
+     SETTINGS VIEW
+  ═══════════════════════════════ */
+  .press-settings-page { max-width: 680px; margin: 0 auto; padding: 0 40px 100px; }
+  .press-settings-head { padding: 28px 0 20px; border-bottom: 3px solid var(--ink); margin-bottom: 0; }
+  .press-settings-title { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; letter-spacing: 0.04em; line-height: 1; }
+  .press-settings-section { padding: 24px 0; border-bottom: 1px solid var(--rule); }
+  .press-settings-label { font-family: 'Space Mono', monospace; font-size: 0.58rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--mid); margin-bottom: 18px; }
+  .press-settings-label-row { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px; }
+  .press-field { margin-bottom: 18px; }
+  .press-field label { margin-bottom: 7px; }
+  .press-field input { margin-bottom: 0; }
+  .press-security-note { background: var(--lift); padding: 10px 14px; margin-top: 14px; border-left: 3px solid var(--rule); }
+  .press-security-note span { font-family: 'Space Mono', monospace; font-size: 0.54rem; letter-spacing: 0.08em; color: var(--mid); line-height: 1.7; }
+  .press-action-row { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+  .press-action-row .btn { width: auto; flex: 1; }
+  .settings-status { font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 0.08em; }
+  .settings-details { border: none; padding: 0; overflow: visible; }
+  .settings-details > summary { display: flex; align-items: center; justify-content: space-between; cursor: pointer; list-style: none; user-select: none; padding: 20px 0; border-bottom: 1px solid var(--rule); font-family: 'Space Mono', monospace; font-size: 0.58rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--mid); }
+  .settings-details summary::-webkit-details-marker { display: none; }
+  .settings-details[open] > summary { color: var(--ink); }
+  .settings-details-body { padding-top: 20px; }
+  .setting-row { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--rule); font-family: 'Space Mono', monospace; font-size: 0.65rem; }
+  .setting-row:last-child { border-bottom: none; }
+  .setting-label { color: var(--mid); text-transform: uppercase; letter-spacing: 0.07em; }
+  .setting-val { color: var(--ink); }
+  .storage-badge { font-family: 'Space Mono', monospace; font-size: 0.56rem; letter-spacing: 0.06em; color: var(--mid); background: var(--lift); border-left: 3px solid var(--rule); padding: 6px 10px; margin-top: 12px; line-height: 1.5; }
+  .export-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
+  .export-row select { flex: 1; margin-bottom: 0; min-width: 120px; }
+
+  /* ── PROVIDER SELECTOR (AI settings) ── */
+  .press-provider-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .press-provider-opt { border: 1px solid var(--rule); padding: 10px 14px; cursor: pointer; transition: all 0.12s; }
+  .press-provider-opt:hover { border-color: var(--ink); }
+  .press-provider-opt.selected { border-color: var(--ink); background: var(--lift); }
+  .press-provider-name { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink); margin-bottom: 2px; }
+  .press-provider-note { font-family: 'Source Serif 4', serif; font-size: 0.72rem; color: var(--mid); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    .press-masthead-top { padding: 0 20px; height: 46px; }
+    .press-nav button { padding: 8px 10px; font-size: 0.5rem; }
+    .press-container { padding: 0 20px; }
+    .press-archive-page, .press-browse-page, .press-settings-page, .press-setup-wrap { padding-left: 20px; padding-right: 20px; }
+    .press-review-body { grid-template-columns: 1fr; }
+    .press-side-col { border-left: none; padding-left: 0; border-top: 1px solid var(--rule); padding-top: 20px; margin-top: 4px; }
+    .press-artist { font-size: clamp(2.4rem, 10vw, 3rem); }
+    .values-stats { grid-template-columns: repeat(2, 1fr); }
+    .values-log-row { grid-template-columns: 2fr 1fr 1fr 28px; }
+    .values-log-row .vl-min { display: none; }
+    .press-facts-grid { grid-template-columns: 1fr; }
+    .press-archive-row { grid-template-columns: 48px 1fr auto; }
+    .press-archive-art, .press-archive-art img, .press-archive-art-ph { width: 48px; height: 48px; }
+    .press-hero-caption { left: 20px; }
+    .press-provider-grid { grid-template-columns: 1fr; }
   }
-  .export-row select {
-    flex: 1;
-    margin-bottom: 0;
-    min-width: 120px;
-  }
+
 </style>
 </head>
 <body>
@@ -1406,33 +391,35 @@
 <!-- Boot loader — shown while IndexedDB + crypto initialise -->
 <div id="boot-loader">
   <div class="spinner"></div>
-  <div class="boot-logo">Dig <span>Free</span></div>
+  <div class="boot-logo">Dig <em>Free</em></div>
 </div>
 
-<header>
-  <div class="logo">Dig <span>Free</span></div>
-  <nav>
-    <button class="nav-btn active" onclick="showView('today')">Today</button>
-    <button class="nav-btn" onclick="showView('history')">History</button>
-    <button class="nav-btn" onclick="showView('browse')">Browse</button>
-    <button class="nav-btn" onclick="showView('values')">Values</button>
-    <button class="nav-btn" id="nav-archive" onclick="showView('archive')" style="display:none">Archive</button>
-    <button class="nav-btn" onclick="showView('settings')">Settings</button>
+<!-- MASTHEAD -->
+<div class="press-masthead" id="press-masthead">
+  <div class="press-masthead-top">
+    <div class="press-logo" onclick="showView('today')">Dig <em>Free</em></div>
+    <div class="press-masthead-right" id="masthead-right"></div>
+  </div>
+  <nav class="press-nav">
+    <button class="active" id="nav-today"    onclick="showView('today')">Today</button>
+    <button               id="nav-history"  onclick="showView('history')">History</button>
+    <button               id="nav-browse"   onclick="showView('browse')">Browse</button>
+    <button               id="nav-values"   onclick="showView('values')">Values</button>
+    <button               id="nav-archive"  onclick="showView('archive')" style="display:none">Archive</button>
+    <button               id="nav-settings" onclick="showView('settings')">Settings</button>
   </nav>
-</header>
+</div>
 
 <!-- SETUP -->
 <div id="view-setup" class="view active">
-  <div class="setup-card">
-
-    <div class="setup-hero">
-      <div class="setup-logo">Dig <span>Free</span></div>
-      <p class="setup-tagline">Your Discogs collection, one record at a time.</p>
+  <div class="press-setup-wrap">
+    <div class="press-setup-head">
+      <div class="press-setup-logo">Dig <em>Free</em></div>
+      <p class="press-setup-tagline">Your Discogs collection, one record at a time.</p>
     </div>
 
     <div id="setup-error" class="error-box" style="display:none"></div>
 
-    <!-- Step 1: Discogs (required) -->
     <div class="setup-step">
       <span class="setup-step-label">Step 1 — Discogs (required)</span>
       <label>Username</label>
@@ -1440,25 +427,29 @@
       <label>Personal Access Token</label>
       <input type="password" id="setup-token" placeholder="Paste your token here">
       <p class="setup-hint">
-        Get a free token at <a href="https://www.discogs.com/settings/developers" target="_blank" rel="noopener">discogs.com/settings/developers</a>
-        → Generate new token
+        Get a free token at <a href="https://www.discogs.com/settings/developers" target="_blank" rel="noopener">discogs.com/settings/developers</a> → Generate new token
       </p>
     </div>
 
-    <!-- Step 2: Claude AI (optional) -->
     <details class="setup-details">
-      <summary>Step 2 — Claude AI Commentary (optional)</summary>
+      <summary>Step 2 — AI Commentary (optional)</summary>
       <div class="setup-details-body">
-        <label>Anthropic API Key</label>
-        <input type="password" id="setup-claude-key" placeholder="sk-ant-…" autocomplete="off">
+        <label>AI Provider</label>
+        <select id="setup-ai-provider" style="width:100%; margin-bottom:14px;">
+          <option value="anthropic">Anthropic (Claude)</option>
+          <option value="openai">OpenAI (ChatGPT)</option>
+          <option value="gemini">Google Gemini Flash (free)</option>
+          <option value="groq">Groq (free, fast)</option>
+        </select>
+        <label>API Key</label>
+        <input type="password" id="setup-ai-key" placeholder="Your API key" autocomplete="off">
         <p class="setup-hint" style="margin-top:0;">
-          Get a key at <a href="https://console.anthropic.com/" target="_blank" rel="noopener">console.anthropic.com</a>.
-          Costs ~$0.01 per album pick. Unlocks a personal take, fun facts, and tracklist highlights for each record.
+          Unlocks a personal take, fun facts, and tracklist highlights for each pick.
+          Gemini Flash and Groq offer free tiers.
         </p>
       </div>
     </details>
 
-    <!-- Step 3: WordPress (advanced) -->
     <details class="setup-details">
       <summary>Step 3 — WordPress Publishing (advanced)</summary>
       <div class="setup-details-body">
@@ -1469,9 +460,7 @@
         <label>Application Password</label>
         <input type="password" id="setup-wp-pass" placeholder="xxxx xxxx xxxx xxxx xxxx xxxx">
         <p class="setup-hint" style="margin-top:0;">
-          Requires the <strong style="color:var(--cream);">Dig Free WordPress plugin</strong> installed on your site.
-          Generate an <a href="https://wordpress.com/support/security/two-step-authentication/application-specific-passwords/" target="_blank" rel="noopener">Application Password</a>
-          in your WP user profile.
+          Requires the Dig Free WordPress plugin. Generate an Application Password in your WP user profile.
         </p>
       </div>
     </details>
@@ -1485,20 +474,20 @@
       <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
       <div class="progress-text" id="progress-text">Fetching page 1…</div>
     </div>
-
   </div>
 </div>
 
 <!-- TODAY -->
 <div id="view-today" class="view" style="display:none">
-  <div class="status-bar">
-    <div class="status-info">
-      <strong id="collection-size">—</strong> records cached
-      &nbsp;·&nbsp; synced <strong id="synced-date">—</strong>
-    </div>
-    <div class="btn-row">
-      <button class="btn-sm" onclick="pickAlbum()">↺ Re-roll</button>
-      <button class="btn-sm amber" onclick="refreshCollection()">↻ Sync</button>
+  <div class="press-container">
+    <div class="press-status-bar">
+      <div class="press-status-info">
+        <strong id="collection-size">—</strong> records &nbsp;·&nbsp; synced <strong id="synced-date">—</strong>
+      </div>
+      <div class="btn-row">
+        <button class="btn-sm" onclick="pickAlbum()">↺ Re-roll</button>
+        <button class="btn-sm" onclick="refreshCollection()">↻ Sync</button>
+      </div>
     </div>
   </div>
   <div id="today-content"></div>
@@ -1506,40 +495,43 @@
 
 <!-- HISTORY -->
 <div id="view-history" class="view" style="display:none">
-  <div class="history-header">
-    <div>
-      <h2>Past Picks</h2>
-      <span class="history-count" id="history-count"></span>
+  <div class="press-archive-page">
+    <div class="press-archive-head">
+      <div class="press-archive-title">The Archive</div>
+      <div class="press-archive-sub" id="history-count"></div>
     </div>
-    <div class="history-filters">
-      <button class="btn-sm amber" id="hf-all"   onclick="setHistoryFilter('all')">All</button>
-      <button class="btn-sm"       id="hf-daily" onclick="setHistoryFilter('daily')">🎵 Daily</button>
-      <button class="btn-sm"       id="hf-user"  onclick="setHistoryFilter('user')">♥ My Picks</button>
+    <div class="press-filter-strip">
+      <button class="press-filter active" id="hf-all"   onclick="setHistoryFilter('all')">All</button>
+      <button class="press-filter"        id="hf-daily" onclick="setHistoryFilter('daily')">Daily</button>
+      <button class="press-filter"        id="hf-user"  onclick="setHistoryFilter('user')">My Picks</button>
     </div>
+    <div id="history-grid"></div>
   </div>
-  <div id="history-grid"></div>
 </div>
 
 <!-- BROWSE -->
 <div id="view-browse" class="view" style="display:none">
-  <div class="history-header">
-    <h2>Collection</h2>
-    <span class="history-count" id="browse-count"></span>
+  <div class="press-browse-page">
+    <div class="press-browse-head">
+      <div class="press-browse-title">Collection</div>
+      <div class="browse-count" id="browse-count"></div>
+    </div>
+    <div class="browse-toolbar">
+      <input type="text" id="browse-search" placeholder="Filter by artist or title…" oninput="filterBrowse()" autocomplete="off">
+      <select class="browse-sort" id="browse-sort" onchange="filterBrowse()">
+        <option value="artist">Sort: Artist</option>
+        <option value="title">Sort: Title</option>
+        <option value="year-asc">Sort: Year ↑</option>
+        <option value="year-desc">Sort: Year ↓</option>
+      </select>
+    </div>
+    <div id="browse-list"></div>
   </div>
-  <div class="browse-toolbar">
-    <input type="text" id="browse-search" placeholder="Filter by artist or title…" oninput="filterBrowse()" autocomplete="off">
-    <select class="browse-sort" id="browse-sort" onchange="filterBrowse()">
-      <option value="artist">Sort: Artist</option>
-      <option value="title">Sort: Title</option>
-      <option value="year-asc">Sort: Year ↑</option>
-      <option value="year-desc">Sort: Year ↓</option>
-    </select>
-  </div>
-  <div id="browse-list"></div>
 </div>
 
 <!-- VALUES -->
 <div id="view-values" class="view" style="display:none">
+<div style="max-width:900px; margin:0 auto; padding:0 40px 100px;">
   <div class="values-header">
     <div>
       <h2>Collection Value</h2>
@@ -1574,143 +566,144 @@
     </div>
   </div>
   <div id="values-log" style="display:none"></div>
+</div><!-- /values inner -->
 </div>
 
 <!-- ARCHIVE -->
 <div id="view-archive" class="view" style="display:none">
+<div style="max-width:900px; margin:0 auto; padding:0 40px 100px;">
   <div class="archive-header">
     <div>
       <h2>Archive</h2>
       <div class="archive-meta" id="archive-meta">No file loaded</div>
     </div>
     <div class="archive-toolbar">
-      <div class="history-filters">
-        <button class="btn-sm amber" id="af-all"   onclick="setArchiveFilter('all')">All</button>
-        <button class="btn-sm"       id="af-daily" onclick="setArchiveFilter('daily')">🎵 Daily</button>
-        <button class="btn-sm"       id="af-user"  onclick="setArchiveFilter('user')">♥ My Picks</button>
+      <div style="display:flex; gap:0;">
+        <button class="press-filter active" id="af-all"   onclick="setArchiveFilter('all')">All</button>
+        <button class="press-filter"        id="af-daily" onclick="setArchiveFilter('daily')">Daily</button>
+        <button class="press-filter"        id="af-user"  onclick="setArchiveFilter('user')">My Picks</button>
       </div>
       <button class="archive-close" onclick="closeArchive()">✕ Close</button>
     </div>
   </div>
   <div id="archive-grid"></div>
 </div>
+</div>
 
 <!-- SETTINGS -->
 <div id="view-settings" class="view" style="display:none">
-  <div class="settings-card">
-    <h2>Settings</h2>
+  <div class="press-settings-page">
+    <div class="press-settings-head">
+      <div class="press-settings-title">Settings</div>
+    </div>
 
     <!-- ── Discogs ── -->
-    <div class="settings-section">
-      <div class="settings-section-header">
-        <span class="setting-label" style="color:var(--amber);">Discogs</span>
-        <span id="s-discogs-status" style="font-family:'DM Mono',monospace; font-size:0.68rem;"></span>
+    <div class="press-settings-section">
+      <div class="press-settings-label-row">
+        <div class="press-settings-label">Discogs — Required</div>
+        <span id="s-discogs-status" class="settings-status"></span>
       </div>
-      <p style="font-size:0.78rem; color:var(--muted); line-height:1.6; margin-bottom:16px;">
-        Dig Free connects to your Discogs collection using your username and a personal access token.
-        To get a token, go to <a href="https://www.discogs.com/settings/developers" target="_blank" rel="noopener noreferrer" style="color:var(--amber);">discogs.com/settings/developers</a>
-        and click <strong style="color:var(--cream);">Generate new token</strong>.
-      </p>
-      <label for="s-discogs-username">Discogs Username</label>
-      <input type="text" id="s-discogs-username" placeholder="your_discogs_username" autocomplete="off" style="margin-bottom:10px;">
-      <label for="s-discogs-token">Personal Access Token</label>
-      <input type="password" id="s-discogs-token" placeholder="enter token to update" autocomplete="off" style="margin-bottom:10px;">
-      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
-        <button class="btn secondary" style="flex:1; margin-bottom:0;" onclick="saveDiscogsConfig()">Save</button>
-        <button class="btn secondary" style="flex:1; margin-bottom:0;" onclick="testDiscogsConnection()">Test Connection</button>
+      <div class="press-field">
+        <label for="s-discogs-username">Username</label>
+        <input type="text" id="s-discogs-username" placeholder="your_discogs_username" autocomplete="off">
       </div>
-
-      <div class="setting-row">
-        <span class="setting-label">Collection</span>
-        <span class="setting-val" id="s-collection">—</span>
+      <div class="press-field">
+        <label for="s-discogs-token">Personal Access Token</label>
+        <input type="password" id="s-discogs-token" placeholder="enter token to update" autocomplete="off">
       </div>
-      <div class="setting-row">
-        <span class="setting-label">Last Synced</span>
-        <span class="setting-val" id="s-synced">—</span>
+      <div class="press-action-row">
+        <button class="btn secondary" onclick="saveDiscogsConfig()">Save</button>
+        <button class="btn secondary" onclick="testDiscogsConnection()">Test Connection</button>
       </div>
-      <div class="setting-row" style="border-bottom:none;">
-        <span class="setting-label">History</span>
-        <span class="setting-val" id="s-history">—</span>
+      <div style="margin-top:20px;">
+        <div class="setting-row"><span class="setting-label">Collection</span><span class="setting-val" id="s-collection">—</span></div>
+        <div class="setting-row"><span class="setting-label">Last Synced</span><span class="setting-val" id="s-synced">—</span></div>
+        <div class="setting-row" style="border-bottom:none;"><span class="setting-label">History</span><span class="setting-val" id="s-history">—</span></div>
       </div>
-
-      <div style="margin-top:16px;">
-        <button class="btn secondary" style="width:100%; margin-bottom:0;" onclick="refreshCollection()">↻ Resync Collection from Discogs</button>
+      <div class="press-action-row" style="margin-top:16px;">
+        <button class="btn secondary" onclick="refreshCollection()">↻ Resync from Discogs</button>
       </div>
-      <div class="storage-badge">🔒 Credentials encrypted with AES-256 · stored locally in your browser · never transmitted to Dig Free</div>
+      <div class="press-security-note" style="margin-top:14px;">
+        <span>🔒 &nbsp;Encrypted with AES-256 &nbsp;·&nbsp; stored locally &nbsp;·&nbsp; never transmitted to Dig Free</span>
+      </div>
     </div>
 
     <!-- ── AI Features ── -->
-    <div class="settings-section">
-      <div class="settings-section-header">
-        <span class="setting-label" style="color:var(--amber);">AI Features</span>
-        <span id="s-claude-status" style="font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--green);"></span>
+    <div class="press-settings-section">
+      <div class="press-settings-label-row">
+        <div class="press-settings-label">AI Commentary — Optional</div>
+        <span id="s-ai-status" class="settings-status"></span>
       </div>
-      <p style="font-size:0.78rem; color:var(--muted); line-height:1.6; margin-bottom:16px;">
-        Add an Anthropic API key to unlock Claude's Take, Fun Facts, and Tracklist Highlights on each pick.
-        Get a key at <a href="https://console.anthropic.com/" target="_blank" rel="noopener noreferrer" style="color:var(--amber);">console.anthropic.com</a>.
-      </p>
-      <label for="s-claude-key">Anthropic API Key</label>
-      <input type="password" id="s-claude-key" placeholder="sk-ant-…" style="margin-bottom:10px;">
-      <div style="display:flex; gap:8px;">
-        <button class="btn secondary" style="flex:1; margin-bottom:0;" onclick="saveClaudeKey()">Save Key</button>
-        <button class="btn secondary danger" id="s-claude-clear" style="flex:1; margin-bottom:0; display:none;" onclick="clearClaudeKey()">Remove Key</button>
+      <div class="press-provider-grid" id="s-provider-grid">
+        <div class="press-provider-opt selected" data-provider="anthropic" onclick="selectProvider('anthropic')">
+          <div class="press-provider-name">Anthropic</div>
+          <div class="press-provider-note">Claude · ~$0.01/pick</div>
+        </div>
+        <div class="press-provider-opt" data-provider="openai" onclick="selectProvider('openai')">
+          <div class="press-provider-name">OpenAI</div>
+          <div class="press-provider-note">GPT-4o-mini · ~$0.01/pick</div>
+        </div>
+        <div class="press-provider-opt" data-provider="gemini" onclick="selectProvider('gemini')">
+          <div class="press-provider-name">Gemini Flash</div>
+          <div class="press-provider-note">Google · free tier available</div>
+        </div>
+        <div class="press-provider-opt" data-provider="groq" onclick="selectProvider('groq')">
+          <div class="press-provider-name">Groq</div>
+          <div class="press-provider-note">Llama 3 · free &amp; fast</div>
+        </div>
+      </div>
+      <div class="press-field">
+        <label for="s-ai-key" id="s-ai-key-label">API Key</label>
+        <input type="password" id="s-ai-key" placeholder="Your API key">
+      </div>
+      <div class="press-action-row">
+        <button class="btn secondary" onclick="saveAiKey()">Save Key</button>
+        <button class="btn secondary danger" id="s-ai-clear" style="display:none;" onclick="clearAiKey()">Remove Key</button>
       </div>
     </div>
 
-    <!-- ── WordPress Publishing (advanced, collapsed by default) ── -->
-    <div class="settings-section">
-      <details class="settings-details" id="settings-wp-details">
-        <summary>
-          <div class="settings-section-header">
-            <span class="setting-label" style="color:var(--amber);">WordPress Publishing</span>
-            <span id="s-wp-status" style="font-family:'DM Mono',monospace; font-size:0.68rem;"></span>
-          </div>
-          <span class="settings-details-toggle">▸ Advanced</span>
-        </summary>
-        <p style="font-size:0.78rem; color:var(--muted); line-height:1.6; margin-bottom:16px;">
-          Publish picks to your WordPress site. Install the <strong style="color:var(--cream);">Dig Free plugin</strong> on your site, then generate an
-          <a href="https://wordpress.com/support/security/two-step-authentication/application-specific-passwords/" target="_blank" rel="noopener noreferrer" style="color:var(--amber);">Application Password</a>
-          in your WordPress user profile.
-        </p>
-        <label for="s-wp-url">Site URL</label>
-        <input type="text" id="s-wp-url" placeholder="https://yoursite.com" style="margin-bottom:10px;">
-        <label for="s-wp-user">WordPress Username</label>
-        <input type="text" id="s-wp-user" placeholder="your_wp_username" autocomplete="off" style="margin-bottom:10px;">
-        <label for="s-wp-pass">Application Password</label>
-        <input type="password" id="s-wp-pass" placeholder="xxxx xxxx xxxx xxxx xxxx xxxx" style="margin-bottom:10px;">
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button class="btn secondary" style="flex:1; margin-bottom:0;" onclick="saveWpConfig()">Save</button>
-          <button class="btn secondary" style="flex:1; margin-bottom:0;" onclick="testWpConnection()">Test Connection</button>
-          <button class="btn secondary danger" id="s-wp-clear" style="flex:1; margin-bottom:0; display:none;" onclick="clearWpConfig()">Disconnect</button>
+    <!-- ── WordPress (advanced) ── -->
+    <details class="settings-details" id="settings-wp-details">
+      <summary>Advanced — WordPress Integration <span id="s-wp-status" class="settings-status" style="margin-left:8px;"></span></summary>
+      <div class="settings-details-body">
+        <div class="press-field">
+          <label for="s-wp-url">Site URL</label>
+          <input type="text" id="s-wp-url" placeholder="https://yoursite.com">
         </div>
-        <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--label);">
-          <p style="font-size:0.75rem; color:var(--muted); line-height:1.5; margin-bottom:10px;">
-            Accidentally removed local picks? Pull them back from your WordPress site into Dig Free history.
-          </p>
+        <div class="press-field">
+          <label for="s-wp-user">WordPress Username</label>
+          <input type="text" id="s-wp-user" placeholder="your_wp_username" autocomplete="off">
+        </div>
+        <div class="press-field">
+          <label for="s-wp-pass">Application Password</label>
+          <input type="password" id="s-wp-pass" placeholder="xxxx xxxx xxxx xxxx xxxx xxxx">
+        </div>
+        <div class="press-action-row">
+          <button class="btn secondary" onclick="saveWpConfig()">Save</button>
+          <button class="btn secondary" onclick="testWpConnection()">Test Connection</button>
+          <button class="btn secondary danger" id="s-wp-clear" style="display:none;" onclick="clearWpConfig()">Disconnect</button>
+        </div>
+        <div style="margin-top:16px; padding-top:16px; border-top:1px solid var(--rule);">
+          <div style="font-family:'Source Serif 4',serif; font-size:0.82rem; color:var(--mid); margin-bottom:10px;">
+            Accidentally removed local picks? Pull them back from WordPress.
+          </div>
           <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-            <button class="btn secondary" style="margin-bottom:0; white-space:nowrap;" onclick="importFromWordPress()">↓ Import from WordPress</button>
-            <span id="s-wp-import-status" style="font-family:'DM Mono',monospace; font-size:0.68rem;"></span>
+            <button class="btn secondary" style="width:auto; margin-bottom:0;" onclick="importFromWordPress()">↓ Import from WordPress</button>
+            <span id="s-wp-import-status" class="settings-status"></span>
           </div>
         </div>
-      </details>
-    </div>
+      </div>
+    </details>
 
     <!-- ── Export & Archive ── -->
-    <div class="settings-section">
-      <div class="settings-section-header">
-        <span class="setting-label" style="color:var(--amber);">Export &amp; Archive</span>
-      </div>
-      <p style="font-size:0.78rem; color:var(--muted); line-height:1.6; margin-bottom:16px;">
-        Export your history year-by-year as JSON files to keep a permanent local record. Load an exported file into the Archive view to browse it read-only.
-      </p>
+    <div class="press-settings-section">
+      <div class="press-settings-label">Export &amp; Archive</div>
       <div class="export-row">
-        <select id="export-year-select">
-          <option value="">— choose year —</option>
-        </select>
-        <button class="btn secondary" style="margin-bottom:0; white-space:nowrap;" onclick="exportHistory()">⬇ Export Year</button>
+        <select id="export-year-select"><option value="">— choose year —</option></select>
+        <button class="btn secondary" style="width:auto; margin-bottom:0; white-space:nowrap;" onclick="exportHistory()">⬇ Export Year</button>
       </div>
       <div style="margin-top:10px;">
-        <label for="archive-file-input" class="btn secondary" style="display:inline-block; cursor:pointer; margin-bottom:0;">
+        <label for="archive-file-input" class="btn secondary" style="display:inline-flex; width:auto; cursor:pointer; margin-bottom:0;">
           📂 Load Archive File
         </label>
         <input type="file" id="archive-file-input" accept=".json" style="display:none" onchange="loadArchive(event)">
@@ -1718,33 +711,37 @@
     </div>
 
     <!-- ── Value Tracking ── -->
-    <div class="settings-section">
-      <div class="settings-section-header">
-        <span class="setting-label" style="color:var(--amber);">Value Tracking</span>
-        <span id="s-values-count" style="font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--muted);"></span>
+    <div class="press-settings-section">
+      <div class="press-settings-label-row">
+        <div class="press-settings-label">Value Tracking</div>
+        <span id="s-values-count" class="settings-status"></span>
       </div>
-      <p style="font-size:0.78rem; color:var(--muted); line-height:1.6; margin-bottom:16px;">
-        Export your collection value snapshots as a JSON backup. Import a CSV (date, low, median, high) to load historical data.
-      </p>
-      <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <button class="btn secondary" style="flex:1; margin-bottom:0;" onclick="exportValueHistory()">⬇ Export</button>
-        <label for="s-values-csv-input" class="btn secondary" style="flex:1; margin-bottom:0; cursor:pointer; text-align:center;">📂 Import CSV</label>
+      <div class="press-action-row">
+        <button class="btn secondary" onclick="exportValueHistory()">⬇ Export</button>
+        <label for="s-values-csv-input" class="btn secondary" style="cursor:pointer; text-align:center;">📂 Import CSV</label>
         <input type="file" id="s-values-csv-input" accept=".csv,.txt" style="display:none" onchange="loadValueCSV(event)">
-        <button class="btn secondary danger" id="s-values-clear" style="flex:1; margin-bottom:0; display:none;" onclick="clearValueHistory()">Clear</button>
+        <button class="btn secondary danger" id="s-values-clear" style="display:none;" onclick="clearValueHistory()">Clear</button>
+      </div>
+    </div>
+
+    <!-- ── Data & Storage ── -->
+    <div class="press-settings-section">
+      <div class="press-settings-label">Data &amp; Storage</div>
+      <div style="font-family:'Space Mono',monospace; font-size:0.6rem; letter-spacing:0.06em; color:var(--mid); line-height:2.2;">
+        <div>Credentials &nbsp;·&nbsp; AES-256 encrypted, IndexedDB</div>
+        <div>Images &nbsp;·&nbsp; HD artwork cached, IndexedDB</div>
+        <div>Collection &amp; History &nbsp;·&nbsp; localStorage</div>
       </div>
     </div>
 
     <!-- ── Danger Zone ── -->
-    <div class="settings-section" style="border-color: rgba(184,64,64,0.25);">
-      <div class="settings-section-header" style="margin-bottom:12px;">
-        <span class="setting-label" style="color:var(--red);">Danger Zone</span>
+    <div class="press-settings-section" style="border-bottom:none;">
+      <div class="press-settings-label" style="color:var(--press);">Danger Zone</div>
+      <div style="font-family:'Source Serif 4',serif; font-size:0.85rem; color:var(--mid); margin-bottom:16px; line-height:1.6;">
+        Reset &amp; Disconnect removes all settings, credentials, collection data, and history. Cannot be undone.
       </div>
-      <p style="font-size:0.78rem; color:var(--muted); line-height:1.6; margin-bottom:16px;">
-        Reset &amp; Disconnect removes all settings, credentials, collection data, and history from this browser. This cannot be undone.
-      </p>
-      <button class="btn secondary danger" style="width:100%; margin-bottom:0;" onclick="resetAll()">Reset &amp; Disconnect</button>
+      <button class="btn danger" style="width:auto;" onclick="resetAll()">Reset &amp; Disconnect</button>
     </div>
-
   </div>
 </div>
 
@@ -1774,7 +771,8 @@ let creds          = null;
 let collection     = [];
 let history        = [];
 let meta           = null;
-let claudeKey      = null;
+let aiKey          = null;   // API key for AI commentary (any provider)
+let aiProvider     = 'anthropic'; // 'anthropic' | 'openai' | 'gemini' | 'groq'
 let wpConfig       = null;
 let historyFilter  = 'all';
 let activeEdit     = null;   // { requestedAt, field: 'date'|'note' }
@@ -1943,9 +941,9 @@ function showToast(msg, duration = 3500) {
     el.id = 'df-toast';
     el.style.cssText = `
       position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
-      background:var(--groove); border:1px solid var(--label);
-      color:var(--cream); font-family:'DM Mono',monospace; font-size:0.72rem;
-      letter-spacing:0.06em; padding:10px 20px; border-radius:8px;
+      background:var(--ink); border:none;
+      color:var(--paper); font-family:'Space Mono',monospace; font-size:0.65rem;
+      letter-spacing:0.08em; padding:10px 22px;
       z-index:10000; opacity:0; transition:opacity 0.3s;
       pointer-events:none; white-space:nowrap;
     `;
@@ -1971,9 +969,13 @@ async function init() {
   if (db && encKey) await migrateFromV1();
 
   // 3. Load credentials (decrypted from IndexedDB)
-  creds     = db ? await loadCredentials('discogs') : null;
-  claudeKey = db ? (await loadCredentials('claude'))?.key ?? null : null;
-  wpConfig  = db ? await loadCredentials('wp') : null;
+  creds      = db ? await loadCredentials('discogs') : null;
+  const aiCred = db ? await loadCredentials('ai') : null;
+  // Backward-compat: fall back to old 'claude' credential store
+  const legacyClaude = db && !aiCred ? await loadCredentials('claude') : null;
+  aiKey      = aiCred?.key ?? legacyClaude?.key ?? null;
+  aiProvider = aiCred?.provider ?? 'anthropic';
+  wpConfig   = db ? await loadCredentials('wp') : null;
 
   // 4. Load collection data from localStorage (sync, non-sensitive)
   collection   = loadJSON(STORAGE.COLLECTION) ?? [];
@@ -1999,14 +1001,11 @@ async function init() {
   updateStatusBar();
   showView('today', true);
   setTodayContent(`
-    <div style="text-align:center; padding:60px 20px;">
-      ${vinylSVG(80)}
-      <p style="font-family:'DM Mono',monospace; font-size:0.75rem; letter-spacing:0.1em;
-                text-transform:uppercase; color:var(--muted); margin:24px 0 28px;">
-        Ready to dig
-      </p>
-      <button class="btn" onclick="pickAlbum()" style="min-width:180px;">
-        🎵 Pick Today's Album
+    <div class="press-ready">
+      <div class="press-ready-head">Ready to Dig</div>
+      <p class="press-ready-sub">Your collection is loaded. Pick today's record.</p>
+      <button class="btn" onclick="pickAlbum()" style="width:auto; min-width:200px;">
+        Pick Today's Album
       </button>
     </div>
   `);
@@ -2027,17 +1026,17 @@ function showView(name, skipNav = false) {
     v.classList.remove('active');
   });
   const el = document.getElementById('view-' + name);
-  el.style.display = 'block';
-  el.classList.add('active');
+  if (el) { el.style.display = 'block'; el.classList.add('active'); }
+
+  // Show/hide masthead based on whether we're in setup
+  const masthead = document.getElementById('press-masthead');
+  if (masthead) masthead.style.display = name === 'setup' ? 'none' : '';
 
   if (!skipNav) {
-    // Named nav buttons (excludes the hidden archive btn from index-based logic)
-    ['today','history','browse','values','settings'].forEach(n => {
-      const btn = document.querySelector(`.nav-btn[onclick="showView('${n}')"]`);
+    ['today','history','browse','values','settings','archive'].forEach(n => {
+      const btn = document.getElementById('nav-' + n);
       if (btn) btn.classList.toggle('active', n === name);
     });
-    const archiveBtn = document.getElementById('nav-archive');
-    if (archiveBtn) archiveBtn.classList.toggle('active', name === 'archive');
 
     if (name === 'history')  renderHistory();
     if (name === 'browse')   renderBrowse();
@@ -2045,6 +1044,7 @@ function showView(name, skipNav = false) {
     if (name === 'settings') renderSettings();
     if (name === 'archive')  renderArchive();
   }
+  window.scrollTo(0, 0);
 }
 
 // ── SETUP ──
@@ -2074,11 +1074,13 @@ async function handleSetup() {
     saveJSON(STORAGE.COLLECTION, collection);
     saveJSON(STORAGE.META, meta);
 
-    // Optional: Claude API key from setup form
-    const claudeInput = document.getElementById('setup-claude-key')?.value.trim();
-    if (claudeInput) {
-      claudeKey = claudeInput;
-      await saveCredentials('claude', { key: claudeKey });
+    // Optional: AI key from setup form
+    const aiKeyInput     = document.getElementById('setup-ai-key')?.value.trim();
+    const aiProviderSel  = document.getElementById('setup-ai-provider')?.value ?? 'anthropic';
+    if (aiKeyInput) {
+      aiKey      = aiKeyInput;
+      aiProvider = aiProviderSel;
+      await saveCredentials('ai', { key: aiKey, provider: aiProvider });
     }
 
     // Optional: WordPress from setup form
@@ -2092,7 +1094,6 @@ async function handleSetup() {
 
     updateStatusBar();
     showView('today');
-    document.querySelectorAll('.nav-btn')[0].classList.add('active');
     await pickAlbum();
   } catch (e) {
     errEl.textContent = e.message;
@@ -2257,9 +1258,9 @@ async function pickAlbum() {
   renderAlbumCard({ pick, rating, tracklist, imgDataUrl: imageDisplay, take, facts, highlights });
 }
 
-// ── CLAUDE COMMENTARY ──
-async function generateCommentary(pick, tracklist, rating) {
-  const prompt = `You are a warm, knowledgeable music lover recommending a vinyl record to a friend.
+// ── AI COMMENTARY — MULTI-PROVIDER ──
+function buildAiPrompt(pick, tracklist, rating) {
+  return `You are a warm, knowledgeable music journalist writing a short review for a vinyl collector.
 
 Album: "${pick.title}" by ${pick.artist}
 Year: ${pick.year ?? 'unknown'}
@@ -2270,109 +1271,207 @@ Tracklist: ${tracklist.slice(0, 20).join(', ') || 'unknown'}
 
 Respond ONLY with a JSON object (no markdown, no backticks) with exactly these keys:
 {
-  "take": "2-3 sentences of warm, genuine commentary. Reference the genre, era, or emotional vibe. Sound like a knowledgeable friend, not Wikipedia.",
+  "take": "2-3 sentences of warm, editorial commentary. Write like a music journalist, not Wikipedia. Reference the emotional vibe, context, or influence.",
   "facts": ["fact 1", "fact 2", "fact 3"],
   "highlights": [
-    {"track": "Track Name", "note": "why it's worth a listen"},
-    {"track": "Track Name", "note": "why it's worth a listen"},
-    {"track": "Track Name", "note": "why it's worth a listen"}
+    {"track": "Track Name", "note": "why it stands out"},
+    {"track": "Track Name", "note": "why it stands out"},
+    {"track": "Track Name", "note": "why it stands out"}
   ]
 }
 
-For facts: genuinely interesting tidbits — recording history, personnel, cultural context, chart performance, legacy. Make them surprising and specific.
-For highlights: pick real tracks from the tracklist if provided. If no tracklist, pick tracks you know. Keep notes to one punchy sentence.`;
+For facts: genuinely interesting tidbits — recording history, personnel, cultural context, legacy. Be specific and surprising.
+For highlights: pick real tracks from the tracklist. One punchy sentence each.`;
+}
 
-  if (!claudeKey) return { take: null, facts: null, highlights: null };
-
+async function generateCommentary(pick, tracklist, rating) {
+  if (!aiKey) return { take: null, facts: null, highlights: null };
+  const prompt = buildAiPrompt(pick, tracklist, rating);
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': claudeKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }],
-      }),
-    });
-    const data = await res.json();
-    const text = data.content?.[0]?.text ?? '';
+    let text = '';
+    if (aiProvider === 'anthropic') {
+      text = await fetchAnthropic(prompt);
+    } else if (aiProvider === 'openai') {
+      text = await fetchOpenAI(prompt);
+    } else if (aiProvider === 'gemini') {
+      text = await fetchGemini(prompt);
+    } else if (aiProvider === 'groq') {
+      text = await fetchGroq(prompt);
+    }
+    // Strip markdown code fences if present
+    text = text.replace(/^```(?:json)?\n?/,'').replace(/\n?```$/,'').trim();
     return JSON.parse(text);
   } catch(e) {
+    console.warn('AI commentary failed:', e);
     return { take: null, facts: null, highlights: null };
   }
 }
 
-// ── RENDER CARD ──
+async function fetchAnthropic(prompt) {
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': aiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      messages: [{ role: 'user', content: prompt }],
+    }),
+  });
+  const data = await res.json();
+  return data.content?.[0]?.text ?? '';
+}
+
+async function fetchOpenAI(prompt) {
+  const res = await fetch('https://api.openai.com/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${aiKey}` },
+    body: JSON.stringify({
+      model: 'gpt-4o-mini',
+      max_tokens: 1000,
+      messages: [{ role: 'user', content: prompt }],
+    }),
+  });
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content ?? '';
+}
+
+async function fetchGemini(prompt) {
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${aiKey}`,
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
+    }
+  );
+  const data = await res.json();
+  return data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+}
+
+async function fetchGroq(prompt) {
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${aiKey}` },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      max_tokens: 1000,
+      messages: [{ role: 'user', content: prompt }],
+    }),
+  });
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content ?? '';
+}
+
+// ── RENDER CARD — THE MUSIC PRESS ──
 function renderAlbumCard({ pick, rating, tracklist, imgDataUrl, take, facts, highlights }) {
-  const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-  const stars  = rating ? renderStars(rating) : null;
-  const genres = [...(pick.genres ?? []), ...(pick.styles ?? [])].slice(0, 3);
+  const today = new Date().toLocaleDateString('en-US', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  const genres = [...(pick.genres ?? []), ...(pick.styles ?? [])].slice(0, 4);
 
-  const artHtml = imgDataUrl
-    ? `<img src="${imgDataUrl}" alt="${esc(pick.title)} cover">`
-    : `<div class="art-placeholder">${vinylSVG()}</div>`;
+  // Score: Discogs rating is /5, convert to /10
+  const score = rating ? (rating * 2).toFixed(1) : null;
 
-  const factsHtml = (facts ?? []).map(f => `<li>${esc(f)}</li>`).join('');
+  // Hero image
+  const heroHtml = imgDataUrl
+    ? `<div class="press-hero">
+         <img class="press-hero-img" src="${imgDataUrl}" alt="${esc(pick.title)}">
+         <div class="press-hero-caption">${esc(pick.title)} &nbsp;·&nbsp; ${esc(pick.artist)}${pick.label ? ' &nbsp;·&nbsp; ' + esc(pick.label) : ''}${pick.year ? ', ' + pick.year : ''}</div>
+       </div>`
+    : `<div class="press-hero" style="background:var(--lift); display:flex; align-items:center; justify-content:center;">
+         <div style="font-family:'Bebas Neue',sans-serif; font-size:3rem; color:var(--rule); letter-spacing:0.1em;">♫</div>
+       </div>`;
 
-  const highlightsHtml = (highlights ?? []).map(h => `
-    <li>
-      <span class="track-name">${esc(h.track)}</span>
-      <span class="track-note">${esc(h.note)}</span>
-    </li>
-  `).join('');
+  // Metadata strip pills
+  const metaPills = [
+    pick.year,
+    pick.label,
+    pick.country,
+    ...genres,
+  ].filter(Boolean).map(v => `<span class="press-meta-pill">${esc(v)}</span>`).join('');
 
-  const pillsHtml = [
-    pick.year ? `<span class="pill year">${pick.year}</span>` : '',
-    ...genres.map(g => `<span class="pill">${esc(g)}</span>`),
-    pick.label ? `<span class="pill">${esc(pick.label)}</span>` : '',
-    pick.country ? `<span class="pill">${esc(pick.country)}</span>` : '',
-  ].filter(Boolean).join('');
+  // Track highlights sidebar
+  const trackItems = (highlights ?? []).map((h, i) => `
+    <div class="press-track-item">
+      <div class="press-track-id">${tracklist[i] ? String.fromCharCode(65 + Math.floor(i/2)) + ((i%2)+1) : (i+1) + '.'}</div>
+      <div class="press-track-name">${esc(h.track)}</div>
+      <div class="press-track-note">${esc(h.note)}</div>
+    </div>`).join('');
 
-  const ratingHtml = stars ? `
-    <div class="rating-row">
-      <span class="stars">${stars}</span>
-      <span>${rating.toFixed(1)} / 5 community rating</span>
-    </div>` : '';
+  // Facts grid
+  const factsGrid = (facts ?? []).map(f => `<div class="press-fact">${esc(f)}</div>`).join('');
+
+  // Review prose — split take into sentences for drop cap + pullquote effect
+  let mainColHtml = '';
+  if (take) {
+    const sentences = take.match(/[^.!?]+[.!?]+/g) ?? [take];
+    const midIdx = Math.floor(sentences.length / 2);
+    const firstBlock  = sentences.slice(0, midIdx || sentences.length).join(' ').trim();
+    const secondBlock = sentences.slice(midIdx).join(' ').trim();
+    mainColHtml = `
+      <p class="press-body-text">${esc(firstBlock)}</p>
+      ${secondBlock ? `
+      <blockquote class="press-pullquote">
+        <div class="press-pullquote-text">${esc(secondBlock)}</div>
+      </blockquote>` : ''}
+    `;
+  } else {
+    mainColHtml = `
+      <p class="press-body-text" style="color:var(--mid); font-style:italic;">
+        No AI commentary — add an API key in Settings to unlock the review.
+      </p>`;
+  }
+
+  // WordPress publish button (if configured)
+  const todayEntry = history[0];
+  const wpBtn = wpConfig && todayEntry
+    ? (todayEntry.wpPostId
+        ? `<button class="press-btn" onclick="unpublishEntry('${todayEntry.requestedAt}')">↓ Unpublish</button>`
+        : `<button class="press-btn" onclick="publishEntry('${todayEntry.requestedAt}')">↑ Publish</button>`)
+    : '';
 
   setTodayContent(`
-    <div class="album-card">
-      <div class="card-header">
-        <div class="card-badge">🎵 Album of the Day · ${today}</div>
-        <div class="album-art-wrap">${artHtml}</div>
-        <div class="card-meta">
-          <div class="card-artist">${esc(pick.artist)}</div>
-          <div class="card-title">${esc(pick.title)}</div>
-          <div class="card-pills">${pillsHtml}</div>
-          ${ratingHtml}
+    <div class="press-review-anim">
+      ${heroHtml}
+      <div class="press-container">
+        <div class="press-review-top">
+          <div class="press-review-info">
+            <div class="press-kicker">Daily Pick &nbsp;·&nbsp; ${today}</div>
+            <h1 class="press-artist">${esc(pick.artist)}</h1>
+            <div class="press-album-title">${esc(pick.title)}</div>
+          </div>
+          ${score ? `
+          <div class="press-score-block">
+            <div class="press-score-num">${score}</div>
+            <div class="press-score-denom">out of 10</div>
+          </div>` : ''}
         </div>
-      </div>
 
-      ${take ? `
-      <div class="card-section">
-        <div class="section-label">Claude's Take</div>
-        <p class="take-text">${esc(take)}</p>
-      </div>` : ''}
+        <div class="press-meta-strip">${metaPills}</div>
 
-      ${factsHtml ? `
-      <div class="card-section">
-        <div class="section-label">Fun Facts</div>
-        <ul class="facts-list">${factsHtml}</ul>
-      </div>` : ''}
+        <div class="press-review-body">
+          <div class="press-main-col">${mainColHtml}</div>
+          ${trackItems ? `
+          <div class="press-side-col">
+            <div class="press-side-label">Track Highlights</div>
+            ${trackItems}
+          </div>` : ''}
+        </div>
 
-      ${highlightsHtml ? `
-      <div class="card-section">
-        <div class="section-label">Tracklist Highlights</div>
-        <ul class="tracks-list">${highlightsHtml}</ul>
-      </div>` : ''}
+        ${factsGrid ? `
+        <div class="press-lower">
+          <div class="press-section-head">Notes &amp; Context</div>
+          <div class="press-facts-grid">${factsGrid}</div>
+        </div>` : ''}
 
-      <div class="card-footer">
-        <button class="btn ghost" onclick="pickAlbum()" style="flex:1">↺ Pick Another</button>
-        <button class="btn secondary" onclick="showView('history')" style="flex:1">View History</button>
+        <div class="press-footer">
+          <button class="press-btn primary" onclick="pickAlbum()">↺ Pick Another</button>
+          <button class="press-btn" onclick="showView('history')">Archive →</button>
+          ${wpBtn}
+        </div>
       </div>
     </div>
   `);
@@ -2388,8 +1487,9 @@ function renderStars(rating) {
 // ── HISTORY ──
 function setHistoryFilter(filter) {
   historyFilter = filter;
-  document.querySelectorAll('.history-filters .btn-sm').forEach(b => b.classList.remove('amber'));
-  document.getElementById('hf-' + filter).classList.add('amber');
+  document.querySelectorAll('.press-filter-strip .press-filter').forEach(b => b.classList.remove('active'));
+  const btn = document.getElementById('hf-' + filter);
+  if (btn) btn.classList.add('active');
   renderHistory();
 }
 
@@ -2404,7 +1504,7 @@ function renderHistory() {
   const totalLabel = historyFilter === 'all'
     ? (history.length ? `${history.length} picks` : '')
     : `${filtered.length} of ${history.length} picks`;
-  countEl.textContent = totalLabel;
+  if (countEl) countEl.textContent = totalLabel;
 
   if (!history.length) {
     grid.innerHTML = '<p class="history-empty">No picks yet — go find something to listen to!</p>';
@@ -2416,75 +1516,72 @@ function renderHistory() {
     return;
   }
 
-  grid.innerHTML = `<div class="history-grid">
-    ${filtered.map(h => {
-      const source         = h.source ?? 'daily';
-      const displayDateStr = h.pickedDate ?? h.requestedAt;
-      const isEditDate     = activeEdit?.requestedAt === h.requestedAt && activeEdit?.field === 'date';
-      const isEditNote     = activeEdit?.requestedAt === h.requestedAt && activeEdit?.field === 'note';
+  grid.innerHTML = filtered.map(h => {
+    const source         = h.source ?? 'daily';
+    const displayDateStr = h.pickedDate ?? h.requestedAt;
+    const isEditDate     = activeEdit?.requestedAt === h.requestedAt && activeEdit?.field === 'date';
+    const isEditNote     = activeEdit?.requestedAt === h.requestedAt && activeEdit?.field === 'note';
 
-      // Render thumbnail now; IndexedDB lazy-loader will upgrade to HD
-      const artHtml = h.imgDataUrl
-        ? `<img src="${h.imgDataUrl}" alt="${esc(h.title)}"${h.id ? ` data-release-id="${h.id}"` : ''} loading="lazy">`
-        : (h.id
-            ? `<div class="art-placeholder" data-release-id="${h.id}">${vinylSVG(48)}</div>`
-            : vinylSVG(48));
+    const artHtml = h.imgDataUrl
+      ? `<img src="${h.imgDataUrl}" alt="${esc(h.title)}"${h.id ? ` data-release-id="${h.id}"` : ''} loading="lazy" style="width:64px;height:64px;object-fit:cover;display:block;">`
+      : `<div class="press-archive-art-ph" ${h.id ? `data-release-id="${h.id}"` : ''}>♫</div>`;
 
-      const dateHtml = isEditDate
-        ? `<div class="hist-edit-row">
-             <input type="date" id="edit-date-${h.requestedAt}"
-               value="${toDateInputValue(displayDateStr)}" class="hist-date-input">
-             <button class="hist-edit-action" onclick="saveDate('${h.requestedAt}', document.getElementById('edit-date-${h.requestedAt}').value)">Save</button>
-             <button class="hist-edit-action" onclick="cancelEdit()">Cancel</button>
-           </div>`
-        : `<div class="hist-picked-on">Picked on: ${fmtPickedDate(displayDateStr)}
-             <button class="hist-edit-btn" onclick="startEdit('${h.requestedAt}','date')" title="Edit date">✎</button>
-           </div>`;
+    const artWrap = h.id
+      ? `<a href="https://www.discogs.com/release/${h.id}" target="_blank" rel="noopener noreferrer" class="press-archive-art">${artHtml}</a>`
+      : `<div class="press-archive-art">${artHtml}</div>`;
 
-      const noteHtml = isEditNote
-        ? `<div class="hist-note-wrap">
-             <textarea id="edit-note-${h.requestedAt}" class="hist-note-input"
-               rows="2" placeholder="Add a note…">${esc(h.note ?? '')}</textarea>
-             <div style="display:flex;gap:6px;margin-top:4px;">
-               <button class="hist-edit-action" onclick="saveNote('${h.requestedAt}', document.getElementById('edit-note-${h.requestedAt}').value)">Save</button>
-               <button class="hist-edit-action" onclick="cancelEdit()">Cancel</button>
-             </div>
-           </div>`
-        : h.note
-          ? `<div class="hist-note">${esc(h.note)}
-               <button class="hist-edit-btn" onclick="startEdit('${h.requestedAt}','note')" title="Edit note">✎</button>
-             </div>`
-          : `<button class="hist-note-add" onclick="startEdit('${h.requestedAt}','note')">+ Add note</button>`;
+    const dateHtml = isEditDate
+      ? `<div class="hist-edit-row">
+           <input type="date" id="edit-date-${h.requestedAt}" value="${toDateInputValue(displayDateStr)}" class="hist-date-input">
+           <button class="hist-edit-action" onclick="saveDate('${h.requestedAt}', document.getElementById('edit-date-${h.requestedAt}').value)">Save</button>
+           <button class="hist-edit-action" onclick="cancelEdit()">✕</button>
+         </div>`
+      : '';
 
-      const artWrap = h.id
-        ? `<a class="hist-art-link" href="https://www.discogs.com/release/${h.id}" target="_blank" rel="noopener noreferrer" title="View on Discogs"><div class="hist-art">${artHtml}</div></a>`
-        : `<div class="hist-art-nolink"><div class="hist-art">${artHtml}</div></div>`;
+    const noteHtml = isEditNote
+      ? `<div class="hist-note-wrap">
+           <textarea id="edit-note-${h.requestedAt}" class="hist-note-input" rows="2" placeholder="Add a note…">${esc(h.note ?? '')}</textarea>
+           <div style="display:flex;gap:6px;margin-top:4px;">
+             <button class="hist-edit-action" onclick="saveNote('${h.requestedAt}', document.getElementById('edit-note-${h.requestedAt}').value)">Save</button>
+             <button class="hist-edit-action" onclick="cancelEdit()">✕</button>
+           </div>
+         </div>`
+      : (h.note ? `<div class="press-archive-note">${esc(h.note)}</div>` : '');
 
-      return `
-        <div class="hist-card">
-          ${artWrap}
-          <div class="hist-info">
-            <div class="hist-artist">${esc(h.artist)}</div>
-            <div class="hist-title">${esc(h.title)}${h.year ? ` (${h.year})` : ''}</div>
-            <div class="hist-footer">
-              <span class="hist-source ${source}">${source === 'daily' ? '🎵 Daily Pick' : '♥ My Pick'}</span>
-              <button class="hist-remove" onclick="removeFromHistory('${h.requestedAt}')" title="Remove from history">×</button>
-            </div>
-            ${dateHtml}
-            ${noteHtml}
-            ${wpConfig ? `
-            <div class="hist-wp">
-              ${h.wpPostId
-                ? `<span class="hist-published">✓ Published</span>
-                   <button class="hist-wp-btn danger" onclick="unpublishEntry('${h.requestedAt}')">Remove</button>`
-                : `<button class="hist-wp-btn" onclick="publishEntry('${h.requestedAt}')">↑ Publish</button>`
-              }
-            </div>` : ''}
-          </div>
+    const actions = `
+      <div class="press-archive-actions">
+        <button class="press-row-btn" onclick="startEdit('${h.requestedAt}','date')">Edit date</button>
+        <button class="press-row-btn" onclick="startEdit('${h.requestedAt}','note')">${h.note ? 'Edit note' : '+ Note'}</button>
+        ${wpConfig ? (h.wpPostId
+          ? `<button class="press-row-btn" onclick="unpublishEntry('${h.requestedAt}')">↓ Unpublish</button>`
+          : `<button class="press-row-btn" onclick="publishEntry('${h.requestedAt}')">↑ Publish</button>`)
+          : ''}
+        <button class="press-row-btn danger" onclick="removeFromHistory('${h.requestedAt}')">Remove</button>
+      </div>`;
+
+    const badge = h.wpPostId
+      ? `<span class="press-archive-badge published">Published</span>`
+      : (source === 'user'
+          ? `<span class="press-archive-badge pick">My Pick</span>`
+          : `<span class="press-archive-badge">Daily</span>`);
+
+    return `
+      <div class="press-archive-row">
+        ${artWrap}
+        <div>
+          <div class="press-archive-artist">${esc(h.artist)}</div>
+          <div class="press-archive-album">${esc(h.title)}${h.year ? ` (${h.year})` : ''}</div>
+          ${h.note && !isEditNote ? '' : ''}
+          ${noteHtml}
+          ${dateHtml}
+          ${actions}
         </div>
-      `;
-    }).join('')}
-  </div>`;
+        <div class="press-archive-right">
+          <div class="press-archive-date">${fmtPickedDate(displayDateStr)}</div>
+          ${badge}
+        </div>
+      </div>`;
+  }).join('');
 
   // Upgrade thumbnails to HD images stored in IndexedDB
   initHistoryImageLazyLoad();
@@ -2494,7 +1591,7 @@ function renderHistory() {
 function initHistoryImageLazyLoad() {
   if (!db) return;
   const targets = document.querySelectorAll(
-    '#history-grid img[data-release-id], #history-grid .art-placeholder[data-release-id]'
+    '#history-grid img[data-release-id], #history-grid .press-archive-art-ph[data-release-id]'
   );
   if (!targets.length) return;
 
@@ -2642,7 +1739,7 @@ function filterBrowse() {
 
     const thumbHtml = r.thumb
       ? `<img src="${esc(r.thumb)}" alt="${esc(r.artist)} – ${esc(r.title)}" loading="lazy">`
-      : vinylSVG(36);
+      : `<span style="font-size:1.2rem;color:var(--mid);">♫</span>`;
 
     const lastPick   = lastPickMap.get(r.id);
     const lastAdded  = lastPick
@@ -2707,19 +1804,24 @@ function renderSettings() {
   document.getElementById('s-synced').textContent     = meta?.cachedAt ? fmtDate(meta.cachedAt) : '—';
   document.getElementById('s-history').textContent    = history.length ? `${history.length} picks` : 'None';
 
-  const statusEl = document.getElementById('s-claude-status');
-  const clearBtn = document.getElementById('s-claude-clear');
-  const keyInput = document.getElementById('s-claude-key');
-  if (claudeKey) {
-    statusEl.textContent  = '✓ Key saved';
-    clearBtn.style.display = '';
-    keyInput.placeholder  = '••••••••••••••••••••';
+  const aiStatusEl = document.getElementById('s-ai-status');
+  const aiClearBtn = document.getElementById('s-ai-clear');
+  const aiKeyInput = document.getElementById('s-ai-key');
+  if (aiKey) {
+    if (aiStatusEl) aiStatusEl.textContent  = '✓ Key saved';
+    if (aiStatusEl) aiStatusEl.style.color  = 'var(--green)';
+    if (aiClearBtn) aiClearBtn.style.display = '';
+    if (aiKeyInput) aiKeyInput.placeholder  = '••••••••••••••••••••';
   } else {
-    statusEl.textContent  = '';
-    clearBtn.style.display = 'none';
-    keyInput.placeholder  = 'sk-ant-…';
+    if (aiStatusEl) aiStatusEl.textContent  = '';
+    if (aiClearBtn) aiClearBtn.style.display = 'none';
+    if (aiKeyInput) aiKeyInput.placeholder  = 'Your API key';
   }
-  keyInput.value = '';
+  if (aiKeyInput) aiKeyInput.value = '';
+  // Highlight the selected provider
+  document.querySelectorAll('.press-provider-opt').forEach(opt => {
+    opt.classList.toggle('selected', opt.dataset.provider === aiProvider);
+  });
 
   // WordPress config
   const wpStatusEl = document.getElementById('s-wp-status');
@@ -2760,18 +1862,28 @@ function renderSettings() {
   }
 }
 
-async function saveClaudeKey() {
-  const val = document.getElementById('s-claude-key').value.trim();
-  if (!val) return;
-  claudeKey = val;
-  await saveCredentials('claude', { key: claudeKey });
-  renderSettings();
+// ── AI KEY MANAGEMENT ──
+function selectProvider(provider) {
+  aiProvider = provider;
+  document.querySelectorAll('.press-provider-opt').forEach(opt => {
+    opt.classList.toggle('selected', opt.dataset.provider === provider);
+  });
 }
 
-async function clearClaudeKey() {
-  if (!confirm('Remove your Anthropic API key? AI features will be hidden until you add one again.')) return;
-  claudeKey = null;
-  await deleteCredential('claude');
+async function saveAiKey() {
+  const val = document.getElementById('s-ai-key')?.value.trim();
+  if (!val) return;
+  aiKey = val;
+  await saveCredentials('ai', { key: aiKey, provider: aiProvider });
+  renderSettings();
+  showToast('AI key saved ✓');
+}
+
+async function clearAiKey() {
+  if (!confirm('Remove your AI key? Commentary will be disabled until you add one again.')) return;
+  aiKey = null;
+  await deleteCredential('ai');
+  await deleteCredential('claude'); // also clear legacy store
   renderSettings();
 }
 
@@ -2811,7 +1923,7 @@ async function testDiscogsConnection() {
     return;
   }
   statusEl.textContent          = 'Testing…';
-  statusEl.style.color          = 'var(--amber)';
+  statusEl.style.color          = 'var(--ink)';
   statusEl.dataset.testing      = '1';
 
   try {
@@ -2883,7 +1995,7 @@ async function testWpConnection() {
   }
 
   statusEl.textContent = 'Testing…';
-  statusEl.style.color = 'var(--muted)';
+  statusEl.style.color = 'var(--mid)';
 
   try {
     const res = await fetch(`${url}/wp-json/digfree/v1/entries`, {
@@ -2986,7 +2098,7 @@ async function importFromWordPress() {
   }
   const statusEl = document.getElementById('s-wp-import-status');
   statusEl.textContent = 'Fetching…';
-  statusEl.style.color = 'var(--amber)';
+  statusEl.style.color = 'var(--ink)';
 
   try {
     const res = await fetch(wpBase() + '/entries', {
@@ -3181,7 +2293,7 @@ function setArchiveFilter(filter) {
   archiveFilter = filter;
   ['all','daily','user'].forEach(f => {
     const btn = document.getElementById('af-' + f);
-    if (btn) btn.classList.toggle('amber', f === filter);
+    if (btn) btn.classList.toggle('active', f === filter);
   });
   renderArchive();
 }
@@ -3208,35 +2320,32 @@ function renderArchive() {
     return;
   }
 
-  // Reuse the same card renderer as history (read-only: no remove/edit/publish controls)
-  gridEl.innerHTML = `<div class="history-grid">${filtered.map(h => {
+  gridEl.innerHTML = filtered.map(h => {
+    const source  = h.source || 'daily';
+    const dateFmt = h.pickedDate ? fmtPickedDate(h.pickedDate) : h.requestedAt ? fmtPickedDate(h.requestedAt) : '';
     const artHtml = h.imgDataUrl
-      ? `<img src="${esc(h.imgDataUrl)}" alt="${esc(h.artist)} – ${esc(h.title)}" loading="lazy">`
-      : vinylSVG(80);
-    const source      = h.source || 'daily';
-    const sourceLabel = source === 'daily' ? '🎵 Daily Pick' : '♥ My Pick';
-    const dateFmt     = h.pickedDate ? fmtPickedDate(h.pickedDate)
-                       : h.requestedAt ? fmtPickedDate(h.requestedAt) : '';
-    const tags = [...(h.genres || []), ...(h.styles || [])].slice(0, 3);
+      ? `<img src="${esc(h.imgDataUrl)}" alt="${esc(h.artist)}" loading="lazy" style="width:64px;height:64px;object-fit:cover;display:block;">`
+      : `<div class="press-archive-art-ph">♫</div>`;
     const artWrap = h.id
-      ? `<a class="hist-art-link" href="https://www.discogs.com/release/${h.id}" target="_blank" rel="noopener noreferrer" title="View on Discogs"><div class="hist-art">${artHtml}</div></a>`
-      : `<div class="hist-art-nolink"><div class="hist-art">${artHtml}</div></div>`;
-
+      ? `<a href="https://www.discogs.com/release/${h.id}" target="_blank" rel="noopener noreferrer" class="press-archive-art">${artHtml}</a>`
+      : `<div class="press-archive-art">${artHtml}</div>`;
+    const badge = source === 'user'
+      ? `<span class="press-archive-badge pick">My Pick</span>`
+      : `<span class="press-archive-badge">Daily</span>`;
     return `
-      <div class="hist-card">
+      <div class="press-archive-row" style="cursor:default;">
         ${artWrap}
-        <div class="hist-info">
-          <div class="hist-artist">${esc(h.artist)}</div>
-          <div class="hist-title">${esc(h.title)}${h.year ? ` (${h.year})` : ''}</div>
-          <div class="hist-footer">
-            <span class="hist-source ${esc(source)}">${esc(sourceLabel)}</span>
-          </div>
-          ${tags.length ? `<div class="hist-tags">${tags.map(t => `<span class="hist-tag">${esc(t)}</span>`).join('')}</div>` : ''}
-          ${dateFmt ? `<div class="hist-picked-on">Picked on: ${esc(dateFmt)}</div>` : ''}
-          ${h.note ? `<div class="hist-note-ro" style="font-style:italic;color:var(--muted);font-size:0.8rem;margin-top:6px;line-height:1.5;">${esc(h.note)}</div>` : ''}
+        <div>
+          <div class="press-archive-artist">${esc(h.artist)}</div>
+          <div class="press-archive-album">${esc(h.title)}${h.year ? ` (${h.year})` : ''}</div>
+          ${h.note ? `<div class="press-archive-note">${esc(h.note)}</div>` : ''}
+        </div>
+        <div class="press-archive-right">
+          <div class="press-archive-date">${esc(dateFmt)}</div>
+          ${badge}
         </div>
       </div>`;
-  }).join('')}</div>`;
+  }).join('');
 }
 
 // ── COLLECTION VALUE ──
@@ -3347,9 +2456,9 @@ function renderValues() {
       ];
       spanBtnsEl.innerHTML = `
         <span class="values-span-label">View</span>
-        <div class="history-filters">
+        <div style="display:flex;gap:0;">
           ${spanDefs.map(s => `
-            <button class="btn-sm ${valueChartSpan === s.key ? 'amber' : ''}"
+            <button class="btn-sm ${valueChartSpan === s.key ? 'active' : ''}"
               onclick="setValueSpan('${s.key}')">${s.label}</button>
           `).join('')}
         </div>`;
@@ -3364,7 +2473,7 @@ function renderValues() {
     if (chartData.length < 2) {
       chartEl.innerHTML = `<div class="values-empty">${
         valueHistory.length === 0
-          ? 'No captures yet — click <strong style="color:var(--cream)">Capture Value Now</strong> to record your first snapshot.'
+          ? 'No captures yet — click <strong style="color:var(--ink)">Capture Value Now</strong> to record your first snapshot.'
           : chartData.length === 0
             ? 'No captures in this time period. Try a wider span or switch to All Time.'
             : 'Only one capture in this period. Capture again or try a wider span to see the trend.'
@@ -3426,7 +2535,7 @@ function renderValues() {
             <div class="values-log-row">
               <span>${fmtDate(d.capturedAt)}</span>
               <span class="vl-min" style="color:var(--red)">${fmtCurrency(d.minimum, currency)}</span>
-              <span style="color:var(--amber)">${fmtCurrency(d.median, currency)}</span>
+              <span style="color:var(--ink)">${fmtCurrency(d.median, currency)}</span>
               <span style="color:var(--green)">${fmtCurrency(d.maximum, currency)}</span>
               <button class="values-del-btn" onclick="deleteValueCapture('${d.capturedAt}')"
                 title="Delete this capture">×</button>
@@ -3520,9 +2629,9 @@ function buildValueChart(data) {
   const dots = data.map((d, i) => {
     const isLast = i === data.length - 1;
     return `
-      <circle cx="${toX(i)}" cy="${toY(d.maximum)}" r="${isLast ? 4 : 3}"   fill="#4a8c5c" ${isLast ? 'stroke="#161410" stroke-width="1.5"' : ''}/>
-      <circle cx="${toX(i)}" cy="${toY(d.median)}"  r="${isLast ? 4.5 : 3.5}" fill="#c8922a" ${isLast ? 'stroke="#161410" stroke-width="1.5"' : ''}/>
-      <circle cx="${toX(i)}" cy="${toY(d.minimum)}" r="${isLast ? 4 : 3}"   fill="#b84040" ${isLast ? 'stroke="#161410" stroke-width="1.5"' : ''}/>
+      <circle cx="${toX(i)}" cy="${toY(d.maximum)}" r="${isLast ? 4 : 3}"   fill="#4a8c5c" ${isLast ? 'stroke="var(--paper)" stroke-width="1.5"' : ''}/>
+      <circle cx="${toX(i)}" cy="${toY(d.median)}"  r="${isLast ? 4.5 : 3.5}" fill="#c8922a" ${isLast ? 'stroke="var(--paper)" stroke-width="1.5"' : ''}/>
+      <circle cx="${toX(i)}" cy="${toY(d.minimum)}" r="${isLast ? 4 : 3}"   fill="#b84040" ${isLast ? 'stroke="var(--paper)" stroke-width="1.5"' : ''}/>
     `;
   }).join('');
 
@@ -3537,7 +2646,7 @@ function buildValueChart(data) {
          data-pts='${pointData.replace(/'/g, '&#39;')}'>
       <!-- Grid -->
       ${gridLines}
-      <line x1="${PAD.left}" y1="${PAD.top}" x2="${PAD.left}" y2="${H - PAD.bottom}" stroke="#3a3530" stroke-width="1"/>
+      <line x1="${PAD.left}" y1="${PAD.top}" x2="${PAD.left}" y2="${H - PAD.bottom}" stroke="var(--rule)" stroke-width="1"/>
       <!-- X labels -->
       ${xLabels}
       <!-- Hairline (shown on hover) -->
@@ -3614,8 +2723,8 @@ function initChartHover(data) {
         <span class="chart-tooltip-lbl">Min</span>
         <span class="chart-tooltip-val">${fmtCurrency(d.minimum, currency)}</span>
       </div>
-      ${note ? `<div style="margin-top:8px; padding-top:8px; border-top:1px solid #3a3530;
-                             font-style:italic; color:var(--muted); font-size:0.7rem;
+      ${note ? `<div style="margin-top:8px; padding-top:8px; border-top:1px solid var(--rule);
+                             font-style:italic; color:var(--mid); font-size:0.7rem;
                              max-width:200px; line-height:1.5; white-space:normal;">${esc(note)}</div>` : ''}
     `;
 
@@ -3924,7 +3033,7 @@ function renderValueImportPreview() {
   el.innerHTML = `
     <div class="values-import-panel">
       <div class="values-import-panel-header">
-        <span>Found <strong style="color:var(--cream)">${rows.length} row${rows.length === 1 ? '' : 's'}</strong> to import</span>
+        <span>Found <strong style="color:var(--ink)">${rows.length} row${rows.length === 1 ? '' : 's'}</strong> to import</span>
         <button class="archive-close" onclick="cancelValueImport()">✕ Cancel</button>
       </div>
       ${errHtml}
@@ -3938,12 +3047,12 @@ function renderValueImportPreview() {
               <tr>
                 <td>${esc(fmtDate(r.capturedAt))}</td>
                 <td style="color:var(--red)">${esc(fmtCurrency(r.minimum, currency))}</td>
-                <td style="color:var(--amber)">${esc(fmtCurrency(r.median, currency))}</td>
+                <td style="color:var(--ink)">${esc(fmtCurrency(r.median, currency))}</td>
                 <td style="color:var(--green)">${esc(fmtCurrency(r.maximum, currency))}</td>
               </tr>`).join('')}
             ${rows.length > 5 ? `
               <tr>
-                <td colspan="4" style="color:var(--muted);font-style:italic;text-align:center;">
+                <td colspan="4" style="color:var(--mid);font-style:italic;text-align:center;">
                   … and ${rows.length - 5} more row${rows.length - 5 === 1 ? '' : 's'}
                 </td>
               </tr>` : ''}
@@ -4016,6 +3125,12 @@ function updateStatusBar() {
   if (!meta) return;
   document.getElementById('collection-size').textContent = meta.totalItems ?? collection.length;
   document.getElementById('synced-date').textContent     = fmtDate(meta.cachedAt);
+  // Update masthead right (issue number = history picks count)
+  const mhRight = document.getElementById('masthead-right');
+  if (mhRight) {
+    const today = new Date().toLocaleDateString('en-US', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+    mhRight.textContent = `Issue ${history.length || '—'}  ·  ${today}`;
+  }
 }
 
 function setTodayContent(html) {
@@ -4056,10 +3171,10 @@ function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 function vinylSVG(size = 64) {
   return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="50" cy="50" r="48" stroke="#3a3530" stroke-width="2" fill="#1f1d19"/>
-    <circle cx="50" cy="50" r="38" stroke="#3a3530" stroke-width="1" fill="none"/>
-    <circle cx="50" cy="50" r="28" stroke="#3a3530" stroke-width="1" fill="none"/>
-    <circle cx="50" cy="50" r="18" stroke="#3a3530" stroke-width="1" fill="none"/>
+    <circle cx="50" cy="50" r="48" stroke="var(--rule)" stroke-width="2" fill="#1f1d19"/>
+    <circle cx="50" cy="50" r="38" stroke="var(--rule)" stroke-width="1" fill="none"/>
+    <circle cx="50" cy="50" r="28" stroke="var(--rule)" stroke-width="1" fill="none"/>
+    <circle cx="50" cy="50" r="18" stroke="var(--rule)" stroke-width="1" fill="none"/>
     <circle cx="50" cy="50" r="6" fill="#c8922a" opacity="0.6"/>
     <circle cx="50" cy="50" r="3" fill="#0e0d0b"/>
   </svg>`;
