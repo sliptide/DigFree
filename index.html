@@ -116,7 +116,7 @@
   .btn.ghost:hover { border-color: var(--ink); }
   .btn.danger { color: var(--press) !important; border-color: var(--press) !important; }
   .btn.danger:hover { background: rgba(217,0,24,0.06) !important; }
-  .press-btn { font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; background: none; border: 1px solid var(--rule); color: var(--mid); padding: 10px 22px; cursor: pointer; transition: all 0.12s; }
+  .press-btn { font-family: 'Space Mono', monospace; font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; background: none; border: 1px solid var(--rule); color: var(--mid); padding: 12px 26px; cursor: pointer; transition: all 0.12s; }
   .press-btn:hover { color: var(--ink); border-color: var(--ink); }
   .press-btn.primary { background: var(--ink); color: var(--paper); border-color: var(--ink); }
   .press-btn.primary:hover { background: #2a2a2a; }
@@ -150,41 +150,41 @@
   /* ═══════════════════════════════
      TODAY VIEW — PRESS REVIEW
   ═══════════════════════════════ */
-  .press-hero { width: 100%; height: min(52vw, 480px); overflow: hidden; background: var(--ink); position: relative; }
-  .press-hero-img { width: 100%; height: 100%; object-fit: cover; object-position: center 15%; display: block; filter: brightness(0.9) contrast(1.05); }
+  .press-hero { width: min(1000px, 100%); aspect-ratio: 1/1; margin: 0 auto; overflow: hidden; background: var(--ink); position: relative; }
+  .press-hero-img { width: 100%; height: 100%; object-fit: cover; object-position: center center; display: block; filter: brightness(0.9) contrast(1.05); }
   .press-hero::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, rgba(12,12,12,0.45) 80%, rgba(12,12,12,0.72) 100%); pointer-events: none; }
-  .press-hero-caption { position: absolute; bottom: 16px; left: 40px; z-index: 2; font-family: 'Space Mono', monospace; font-size: 0.52rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.45); }
+  .press-hero-caption { position: absolute; bottom: 16px; left: 40px; z-index: 2; font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.45); }
   .press-container { max-width: 900px; margin: 0 auto; padding: 0 40px; }
   .press-status-bar { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; border-bottom: 1px solid var(--rule); }
   .press-status-info { font-family: 'Space Mono', monospace; font-size: 0.56rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); }
   .press-status-info strong { color: var(--ink); }
   .press-review-top { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; padding: 28px 0 22px; border-bottom: 3px solid var(--ink); }
   .press-review-info { flex: 1; min-width: 0; }
-  .press-kicker { font-family: 'Space Mono', monospace; font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--press); margin-bottom: 10px; }
+  .press-kicker { font-family: 'Space Mono', monospace; font-size: 0.8rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--press); margin-bottom: 10px; }
   .press-artist { font-family: 'Bebas Neue', sans-serif; font-size: clamp(3rem,7vw,5.8rem); line-height: 0.92; letter-spacing: 0.03em; color: var(--ink); margin-bottom: 8px; }
   .press-album-title { font-family: 'Source Serif 4', serif; font-style: italic; font-weight: 300; font-size: clamp(1.1rem,2.5vw,1.5rem); color: var(--mid); }
   .press-score-block { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; padding: 12px 20px 10px; border: 2px solid var(--ink); min-width: 90px; }
   .press-score-num { font-family: 'Bebas Neue', sans-serif; font-size: 3.4rem; line-height: 1; color: var(--press); letter-spacing: 0.02em; }
   .press-score-denom { font-family: 'Space Mono', monospace; font-size: 0.55rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mid); margin-top: 2px; }
   .press-meta-strip { display: flex; flex-wrap: wrap; gap: 0; padding: 10px 0; border-bottom: 1px solid var(--rule); margin-bottom: 32px; }
-  .press-meta-pill { font-family: 'Space Mono', monospace; font-size: 0.56rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mid); padding-right: 14px; margin-right: 14px; border-right: 1px solid var(--rule); }
+  .press-meta-pill { font-family: 'Space Mono', monospace; font-size: 0.78rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mid); padding-right: 14px; margin-right: 14px; border-right: 1px solid var(--rule); }
   .press-meta-pill:last-child { border-right: none; }
   .press-review-body { display: grid; grid-template-columns: 1fr 260px; gap: 0 48px; margin-bottom: 48px; }
-  .press-body-text { font-family: 'Source Serif 4', serif; font-weight: 300; font-size: 1rem; line-height: 1.85; color: var(--ink); margin-bottom: 22px; }
-  .press-body-text:first-child::first-letter { font-family: 'Bebas Neue', sans-serif; font-size: 4.2rem; line-height: 0.78; float: left; margin-right: 8px; margin-top: 4px; color: var(--press); }
+  .press-body-text { font-family: 'Source Serif 4', serif; font-weight: 300; font-size: 1.2rem; line-height: 1.85; color: var(--ink); margin-bottom: 22px; }
+  .press-body-text:first-child::first-letter { font-family: 'Bebas Neue', sans-serif; font-size: 4.8rem; line-height: 0.78; float: left; margin-right: 8px; margin-top: 4px; color: var(--press); }
   .press-pullquote { margin: 28px 0; padding: 18px 0; border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); }
-  .press-pullquote-text { font-family: 'Source Serif 4', serif; font-style: italic; font-size: 1.25rem; font-weight: 400; line-height: 1.55; color: var(--ink); }
-  .press-pullquote-text::before { content: '\201C'; font-size: 3rem; line-height: 0.6; vertical-align: -0.55rem; margin-right: 4px; color: var(--press); }
+  .press-pullquote-text { font-family: 'Source Serif 4', serif; font-style: italic; font-size: 1.5rem; font-weight: 400; line-height: 1.55; color: var(--ink); }
+  .press-pullquote-text::before { content: '\201C'; font-size: 3.5rem; line-height: 0.6; vertical-align: -0.55rem; margin-right: 4px; color: var(--press); }
   .press-side-col { border-left: 1px solid var(--rule); padding-left: 32px; }
   .press-side-label { font-family: 'Space Mono', monospace; font-size: 0.52rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--mid); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--rule); }
   .press-track-item { padding: 10px 0; border-bottom: 1px solid var(--rule); }
-  .press-track-id { font-family: 'Space Mono', monospace; font-size: 0.55rem; color: var(--press); text-transform: uppercase; margin-bottom: 2px; }
-  .press-track-name { font-family: 'Source Serif 4', serif; font-size: 0.88rem; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
-  .press-track-note { font-family: 'Source Serif 4', serif; font-style: italic; font-size: 0.78rem; color: var(--mid); }
+  .press-track-id { font-family: 'Space Mono', monospace; font-size: 0.72rem; color: var(--press); text-transform: uppercase; margin-bottom: 2px; }
+  .press-track-name { font-family: 'Source Serif 4', serif; font-size: 1.05rem; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+  .press-track-note { font-family: 'Source Serif 4', serif; font-style: italic; font-size: 0.95rem; color: var(--mid); }
   .press-lower { border-top: 2px solid var(--ink); padding-top: 28px; margin-bottom: 48px; }
   .press-section-head { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 0.05em; color: var(--ink); margin-bottom: 18px; }
   .press-facts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 48px; }
-  .press-fact { font-family: 'Source Serif 4', serif; font-weight: 300; font-size: 0.88rem; line-height: 1.75; color: var(--ink); padding-top: 12px; border-top: 1px solid var(--rule); }
+  .press-fact { font-family: 'Source Serif 4', serif; font-weight: 300; font-size: 1.05rem; line-height: 1.75; color: var(--ink); padding-top: 12px; border-top: 1px solid var(--rule); }
   .press-footer { border-top: 3px solid var(--ink); padding: 22px 0 80px; display: flex; gap: 12px; align-items: center; }
   .press-ready { max-width: 900px; margin: 0 auto; padding: 80px 40px; text-align: center; }
   .press-ready-head { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; letter-spacing: 0.04em; color: var(--ink); margin-bottom: 12px; }
@@ -200,7 +200,7 @@
   .press-archive-title { font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; letter-spacing: 0.04em; line-height: 1; }
   .press-archive-sub { font-family: 'Space Mono', monospace; font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--mid); }
   .press-filter-strip { display: flex; gap: 0; padding: 14px 0; border-bottom: 1px solid var(--rule); }
-  .press-filter { font-family: 'Space Mono', monospace; font-size: 0.58rem; letter-spacing: 0.12em; text-transform: uppercase; background: none; border: 1px solid var(--rule); color: var(--mid); padding: 7px 18px; margin-right: -1px; cursor: pointer; transition: all 0.1s; }
+  .press-filter { font-family: 'Space Mono', monospace; font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; background: none; border: 1px solid var(--rule); color: var(--mid); padding: 9px 22px; margin-right: -1px; cursor: pointer; transition: all 0.1s; }
   .press-filter:hover { color: var(--ink); border-color: var(--ink); z-index:1; position: relative; }
   .press-filter.active { background: var(--ink); color: var(--paper); border-color: var(--ink); z-index: 1; position: relative; }
   .press-archive-row { display: grid; grid-template-columns: 64px 1fr auto; gap: 0 20px; padding: 18px 0; border-bottom: 1px solid var(--rule); align-items: start; cursor: pointer; transition: background 0.1s; }
@@ -242,7 +242,7 @@
   .browse-list { display: flex; flex-direction: column; }
   .browse-item { display: flex; gap: 16px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--rule); text-decoration: none; transition: background 0.1s; }
   .browse-item:hover { background: var(--lift); margin: 0 -14px; padding-left: 14px; padding-right: 14px; }
-  .browse-thumb { flex-shrink: 0; width: 56px; height: 56px; overflow: hidden; background: var(--lift); border: 1px solid var(--rule); display: flex; align-items: center; justify-content: center; }
+  .browse-thumb { flex-shrink: 0; width: 120px; height: 120px; overflow: hidden; background: var(--lift); border: 1px solid var(--rule); display: flex; align-items: center; justify-content: center; }
   .browse-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
   .browse-info { flex: 1; min-width: 0; }
   .browse-artist { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 0.04em; color: var(--ink); margin-bottom: 1px; }
