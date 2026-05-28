@@ -275,6 +275,7 @@
   .tag-filter-bar { display: flex; align-items: center; gap: 10px; padding: 8px 0 4px; font-family: 'Space Mono', monospace; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--mid); }
   .tag-filter-clear { background: none; border: 1px solid var(--rule); color: var(--mid); font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 0.08em; padding: 2px 8px; cursor: pointer; transition: all 0.1s; }
   .tag-filter-clear:hover { color: var(--press); border-color: var(--press); }
+  .press-detail-back { padding: 20px 40px 0; max-width: 900px; margin: 0 auto; }
   .browse-actions { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
   .browse-last-added { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--mid); letter-spacing: 0.04em; }
   .browse-count { font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mid); }
@@ -571,6 +572,14 @@
   </div>
 </div>
 
+<!-- DETAIL (album detail from Browse) -->
+<div id="view-detail" class="view" style="display:none">
+  <div class="press-detail-back">
+    <button class="press-btn" onclick="showView('browse')">← Back to Collection</button>
+  </div>
+  <div id="detail-content"></div>
+</div>
+
 <!-- VALUES -->
 <div id="view-values" class="view" style="display:none">
 <div style="max-width:900px; margin:0 auto; padding:0 40px 100px;">
@@ -829,22 +838,24 @@ let archiveFilter  = 'all';
 let valueHistory    = [];     // [ { capturedAt, minimum, median, maximum, currency, note? } ]
 let pendingImport   = null;   // { rows, dupeCount, errors } while CSV preview is shown
 let activeValueEdit = null;   // capturedAt of the value entry whose note is being edited
+let currentCardState = null;  // { pick, tracklist, rating, imgDataUrl, mode } — for refresh/sync restore
 let valueChartSpan  = 'ALL';  // '3M' | '6M' | '1Y' | '2Y' | 'ALL'
 let valuePage       = 1;      // current page of the capture log
 const VALUE_PAGE_SIZE = 20;
 
 // ── INDEXEDDB HELPERS ──
 const DB_NAME    = 'DigFree';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 function openDB() {
   return new Promise((resolve, reject) => {
     const req = indexedDB.open(DB_NAME, DB_VERSION);
     req.onupgradeneeded = e => {
       const d = e.target.result;
-      if (!d.objectStoreNames.contains('keys'))        d.createObjectStore('keys',        { keyPath: 'id' });
-      if (!d.objectStoreNames.contains('credentials')) d.createObjectStore('credentials', { keyPath: 'id' });
-      if (!d.objectStoreNames.contains('images'))      d.createObjectStore('images',      { keyPath: 'releaseId' });
+      if (!d.objectStoreNames.contains('keys'))          d.createObjectStore('keys',          { keyPath: 'id' });
+      if (!d.objectStoreNames.contains('credentials'))   d.createObjectStore('credentials',   { keyPath: 'id' });
+      if (!d.objectStoreNames.contains('images'))        d.createObjectStore('images',        { keyPath: 'releaseId' });
+      if (!d.objectStoreNames.contains('ai_commentary')) d.createObjectStore('ai_commentary', { keyPath: 'releaseId' });
     };
     req.onsuccess = e => resolve(e.target.result);
     req.onerror   = e => reject(e.target.error);
@@ -884,6 +895,22 @@ function idbClearStore(database, store) {
     const req = tx.objectStore(store).clear();
     req.onsuccess = () => resolve();
     req.onerror   = () => reject(req.error);
+  });
+}
+
+// ── AI COMMENTARY CACHE ──
+async function getAiCache(releaseId) {
+  if (!db || !releaseId) return null;
+  return (await idbGet(db, 'ai_commentary', releaseId)) ?? null;
+}
+
+async function setAiCache(releaseId, { take, facts, highlights }) {
+  if (!db || !releaseId) return;
+  await idbPut(db, 'ai_commentary', {
+    releaseId,
+    take, facts, highlights,
+    provider:  aiProvider,
+    cachedAt:  new Date().toISOString(),
   });
 }
 
@@ -1283,8 +1310,17 @@ async function pickAlbum() {
   if (!imageDisplay && imageUri) imageDisplay = imageUri;
   if (!imageDisplay && pick.thumb) imageDisplay = pick.thumb;
 
-  // Generate commentary via Claude API
-  const { take, facts, highlights } = await generateCommentary(pick, tracklist, rating);
+  // Generate commentary — check cache first
+  const aiCached = await getAiCache(pick.id);
+  let take, facts, highlights;
+  if (aiCached) {
+    ({ take, facts, highlights } = aiCached);
+  } else {
+    ({ take, facts, highlights } = await generateCommentary(pick, tracklist, rating));
+    if (take || facts || highlights) {
+      await setAiCache(pick.id, { take, facts, highlights });
+    }
+  }
 
   // Save to history — thumbnail URL only, HD stored in IndexedDB
   history.unshift({
@@ -1433,7 +1469,10 @@ async function fetchGroq(prompt) {
 }
 
 // ── RENDER CARD — THE MUSIC PRESS ──
-function renderAlbumCard({ pick, rating, tracklist, imgDataUrl, take, facts, highlights }) {
+function renderAlbumCard({ pick, rating, tracklist, imgDataUrl, take, facts, highlights, mode = 'today' }) {
+  // Capture state for refresh and sync-restore
+  currentCardState = { pick, tracklist, rating, imgDataUrl, mode };
+
   const today = new Date().toLocaleDateString('en-US', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
   const genres = [...(pick.genres ?? []), ...(pick.styles ?? [])].slice(0, 4);
 
@@ -1490,21 +1529,41 @@ function renderAlbumCard({ pick, rating, tracklist, imgDataUrl, take, facts, hig
       </p>`;
   }
 
-  // WordPress publish button (if configured)
-  const todayEntry = history[0];
-  const wpBtn = wpConfig && todayEntry
-    ? (todayEntry.wpPostId
-        ? `<button class="press-btn" onclick="unpublishEntry('${todayEntry.requestedAt}')">↓ Unpublish</button>`
-        : `<button class="press-btn" onclick="publishEntry('${todayEntry.requestedAt}')">↑ Publish</button>`)
-    : '';
+  // Footer buttons differ by mode
+  let footerButtons;
+  if (mode === 'detail') {
+    const aiBtn = aiKey
+      ? (take
+          ? `<button class="press-btn press-refresh-btn" onclick="refreshCommentary()">↺ Refresh review</button>`
+          : `<button class="press-btn primary" onclick="generateDetailCommentary(${pick.id})">✦ Generate review</button>`)
+      : '';
+    footerButtons = `
+      <button class="press-btn" onclick="showView('browse')">← Back to Collection</button>
+      ${aiBtn}`;
+  } else {
+    const todayEntry = history[0];
+    const wpBtn = wpConfig && todayEntry
+      ? (todayEntry.wpPostId
+          ? `<button class="press-btn" onclick="unpublishEntry('${todayEntry.requestedAt}')">↓ Unpublish</button>`
+          : `<button class="press-btn" onclick="publishEntry('${todayEntry.requestedAt}')">↑ Publish</button>`)
+      : '';
+    const refreshBtn = aiKey
+      ? `<button class="press-btn press-refresh-btn" onclick="refreshCommentary()">↺ Refresh review</button>`
+      : '';
+    footerButtons = `
+      <button class="press-btn primary" onclick="pickAlbum()">↺ Pick Another</button>
+      <button class="press-btn" onclick="showView('history')">Archive →</button>
+      ${wpBtn}
+      ${refreshBtn}`;
+  }
 
-  setTodayContent(`
+  const cardHtml = `
     <div class="press-review-anim">
       ${heroHtml}
       <div class="press-container">
         <div class="press-review-top">
           <div class="press-review-info">
-            <div class="press-kicker">Daily Pick &nbsp;·&nbsp; ${today}</div>
+            <div class="press-kicker">${mode === 'detail' ? 'From your collection' : `Daily Pick &nbsp;·&nbsp; ${today}`}</div>
             <h1 class="press-artist">${esc(pick.artist)}</h1>
             <div class="press-album-title">${esc(pick.title)}</div>
           </div>
@@ -1533,13 +1592,83 @@ function renderAlbumCard({ pick, rating, tracklist, imgDataUrl, take, facts, hig
         </div>` : ''}
 
         <div class="press-footer">
-          <button class="press-btn primary" onclick="pickAlbum()">↺ Pick Another</button>
-          <button class="press-btn" onclick="showView('history')">Archive →</button>
-          ${wpBtn}
+          ${footerButtons}
         </div>
       </div>
     </div>
-  `);
+  `;
+  if (mode === 'detail') {
+    const container = document.getElementById('detail-content');
+    if (container) container.innerHTML = cardHtml;
+  } else {
+    setTodayContent(cardHtml);
+  }
+}
+
+async function refreshCommentary() {
+  if (!currentCardState) return;
+  const { pick, tracklist, rating, imgDataUrl, mode } = currentCardState;
+  // Disable button while working
+  const btn = document.querySelector('.press-refresh-btn');
+  if (btn) { btn.textContent = '…'; btn.disabled = true; }
+  // Clear cached entry and regenerate
+  if (db) await idbDelete(db, 'ai_commentary', pick.id);
+  const { take, facts, highlights } = await generateCommentary(pick, tracklist, rating);
+  if (take || facts || highlights) await setAiCache(pick.id, { take, facts, highlights });
+  renderAlbumCard({ pick, rating, tracklist, imgDataUrl, take, facts, highlights, mode });
+}
+
+async function generateDetailCommentary(releaseId) {
+  if (!currentCardState) return;
+  const { pick, tracklist, rating, imgDataUrl } = currentCardState;
+  const btn = document.querySelector('#detail-content .press-btn.primary');
+  if (btn) { btn.textContent = 'Generating…'; btn.disabled = true; }
+  const { take, facts, highlights } = await generateCommentary(pick, tracklist, rating);
+  if (take || facts || highlights) await setAiCache(releaseId, { take, facts, highlights });
+  renderAlbumCard({ pick, rating, tracklist, imgDataUrl, take, facts, highlights, mode: 'detail' });
+}
+
+async function showAlbumDetail(releaseId) {
+  showView('detail', true);
+  // Keep Browse nav button highlighted
+  document.querySelectorAll('.press-nav button').forEach(b => b.classList.remove('active'));
+  const browseBtn = document.getElementById('nav-browse');
+  if (browseBtn) browseBtn.classList.add('active');
+
+  document.getElementById('detail-content').innerHTML =
+    `<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">Loading record…</div></div>`;
+
+  const record = collection.find(r => r.id === releaseId);
+  if (!record) { document.getElementById('detail-content').innerHTML = '<p style="padding:40px;color:var(--mid);">Record not found.</p>'; return; }
+
+  // Fetch full release data
+  let releaseData = null;
+  try { releaseData = await discogsGetRelease(releaseId); } catch {}
+
+  const tracklist = releaseData?.tracklist?.map(t => t.title) ?? [];
+  const rating    = releaseData?.community?.rating?.average ?? null;
+  const imageUri  = releaseData?.images?.[0]?.uri ?? null;
+
+  // Resolve image: IndexedDB HD blob → Discogs URI → thumb
+  let imgDataUrl = null;
+  if (db) {
+    const cached = await idbGet(db, 'images', releaseId);
+    if (cached?.blob) imgDataUrl = URL.createObjectURL(cached.blob);
+  }
+  if (!imgDataUrl && imageUri) imgDataUrl = imageUri;
+  if (!imgDataUrl) imgDataUrl = record.thumb ?? null;
+
+  // Check AI cache
+  const aiCached = await getAiCache(releaseId);
+
+  renderAlbumCard({
+    pick:       { ...record, tracklist, rating },
+    rating, tracklist, imgDataUrl,
+    take:       aiCached?.take       ?? null,
+    facts:      aiCached?.facts      ?? null,
+    highlights: aiCached?.highlights ?? null,
+    mode:       'detail',
+  });
 }
 
 function renderStars(rating) {
@@ -1885,9 +2014,9 @@ function filterBrowse() {
         : `<div class="press-art-ph">♫</div>`;
       return `
         <div class="press-art-grid-item" title="${esc(r.artist)} — ${esc(r.title)}">
-          <a href="https://www.discogs.com/release/${r.id}" target="_blank" rel="noopener noreferrer" style="display:contents">
+          <div onclick="showAlbumDetail(${r.id})" style="display:contents; cursor:pointer;">
             ${imgHtml}
-          </a>
+          </div>
           <div class="press-art-grid-overlay"></div>
           <div class="press-art-grid-label">
             <strong>${esc(r.artist)}</strong>
@@ -1926,9 +2055,9 @@ function filterBrowse() {
 
     return `
       <div class="browse-item">
-        <a class="browse-thumb" href="https://www.discogs.com/release/${r.id}" target="_blank" rel="noopener noreferrer" title="View on Discogs">
+        <div class="browse-thumb" onclick="showAlbumDetail(${r.id})" style="cursor:pointer;" title="View album detail">
           ${thumbHtml}
-        </a>
+        </div>
         <div class="browse-info">
           <div class="browse-artist">${esc(r.artist)}</div>
           <div class="browse-title">${esc(r.title)}</div>
@@ -2386,7 +2515,19 @@ async function refreshCollection() {
     saveJSON(STORAGE.COLLECTION, collection);
     saveJSON(STORAGE.META, meta);
     updateStatusBar();
-    await pickAlbum();
+    // Restore current card if one was showing; otherwise show the pick prompt
+    if (currentCardState) {
+      renderAlbumCard(currentCardState);
+    } else {
+      setTodayContent(`
+        <div class="press-ready">
+          <div class="press-ready-head">Collection Updated</div>
+          <p class="press-ready-sub">${releases.length} records synced. Pick today's record.</p>
+          <button class="btn" onclick="pickAlbum()" style="width:auto; min-width:200px;">
+            Pick Today's Album
+          </button>
+        </div>`);
+    }
   } catch(e) {
     setTodayContent(`<div class="error-box">${esc(e.message)}</div>`);
   }
@@ -2403,6 +2544,7 @@ async function resetAll() {
       await idbClearStore(db, 'credentials');
       await idbClearStore(db, 'images');
       await idbClearStore(db, 'keys');
+      await idbClearStore(db, 'ai_commentary');
     } catch(e) { /* best effort */ }
   }
   location.reload();
