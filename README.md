@@ -26,14 +26,18 @@ No servers. No accounts. No installs. Just open the file.
 3. Click **Generate new token** and copy it
 4. Enter your username and token in Dig Free's setup screen
 
-### Optional — Claude AI commentary
+### Optional — AI commentary
 
-Dig Free can generate a personal take, fun facts, and tracklist highlights for each album pick using Claude.
+Dig Free can generate a personal take, fun facts, and tracklist highlights for each album pick. Choose whichever provider you prefer — two of them are free:
 
-1. Get an API key at [console.anthropic.com](https://console.anthropic.com)
-2. Enter it in **Settings → AI Features**
+| Provider | Model | Cost | Get a key |
+|---|---|---|---|
+| **Anthropic** | Claude | ~$0.01 / pick | [console.anthropic.com](https://console.anthropic.com) |
+| **OpenAI** | GPT-4o mini | ~$0.01 / pick | [platform.openai.com](https://platform.openai.com) |
+| **Google Gemini** | Gemini Flash | Free tier available | [aistudio.google.com](https://aistudio.google.com) |
+| **Groq** | Llama 3 | Free tier available | [console.groq.com](https://console.groq.com) |
 
-Cost: ~$0.01 per album pick. You're billed directly by Anthropic — Dig Free sends no data to any intermediate server.
+Select your provider and paste your key in the setup screen or under **Settings → AI Commentary**. You're billed directly by the provider — Dig Free sends no data to any intermediate server.
 
 ### Optional — WordPress publishing
 
@@ -48,7 +52,7 @@ All credentials (Discogs token, Claude API key, WordPress password) are:
 - **Encrypted with AES-256** using the Web Crypto API
 - **Stored only in your browser's IndexedDB** — device-bound, non-exportable key
 - **Never transmitted to Dig Free** — there are no Dig Free servers
-- Only sent directly to Discogs, Anthropic, and your own WordPress site
+- Only sent directly to Discogs, your chosen AI provider, and your own WordPress site
 
 Your collection data, listening history, and value snapshots are stored in `localStorage` in your browser. None of it leaves your device except through the APIs you configure.
 
@@ -60,7 +64,7 @@ Your collection data, listening history, and value snapshots are stored in `loca
 |---|---|
 | **Daily Pick** | Random album from your collection with full Discogs metadata |
 | **HD Artwork** | Full-resolution album art fetched via authenticated Discogs API, cached in IndexedDB |
-| **AI Commentary** | Claude-generated take, fun facts, and tracklist highlights (requires API key) |
+| **AI Commentary** | AI-generated take, fun facts, and tracklist highlights — choose from Anthropic, OpenAI, Gemini, or Groq |
 | **History** | Searchable log of every pick with editable dates and notes |
 | **Browse** | Search and filter your full collection; manually add any record to history |
 | **Value Tracking** | Snapshot your collection's market value over time with a min/median/max chart |
