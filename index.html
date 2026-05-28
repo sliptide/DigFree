@@ -222,11 +222,11 @@
   .press-art-grid-item:hover .press-art-grid-label { opacity: 1; }
   .press-art-grid-label strong { display: block; font-family: 'Bebas Neue', sans-serif; font-size: 0.95rem; letter-spacing: 0.04em; line-height: 1.2; }
   .press-art-grid-label span { font-family: 'Space Mono', monospace; font-size: 0.55rem; letter-spacing: 0.06em; color: rgba(255,255,255,0.7); }
-  .press-archive-row { display: grid; grid-template-columns: 64px 1fr auto; gap: 0 20px; padding: 18px 0; border-bottom: 1px solid var(--rule); align-items: start; cursor: pointer; transition: background 0.1s; }
+  .press-archive-row { display: grid; grid-template-columns: 120px 1fr auto; gap: 0 20px; padding: 18px 0; border-bottom: 1px solid var(--rule); align-items: start; cursor: pointer; transition: background 0.1s; }
   .press-archive-row:hover { background: var(--lift); margin: 0 -14px; padding-left: 14px; padding-right: 14px; }
-  .press-archive-art { width: 64px; height: 64px; flex-shrink: 0; }
-  .press-archive-art img { width: 64px; height: 64px; object-fit: cover; display: block; }
-  .press-archive-art-ph { width: 64px; height: 64px; background: var(--lift); border: 1px solid var(--rule); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: var(--mid); }
+  .press-archive-art { width: 120px; height: 120px; flex-shrink: 0; }
+  .press-archive-art img { width: 120px; height: 120px; object-fit: cover; display: block; }
+  .press-archive-art-ph { width: 120px; height: 120px; background: var(--lift); border: 1px solid var(--rule); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; color: var(--mid); }
   .press-archive-artist { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 0.04em; line-height: 1; color: var(--ink); margin-bottom: 3px; }
   .press-archive-album { font-family: 'Source Serif 4', serif; font-style: italic; font-weight: 300; font-size: 0.88rem; color: var(--mid); }
   .press-archive-note { font-family: 'Source Serif 4', serif; font-size: 0.78rem; color: var(--mid); margin-top: 4px; }
@@ -268,8 +268,13 @@
   .browse-title { font-family: 'Source Serif 4', serif; font-style: italic; font-weight: 300; font-size: 0.85rem; color: var(--mid); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
   .browse-sub { font-family: 'Space Mono', monospace; font-size: 0.7rem; letter-spacing: 0.05em; color: var(--mid); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .browse-pills { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 4px; }
-  .pill { font-family: 'Space Mono', monospace; font-size: 0.52rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); border: 1px solid var(--rule); padding: 2px 7px; }
+  .pill { font-family: 'Space Mono', monospace; font-size: 0.52rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mid); border: 1px solid var(--rule); padding: 2px 7px; cursor: pointer; }
   .pill.year { color: var(--ink); border-color: var(--ink); }
+  .pill:hover { color: var(--ink); border-color: var(--ink); }
+  .pill.tag-active { color: var(--paper); background: var(--ink); border-color: var(--ink); }
+  .tag-filter-bar { display: flex; align-items: center; gap: 10px; padding: 8px 0 4px; font-family: 'Space Mono', monospace; font-size: 0.68rem; letter-spacing: 0.08em; color: var(--mid); }
+  .tag-filter-clear { background: none; border: 1px solid var(--rule); color: var(--mid); font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 0.08em; padding: 2px 8px; cursor: pointer; transition: all 0.1s; }
+  .tag-filter-clear:hover { color: var(--press); border-color: var(--press); }
   .browse-actions { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
   .browse-last-added { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--mid); letter-spacing: 0.04em; }
   .browse-count { font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mid); }
@@ -397,8 +402,8 @@
     .values-log-row { grid-template-columns: 2fr 1fr 1fr 28px; }
     .values-log-row .vl-min { display: none; }
     .press-facts-grid { grid-template-columns: 1fr; }
-    .press-archive-row { grid-template-columns: 48px 1fr auto; }
-    .press-archive-art, .press-archive-art img, .press-archive-art-ph { width: 48px; height: 48px; }
+    .press-archive-row { grid-template-columns: 80px 1fr auto; }
+    .press-archive-art, .press-archive-art img, .press-archive-art-ph { width: 80px; height: 80px; }
     .press-hero-caption { left: 20px; }
     .press-provider-grid { grid-template-columns: 1fr; }
   }
@@ -530,6 +535,10 @@
         <button class="press-view-btn"        id="hv-grid" onclick="setHistoryView('grid')">⊞ Grid</button>
       </div>
     </div>
+    <div id="history-tag-bar" class="tag-filter-bar" style="display:none">
+      Filtering by tag: <strong id="history-tag-label"></strong>
+      <button class="tag-filter-clear" onclick="setHistoryTagFilter(null)">× Clear</button>
+    </div>
     <div id="history-grid"></div>
   </div>
 </div>
@@ -553,6 +562,10 @@
         <button class="press-view-btn active" id="bv-list" onclick="setBrowseView('list')">≡ List</button>
         <button class="press-view-btn"        id="bv-grid" onclick="setBrowseView('grid')">⊞ Grid</button>
       </div>
+    </div>
+    <div id="browse-tag-bar" class="tag-filter-bar" style="display:none">
+      Filtering by tag: <strong id="browse-tag-label"></strong>
+      <button class="tag-filter-clear" onclick="setBrowseTagFilter(null)">× Clear</button>
     </div>
     <div id="browse-list"></div>
   </div>
@@ -724,19 +737,6 @@
       </div>
     </details>
 
-    <!-- ── Import from CrateDig ── -->
-    <div class="press-settings-section">
-      <div class="press-settings-label">Import from CrateDig</div>
-      <div style="font-family:'Source Serif 4',serif; font-size:0.9rem; color:var(--mid); margin-bottom:14px; line-height:1.6;">
-        Fetch your history from a WordPress site running the old CrateDig plugin. Requires your WordPress credentials to be saved above.
-      </div>
-      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-        <input type="text" id="s-cratedig-url" placeholder="https://yoursite.com" autocomplete="off" style="flex:1; min-width:200px;">
-        <button class="btn secondary" style="width:auto; white-space:nowrap;" onclick="importFromCrateDig()">⬇ Import CrateDig History</button>
-      </div>
-      <div id="s-cratedig-status" style="font-family:'Space Mono',monospace; font-size:0.7rem; color:var(--mid); margin-top:10px; display:none;"></div>
-    </div>
-
     <!-- ── Export & Archive ── -->
     <div class="press-settings-section">
       <div class="press-settings-label">Export &amp; Archive</div>
@@ -819,6 +819,8 @@ let aiKey          = null;   // API key for AI commentary (any provider)
 let aiProvider     = 'anthropic'; // 'anthropic' | 'openai' | 'gemini' | 'groq'
 let wpConfig       = null;
 let historyFilter  = 'all';
+let historyTagFilter = null;  // active genre/year tag filter in history
+let browseTagFilter  = null;  // active genre/year tag filter in browse
 let historyViewMode = 'list'; // 'list' | 'grid'
 let browseViewMode  = 'list'; // 'list' | 'grid'
 let activeEdit     = null;   // { requestedAt, field: 'date'|'note' }
@@ -1570,17 +1572,46 @@ function setBrowseView(mode) {
   filterBrowse();
 }
 
+function setHistoryTagFilter(tag) {
+  historyTagFilter = tag;
+  const bar   = document.getElementById('history-tag-bar');
+  const label = document.getElementById('history-tag-label');
+  if (bar) bar.style.display = tag ? '' : 'none';
+  if (label) label.textContent = tag ?? '';
+  renderHistory();
+}
+
+function setBrowseTagFilter(tag) {
+  browseTagFilter = tag;
+  const bar   = document.getElementById('browse-tag-bar');
+  const label = document.getElementById('browse-tag-label');
+  if (bar) bar.style.display = tag ? '' : 'none';
+  if (label) label.textContent = tag ?? '';
+  filterBrowse();
+}
+
 function renderHistory() {
   const grid    = document.getElementById('history-grid');
   const countEl = document.getElementById('history-count');
 
-  const filtered = historyFilter === 'all'
+  let filtered = historyFilter === 'all'
     ? history
     : history.filter(h => (h.source ?? 'daily') === historyFilter);
+  if (historyTagFilter) {
+    const tf = historyTagFilter.toLowerCase();
+    filtered = filtered.filter(h =>
+      String(h.year) === tf ||
+      (h.genres ?? []).some(g => g.toLowerCase() === tf) ||
+      (h.styles ?? []).some(s => s.toLowerCase() === tf)
+    );
+  }
 
-  const totalLabel = historyFilter === 'all'
-    ? (history.length ? `${history.length} picks` : '')
-    : `${filtered.length} of ${history.length} picks`;
+  const base = historyFilter === 'all' ? history.length : history.filter(h => (h.source ?? 'daily') === historyFilter).length;
+  const totalLabel = historyTagFilter
+    ? `${filtered.length} of ${base} picks`
+    : (historyFilter === 'all'
+        ? (history.length ? `${history.length} picks` : '')
+        : `${filtered.length} of ${history.length} picks`);
   if (countEl) countEl.textContent = totalLabel;
 
   if (!history.length) {
@@ -1621,12 +1652,24 @@ function renderHistory() {
     const isEditNote     = activeEdit?.requestedAt === h.requestedAt && activeEdit?.field === 'note';
 
     const artHtml = h.imgDataUrl
-      ? `<img src="${h.imgDataUrl}" alt="${esc(h.title)}"${h.id ? ` data-release-id="${h.id}"` : ''} loading="lazy" style="width:64px;height:64px;object-fit:cover;display:block;">`
+      ? `<img src="${h.imgDataUrl}" alt="${esc(h.title)}"${h.id ? ` data-release-id="${h.id}"` : ''} loading="lazy" style="width:120px;height:120px;object-fit:cover;display:block;">`
       : `<div class="press-archive-art-ph" ${h.id ? `data-release-id="${h.id}"` : ''}>♫</div>`;
 
     const artWrap = h.id
       ? `<a href="https://www.discogs.com/release/${h.id}" target="_blank" rel="noopener noreferrer" class="press-archive-art">${artHtml}</a>`
       : `<div class="press-archive-art">${artHtml}</div>`;
+
+    // Genre/year tag pills for history
+    const histTags = [...(h.genres ?? []), ...(h.styles ?? [])].slice(0, 4);
+    const histPillsHtml = [
+      h.year ? `<span class="pill year${historyTagFilter === String(h.year) ? ' tag-active' : ''}" onclick="setHistoryTagFilter(historyTagFilter === '${h.year}' ? null : '${h.year}')">${h.year}</span>` : '',
+      ...histTags.map(g => {
+        const safe = g.replace(/'/g, "\\'");
+        const active = historyTagFilter === g;
+        return `<span class="pill${active ? ' tag-active' : ''}" onclick="setHistoryTagFilter(${active ? 'null' : `'${safe}'`})">${esc(g)}</span>`;
+      }),
+    ].filter(Boolean).join('');
+    const histPillsWrap = histPillsHtml ? `<div class="browse-pills" style="margin-top:4px;">${histPillsHtml}</div>` : '';
 
     const dateHtml = isEditDate
       ? `<div class="hist-edit-row">
@@ -1671,6 +1714,7 @@ function renderHistory() {
         <div>
           <div class="press-archive-artist">${esc(h.artist)}</div>
           <div class="press-archive-album">${esc(h.title)}${h.year ? ` (${h.year})` : ''}</div>
+          ${histPillsWrap}
           ${h.note && !isEditNote ? '' : ''}
           ${noteHtml}
           ${dateHtml}
@@ -1802,6 +1846,14 @@ function filterBrowse() {
         r.title.toLowerCase().includes(query)
       )
     : [...collection];
+  if (browseTagFilter) {
+    const tf = browseTagFilter.toLowerCase();
+    items = items.filter(r =>
+      String(r.year) === tf ||
+      (r.genres ?? []).some(g => g.toLowerCase() === tf) ||
+      (r.styles ?? []).some(s => s.toLowerCase() === tf)
+    );
+  }
 
   items.sort((a, b) => {
     if (sortKey === 'title')     return a.title.localeCompare(b.title);
@@ -1811,7 +1863,7 @@ function filterBrowse() {
   });
 
   const countEl = document.getElementById('browse-count');
-  countEl.textContent = query
+  countEl.textContent = (query || browseTagFilter)
     ? `${items.length} of ${collection.length} records`
     : `${collection.length} records`;
 
@@ -1850,8 +1902,12 @@ function filterBrowse() {
   listEl.innerHTML = `<div class="browse-list">${items.map(r => {
     const tags      = [...(r.genres ?? []), ...(r.styles ?? [])].slice(0, 4);
     const pillsHtml = [
-      r.year ? `<span class="pill year">${r.year}</span>` : '',
-      ...tags.map(g => `<span class="pill">${esc(g)}</span>`),
+      r.year ? `<span class="pill year${browseTagFilter === String(r.year) ? ' tag-active' : ''}" onclick="setBrowseTagFilter(browseTagFilter === '${r.year}' ? null : '${r.year}')">${r.year}</span>` : '',
+      ...tags.map(g => {
+        const safe = g.replace(/'/g, "\\'");
+        const active = browseTagFilter === g;
+        return `<span class="pill${active ? ' tag-active' : ''}" onclick="setBrowseTagFilter(${active ? 'null' : `'${safe}'`})">${esc(g)}</span>`;
+      }),
     ].filter(Boolean).join('');
 
     const subParts = [r.label, r.country].filter(Boolean);
@@ -1954,8 +2010,6 @@ function renderSettings() {
     wpClearBtn.style.display = '';
     document.getElementById('s-wp-url').value  = wpConfig.siteUrl;
     document.getElementById('s-wp-user').value = wpConfig.username;
-    const cdUrl = document.getElementById('s-cratedig-url');
-    if (cdUrl && !cdUrl.value) cdUrl.value = wpConfig.siteUrl;
   } else {
     wpStatusEl.textContent   = '';
     wpClearBtn.style.display = 'none';
@@ -2081,116 +2135,6 @@ function wpAuthHeader() {
 
 function wpBase() {
   return wpConfig.siteUrl.replace(/\/$/, '') + '/wp-json/digfree/v1';
-}
-
-// ── IMPORT FROM CRATEDDIG PLUGIN ──
-async function importFromCrateDig() {
-  const statusEl = document.getElementById('s-cratedig-status');
-  const urlInput = document.getElementById('s-cratedig-url');
-  const siteUrl  = (urlInput?.value.trim() || wpConfig?.siteUrl || '').replace(/\/$/, '');
-
-  if (!siteUrl) {
-    statusEl.textContent = 'Enter a WordPress site URL above.';
-    statusEl.style.display = 'block';
-    return;
-  }
-
-  // Build auth header — use saved WP credentials if available
-  const authHeader = wpConfig
-    ? ('Basic ' + btoa(wpConfig.username + ':' + wpConfig.appPassword))
-    : null;
-
-  statusEl.textContent = 'Fetching entries from CrateDig plugin…';
-  statusEl.style.display = 'block';
-
-  let entries = [];
-  try {
-    const headers = { 'Content-Type': 'application/json' };
-    if (authHeader) headers['Authorization'] = authHeader;
-
-    // Paginate — CrateDig plugin returns up to 100 per page
-    let page = 1;
-    while (true) {
-      const res = await fetch(`${siteUrl}/wp-json/cratedig/v1/entries?per_page=100&page=${page}`, { headers });
-      if (!res.ok) throw new Error(`HTTP ${res.status} — ${res.statusText}`);
-      const batch = await res.json();
-      if (!Array.isArray(batch) || !batch.length) break;
-      entries = entries.concat(batch);
-      if (batch.length < 100) break;
-      page++;
-    }
-  } catch (e) {
-    statusEl.textContent = `Failed: ${e.message}. Check the URL and that the CrateDig plugin is active.`;
-    return;
-  }
-
-  if (!entries.length) {
-    statusEl.textContent = 'No entries found on that site.';
-    return;
-  }
-
-  // Map CrateDig entry → Dig Free history entry
-  // Build a lookup by Discogs release ID for upsert
-  const idxById = {};
-  history.forEach((h, i) => { if (h.id) idxById[String(h.id)] = i; });
-  let imported = 0, updated = 0;
-
-  for (const e of entries) {
-    // Extract Discogs release ID from discogs_url or cratedig_id field
-    const discogsId = parseInt(e.cratedig_id)
-      || parseInt((e.discogs_url || '').match(/\/release\/(\d+)/)?.[1])
-      || null;
-
-    // Normalize source: WP plugin may use 'user', 'manual', or other non-daily values.
-    // Treat anything non-empty and non-'daily' as a user pick.
-    const wpSource = (e.source && e.source !== 'daily') ? 'user' : 'daily';
-
-    const mapped = {
-      id:          discogsId,
-      title:       e.title       ?? '',
-      artist:      e.artist      ?? '',
-      year:        parseInt(e.year) || null,
-      genres:      [],
-      styles:      [],
-      label:       e.label       ?? '',
-      country:     e.country     ?? '',
-      rating:      null,
-      tracklist:   [],
-      imgDataUrl:  e.artwork_url ?? '',
-      requestedAt: e.pick_date ? new Date(e.pick_date).toISOString() : new Date().toISOString(),
-      pickedDate:  e.pick_date   ?? null,
-      note:        e.note        ?? '',
-      wpPostId:    e.id          ?? null,
-    };
-
-    if (discogsId && idxById[String(discogsId)] !== undefined) {
-      // Upsert: update metadata from WP. For source, prefer WP value if it's a clear
-      // user-pick signal (non-empty, non-daily); otherwise keep the local value.
-      const idx = idxById[String(discogsId)];
-      const localSource = history[idx].source ?? 'daily';
-      const finalSource = wpSource === 'user' ? 'user' : localSource;
-      history[idx] = Object.assign({}, history[idx], mapped, { source: finalSource });
-      updated++;
-    } else {
-      // New entry: use the normalized WP source
-      history.push({ ...mapped, source: wpSource });
-      if (discogsId) idxById[String(discogsId)] = history.length - 1;
-      imported++;
-    }
-  }
-
-  // Sort history newest-first by requestedAt
-  history.sort((a, b) => new Date(b.requestedAt) - new Date(a.requestedAt));
-  saveJSON(STORAGE.HISTORY, history.slice(0, 1000));
-  renderHistory();
-
-  statusEl.style.color = 'var(--green)';
-  const parts = [];
-  if (imported > 0) parts.push(`${imported} new`);
-  if (updated  > 0) parts.push(`${updated} updated`);
-  statusEl.textContent = parts.length ? `Done — ${parts.join(', ')}.` : 'Nothing to import (0 entries returned).';
-  statusEl.style.color = 'var(--green)';
-  showToast(`CrateDig import complete: ${parts.join(', ')} ✓`);
 }
 
 async function saveWpConfig() {
@@ -2563,7 +2507,7 @@ function renderArchive() {
     const source  = h.source || 'daily';
     const dateFmt = h.pickedDate ? fmtPickedDate(h.pickedDate) : h.requestedAt ? fmtPickedDate(h.requestedAt) : '';
     const artHtml = h.imgDataUrl
-      ? `<img src="${esc(h.imgDataUrl)}" alt="${esc(h.artist)}" loading="lazy" style="width:64px;height:64px;object-fit:cover;display:block;">`
+      ? `<img src="${esc(h.imgDataUrl)}" alt="${esc(h.artist)}" loading="lazy" style="width:120px;height:120px;object-fit:cover;display:block;">`
       : `<div class="press-archive-art-ph">♫</div>`;
     const artWrap = h.id
       ? `<a href="https://www.discogs.com/release/${h.id}" target="_blank" rel="noopener noreferrer" class="press-archive-art">${artHtml}</a>`
