@@ -1,0 +1,3607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crate Dig · Album of the Day</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Mono:wght@300;400;500&family=Lora:ital,wght@0,400;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black:    #0e0d0b;
+    --wax:      #161410;
+    --groove:   #1f1d19;
+    --amber:    #c8922a;
+    --amber-lt: #e8b84b;
+    --cream:    #ede8dc;
+    --muted:    #7a7368;
+    --label:    #3a3530;
+    --red:      #b84040;
+    --green:    #4a8c5c;
+    --radius:   12px;
+    --gap:      24px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--black);
+    color: var(--cream);
+    font-family: 'Lora', Georgia, serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Subtle noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 9999;
+    opacity: 0.4;
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 32px;
+    border-bottom: 1px solid var(--label);
+    position: sticky;
+    top: 0;
+    background: rgba(14,13,11,0.92);
+    backdrop-filter: blur(12px);
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    color: var(--amber);
+  }
+  .logo span { color: var(--cream); font-weight: 400; font-style: italic; }
+
+  nav { display: flex; gap: 4px; }
+  .nav-btn {
+    background: none;
+    border: 1px solid transparent;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .nav-btn:hover { color: var(--cream); border-color: var(--label); }
+  .nav-btn.active { color: var(--amber); border-color: var(--amber); background: rgba(200,146,42,0.08); }
+
+  /* ── VIEWS ── */
+  .view { display: none; padding: 40px 32px; max-width: 900px; margin: 0 auto; }
+  .view.active { display: block; }
+
+  /* ── SETUP VIEW ── */
+  .setup-card {
+    background: var(--wax);
+    border: 1px solid var(--label);
+    border-radius: var(--radius);
+    padding: 48px;
+    max-width: 520px;
+    margin: 60px auto 0;
+  }
+  .setup-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  .setup-card p {
+    color: var(--muted);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 32px;
+  }
+  .setup-card a { color: var(--amber); }
+
+  label {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  input[type="text"], input[type="password"] {
+    width: 100%;
+    background: var(--groove);
+    border: 1px solid var(--label);
+    border-radius: 8px;
+    color: var(--cream);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    padding: 12px 14px;
+    margin-bottom: 20px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus { border-color: var(--amber); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--amber);
+    color: var(--black);
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 12px 24px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    width: 100%;
+    justify-content: center;
+  }
+  .btn:hover { background: var(--amber-lt); }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn.secondary {
+    background: var(--groove);
+    color: var(--cream);
+    border: 1px solid var(--label);
+  }
+  .btn.secondary:hover { background: var(--label); }
+  .btn.ghost {
+    background: transparent;
+    color: var(--amber);
+    border: 1px solid var(--amber);
+  }
+  .btn.ghost:hover { background: rgba(200,146,42,0.1); }
+
+  /* ── TODAY VIEW ── */
+  .status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--label);
+  }
+  .status-info {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.05em;
+  }
+  .status-info strong { color: var(--cream); }
+  .btn-row { display: flex; gap: 10px; }
+  .btn-sm {
+    background: var(--groove);
+    border: 1px solid var(--label);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 7px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-sm:hover { color: var(--cream); border-color: var(--muted); }
+  .btn-sm.amber { color: var(--amber); border-color: var(--amber); background: rgba(200,146,42,0.08); }
+
+  /* ── ALBUM CARD ── */
+  .album-card {
+    background: var(--wax);
+    border: 1px solid var(--label);
+    border-radius: var(--radius);
+    overflow: hidden;
+    animation: fadeUp 0.4s ease;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-header {
+    display: flex;
+    gap: 28px;
+    padding: 32px;
+    background: linear-gradient(135deg, var(--groove) 0%, var(--wax) 100%);
+    border-bottom: 1px solid var(--label);
+    position: relative;
+  }
+
+  .card-badge {
+    position: absolute;
+    top: 20px; right: 24px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--amber);
+    opacity: 0.8;
+  }
+
+  .album-art-wrap {
+    flex-shrink: 0;
+    width: 180px;
+    height: 180px;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 8px 8px 32px rgba(0,0,0,0.6);
+    position: relative;
+  }
+  .album-art-wrap img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .art-placeholder {
+    width: 100%; height: 100%;
+    background: var(--label);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .vinyl-svg { width: 100px; height: 100px; opacity: 0.4; }
+
+  .card-meta { flex: 1; display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+
+  .card-artist {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 6px;
+    color: var(--cream);
+  }
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--amber-lt);
+    margin-bottom: 16px;
+  }
+  .card-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+  .pill {
+    background: var(--label);
+    border-radius: 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    color: var(--muted);
+  }
+  .pill.year { color: var(--amber); background: rgba(200,146,42,0.12); }
+
+  .rating-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .stars { color: var(--amber); letter-spacing: -2px; }
+
+  /* ── CARD SECTIONS ── */
+  .card-section {
+    padding: 24px 32px;
+    border-bottom: 1px solid var(--label);
+  }
+  .card-section:last-child { border-bottom: none; }
+
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--amber);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--label);
+  }
+
+  .take-text {
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: var(--cream);
+    font-style: italic;
+  }
+
+  .facts-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .facts-list li {
+    display: flex;
+    gap: 12px;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--cream);
+    opacity: 0.85;
+  }
+  .facts-list li::before {
+    content: '◆';
+    color: var(--amber);
+    font-size: 0.5rem;
+    margin-top: 6px;
+    flex-shrink: 0;
+  }
+
+  .tracks-list { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+  .tracks-list li { display: flex; gap: 16px; align-items: baseline; }
+  .track-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--amber-lt);
+    flex-shrink: 0;
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .track-note {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .card-footer {
+    padding: 20px 32px;
+    display: flex;
+    gap: 12px;
+    background: rgba(0,0,0,0.2);
+  }
+
+  /* ── LOADING STATE ── */
+  .loading-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    gap: 20px;
+  }
+  .spinner {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    border: 3px solid var(--label);
+    border-top-color: var(--amber);
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  /* ── ERROR ── */
+  .error-box {
+    background: rgba(184,64,64,0.1);
+    border: 1px solid rgba(184,64,64,0.3);
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: #e08080;
+    margin-bottom: 20px;
+  }
+
+  /* ── HISTORY VIEW ── */
+  .history-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .history-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+  }
+  .history-count {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    display: block;
+    margin-top: 2px;
+  }
+  .history-filters { display: flex; gap: 6px; flex-shrink: 0; }
+
+  .hist-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  .hist-remove {
+    background: none;
+    border: none;
+    color: transparent;
+    font-size: 1rem;
+    line-height: 1;
+    padding: 0 2px;
+    cursor: pointer;
+    transition: color 0.15s;
+    flex-shrink: 0;
+  }
+  .hist-card:hover .hist-remove { color: var(--muted); }
+  .hist-remove:hover { color: var(--red) !important; }
+
+  .hist-source {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 10px;
+  }
+  .hist-source.daily { color: var(--amber);  background: rgba(200,146,42,0.12); }
+  .hist-source.user  { color: var(--green);  background: rgba(74,140,92,0.15);  }
+
+  /* WordPress publish controls */
+  .hist-wp { display:flex; align-items:center; gap:6px; margin-top:6px; }
+  .hist-wp-btn {
+    background: none;
+    border: 1px solid var(--label);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .hist-wp-btn:hover { color: var(--amber); border-color: var(--amber); }
+  .hist-wp-btn.danger:hover { color: var(--red); border-color: rgba(184,64,64,0.4); }
+  .hist-published {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--green);
+    opacity: 0.85;
+  }
+
+  .history-empty {
+    text-align: center;
+    padding: 80px 20px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .history-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  .hist-card {
+    background: var(--wax);
+    border: 1px solid var(--label);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+    cursor: default;
+  }
+  .hist-card:hover { border-color: var(--amber); transform: translateY(-2px); }
+  .hist-art-link {
+    display: block;
+    width: 100%; aspect-ratio: 1;
+    overflow: hidden;
+    position: relative;
+  }
+  .hist-art-link::after {
+    content: '↗';
+    position: absolute;
+    top: 8px; right: 8px;
+    background: rgba(0,0,0,0.65);
+    color: var(--amber);
+    font-size: 0.7rem;
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .hist-art-link:hover::after { opacity: 1; }
+  .hist-art-nolink {
+    display: block;
+    width: 100%; aspect-ratio: 1;
+    overflow: hidden;
+  }
+  .hist-art {
+    width: 100%; height: 100%;
+    background: var(--groove);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .hist-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .hist-info { padding: 12px 14px; }
+  .hist-artist {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .hist-title {
+    font-size: 0.8rem;
+    font-style: italic;
+    color: var(--amber-lt);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 6px;
+  }
+  /* "Picked on:" date line + inline edit UI */
+  .hist-picked-on {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.03em;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 5px;
+  }
+  .hist-edit-btn {
+    background: none;
+    border: none;
+    color: var(--label);
+    cursor: pointer;
+    font-size: 0.72rem;
+    padding: 0 2px;
+    line-height: 1;
+    transition: color 0.15s;
+    flex-shrink: 0;
+  }
+  .hist-edit-btn:hover { color: var(--amber); }
+
+  /* Note */
+  .hist-note {
+    font-size: 0.78rem;
+    color: var(--muted);
+    font-style: italic;
+    line-height: 1.4;
+    margin-top: 5px;
+    display: flex;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .hist-note-add {
+    background: none;
+    border: none;
+    color: var(--label);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 4px 0;
+    margin-top: 3px;
+    display: block;
+    transition: color 0.15s;
+  }
+  .hist-note-add:hover { color: var(--muted); }
+
+  /* Inline edit row (date & note) */
+  .hist-edit-row { display: flex; align-items: center; gap: 5px; margin-top: 5px; }
+  .hist-date-input {
+    background: var(--groove);
+    border: 1px solid var(--label);
+    border-radius: 4px;
+    color: var(--cream);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    padding: 4px 6px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .hist-date-input:focus { border-color: var(--amber); }
+  .hist-note-wrap { margin-top: 5px; }
+  .hist-note-input {
+    width: 100%;
+    background: var(--groove);
+    border: 1px solid var(--label);
+    border-radius: 4px;
+    color: var(--cream);
+    font-family: 'Lora', serif;
+    font-size: 0.78rem;
+    line-height: 1.5;
+    padding: 6px 8px;
+    outline: none;
+    resize: vertical;
+    min-height: 52px;
+    transition: border-color 0.2s;
+  }
+  .hist-note-input:focus { border-color: var(--amber); }
+  .hist-edit-action {
+    background: var(--groove);
+    border: 1px solid var(--label);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+    white-space: nowrap;
+  }
+  .hist-edit-action:hover { color: var(--cream); border-color: var(--muted); }
+
+  /* ── SETTINGS VIEW ── */
+  .settings-card {
+    background: var(--wax);
+    border: 1px solid var(--label);
+    border-radius: var(--radius);
+    padding: 36px;
+    max-width: 480px;
+  }
+  .settings-card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--label);
+  }
+  .setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--label);
+  }
+  .setting-row:last-child { border-bottom: none; }
+  .setting-label { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; }
+  .setting-val { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--cream); }
+  .danger { color: var(--red) !important; border-color: rgba(184,64,64,0.4) !important; }
+  .danger:hover { background: rgba(184,64,64,0.1) !important; }
+
+  .settings-section {
+    border: 1px solid var(--label);
+    border-radius: 10px;
+    padding: 22px 24px;
+    margin-bottom: 16px;
+  }
+  .settings-section:last-child { margin-bottom: 0; }
+  .settings-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 12px;
+  }
+
+  /* ── PROGRESS ── */
+  .progress-wrap { margin-top: 16px; }
+  .progress-bar-bg {
+    height: 4px;
+    background: var(--label);
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 8px;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--amber);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+  }
+  .progress-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+  }
+
+  /* ── BROWSE VIEW ── */
+  .browse-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .browse-toolbar input {
+    flex: 1;
+    margin-bottom: 0;
+  }
+  .browse-sort {
+    background: var(--groove);
+    border: 1px solid var(--label);
+    border-radius: 8px;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    padding: 12px 14px;
+    outline: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+    white-space: nowrap;
+  }
+  .browse-sort:focus { border-color: var(--amber); }
+
+  .browse-list { display: flex; flex-direction: column; gap: 2px; }
+
+  .browse-item {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    transition: background 0.15s, border-color 0.15s;
+    text-decoration: none;
+  }
+  .browse-item:hover {
+    background: var(--wax);
+    border-color: var(--label);
+  }
+
+  .browse-thumb {
+    flex-shrink: 0;
+    width: 68px; height: 68px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--groove);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .browse-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .browse-info { flex: 1; min-width: 0; }
+  .browse-artist {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--cream);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+  }
+  .browse-title {
+    font-style: italic;
+    color: var(--amber-lt);
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 6px;
+  }
+  .browse-pills { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 5px; }
+  .browse-sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .browse-actions {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+  }
+  .browse-last-added {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--green);
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    opacity: 0.85;
+  }
+
+  /* Responsive */
+  @media (max-width: 600px) {
+    header { padding: 16px 20px; }
+    .view { padding: 24px 20px; }
+    .card-header { flex-direction: column; align-items: center; text-align: center; }
+    .card-pills { justify-content: center; }
+    .album-art-wrap { width: 140px; height: 140px; }
+    .card-badge { position: static; margin-bottom: 12px; }
+    .setup-card { padding: 28px 24px; }
+    .browse-toolbar { flex-direction: column; align-items: stretch; }
+    .browse-thumb { width: 54px; height: 54px; }
+    .hist-remove { color: var(--muted); } /* always visible on touch */
+    .history-filters { flex-wrap: wrap; }
+  }
+
+  /* ── ARCHIVE VIEW ── */
+  .archive-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .archive-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+  }
+  .archive-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+  .archive-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .archive-close {
+    background: none;
+    border: 1px solid var(--label);
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.06em;
+    padding: 5px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .archive-close:hover { color: var(--cream); border-color: var(--muted); }
+  .archive-empty {
+    text-align: center;
+    color: var(--muted);
+    font-style: italic;
+    padding: 60px 20px;
+    font-size: 0.9rem;
+  }
+
+  /* ── VALUES VIEW ── */
+  .values-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .values-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+  }
+  .values-last-capture {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .values-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .values-stat {
+    background: var(--wax);
+    border: 1px solid var(--label);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .values-stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+  .values-stat-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 1.2rem;
+    font-weight: 500;
+    color: var(--cream);
+  }
+  .values-stat-value.hi  { color: var(--green); }
+  .values-stat-value.lo  { color: var(--red);   }
+  .values-stat-value.med { color: var(--amber);  }
+
+  .values-chart-wrap {
+    background: var(--wax);
+    border: 1px solid var(--label);
+    border-radius: 12px;
+    padding: 24px 24px 16px;
+    margin-bottom: 24px;
+    position: relative;
+  }
+  .values-chart-legend {
+    display: flex;
+    gap: 20px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+  .values-chart-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    color: var(--muted);
+  }
+  .values-chart-legend-line {
+    width: 22px;
+    height: 2px;
+    border-radius: 2px;
+  }
+
+  .chart-tooltip {
+    position: absolute;
+    background: var(--groove);
+    border: 1px solid #3a3530;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.1s;
+    z-index: 20;
+    white-space: nowrap;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  }
+  .chart-tooltip.visible { opacity: 1; }
+  .chart-tooltip-date {
+    color: var(--muted);
+    font-size: 0.65rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .chart-tooltip-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 4px;
+  }
+  .chart-tooltip-row:last-child { margin-bottom: 0; }
+  .chart-tooltip-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .chart-tooltip-lbl { color: var(--muted); min-width: 28px; }
+  .chart-tooltip-val { color: var(--cream); }
+
+  .values-log {
+    background: var(--wax);
+    border: 1px solid var(--label);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .values-log-title {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--label);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--amber);
+  }
+  .values-log-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr 32px;
+    gap: 8px;
+    padding: 11px 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    align-items: center;
+  }
+  .values-log-row.col-head {
+    font-size: 0.62rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: rgba(0,0,0,0.15);
+    padding-top: 9px;
+    padding-bottom: 9px;
+    border-bottom: 1px solid var(--label);
+  }
+  /* Each entry wraps a data row + its note area */
+  .values-log-entry {
+    border-bottom: 1px solid var(--label);
+  }
+  .values-log-entry:last-child { border-bottom: none; }
+  .values-del-btn {
+    background: none;
+    border: none;
+    color: transparent;
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.15s;
+  }
+  .values-log-entry:hover .values-del-btn { color: var(--muted); }
+  .values-del-btn:hover { color: var(--red) !important; }
+
+  /* ── VALUE SPAN FILTER ── */
+  .values-span-btns {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .values-span-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  /* ── VALUE LOG PAGINATION ── */
+  .values-log-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 13px 20px;
+    border-top: 1px solid var(--label);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--muted);
+    flex-wrap: wrap;
+  }
+  .values-page-info {
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.03em;
+  }
+
+  /* ── VALUE ENTRY NOTES ── */
+  .values-note-area {
+    padding: 0 20px 10px;
+  }
+  .values-note-add {
+    background: none;
+    border: none;
+    color: var(--label);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.15s;
+  }
+  .values-note-add:hover { color: var(--muted); }
+  .values-note-text {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-style: italic;
+    line-height: 1.5;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .values-note-edit-btn {
+    background: none;
+    border: none;
+    color: var(--label);
+    font-size: 0.72rem;
+    cursor: pointer;
+    padding: 0 2px;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: color 0.15s;
+  }
+  .values-note-edit-btn:hover { color: var(--amber); }
+  .values-note-input {
+    width: 100%;
+    background: var(--groove);
+    border: 1px solid var(--label);
+    border-radius: 4px;
+    color: var(--cream);
+    font-family: 'Lora', serif;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    padding: 6px 8px;
+    outline: none;
+    resize: vertical;
+    min-height: 50px;
+    transition: border-color 0.2s;
+  }
+  .values-note-input:focus { border-color: var(--amber); }
+  .values-note-save-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 5px;
+  }
+
+  .values-empty {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+    font-style: italic;
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 600px) {
+    .values-stats { grid-template-columns: repeat(2, 1fr); }
+    .values-log-row { grid-template-columns: 2fr 1fr 1fr 28px; }
+    .values-log-row .vl-min { display: none; }
+  }
+
+  /* ── VALUE CSV IMPORT PREVIEW ── */
+  .values-import-panel {
+    background: var(--wax);
+    border: 1px solid var(--amber);
+    border-radius: 12px;
+    padding: 20px 24px;
+  }
+  .values-import-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .values-import-table-wrap {
+    overflow-x: auto;
+    margin-bottom: 14px;
+    border-radius: 6px;
+    border: 1px solid var(--label);
+  }
+  .values-import-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+  }
+  .values-import-table th {
+    background: var(--groove);
+    color: var(--muted);
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--label);
+  }
+  .values-import-table td {
+    padding: 8px 14px;
+    border-bottom: 1px solid var(--label);
+    color: var(--cream);
+  }
+  .values-import-table tr:last-child td { border-bottom: none; }
+  .values-import-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .values-import-dupe-notice {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--amber);
+    background: rgba(200,146,42,0.08);
+    border: 1px solid rgba(200,146,42,0.2);
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 14px;
+  }
+  .values-import-err-notice {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--red);
+    background: rgba(184,64,64,0.08);
+    border: 1px solid rgba(184,64,64,0.2);
+    border-radius: 6px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+    line-height: 1.6;
+  }
+  .values-import-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .values-import-actions .btn,
+  .values-import-actions .btn.secondary {
+    flex: 1;
+    margin-bottom: 0;
+    min-width: 140px;
+  }
+  .values-import-success {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--green);
+    padding: 14px 18px;
+    background: rgba(74,140,92,0.08);
+    border: 1px solid rgba(74,140,92,0.25);
+    border-radius: 8px;
+  }
+
+  /* ── EXPORT / IMPORT SETTINGS ── */
+  .export-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+  .export-row select {
+    flex: 1;
+    margin-bottom: 0;
+    min-width: 120px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Crate <span>Dig</span></div>
+  <nav>
+    <button class="nav-btn active" onclick="showView('today')">Today</button>
+    <button class="nav-btn" onclick="showView('history')">History</button>
+    <button class="nav-btn" onclick="showView('browse')">Browse</button>
+    <button class="nav-btn" onclick="showView('values')">Values</button>
+    <button class="nav-btn" id="nav-archive" onclick="showView('archive')" style="display:none">Archive</button>
+    <button class="nav-btn" onclick="showView('settings')">Settings</button>
+  </nav>
+</header>
+
+<!-- SETUP -->
+<div id="view-setup" class="view active">
+  <div class="setup-card">
+    <h2>Welcome to Crate Dig</h2>
+    <p>Connect your Discogs collection for a daily album recommendation. Your credentials are stored locally and never sent anywhere except Discogs.</p>
+    <div id="setup-error" class="error-box" style="display:none"></div>
+    <label>Discogs Username</label>
+    <input type="text" id="setup-username" placeholder="your_username" autocomplete="off">
+    <label>Discogs API Token</label>
+    <input type="password" id="setup-token" placeholder="Paste your token here">
+    <p style="margin-bottom:20px; font-size:0.8rem;">
+      Get a token at <a href="https://www.discogs.com/settings/developers" target="_blank">discogs.com/settings/developers</a> → Generate new token
+    </p>
+    <button class="btn" id="setup-btn" onclick="handleSetup()">Sync My Collection →</button>
+    <div id="setup-progress" class="progress-wrap" style="display:none">
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill" style="width:0%"></div></div>
+      <div class="progress-text" id="progress-text">Fetching page 1…</div>
+    </div>
+  </div>
+</div>
+
+<!-- TODAY -->
+<div id="view-today" class="view" style="display:none">
+  <div class="status-bar">
+    <div class="status-info">
+      <strong id="collection-size">—</strong> records cached
+      &nbsp;·&nbsp; synced <strong id="synced-date">—</strong>
+    </div>
+    <div class="btn-row">
+      <button class="btn-sm" onclick="pickAlbum()">↺ Re-roll</button>
+      <button class="btn-sm amber" onclick="refreshCollection()">↻ Sync</button>
+    </div>
+  </div>
+  <div id="today-content"></div>
+</div>
+
+<!-- HISTORY -->
+<div id="view-history" class="view" style="display:none">
+  <div class="history-header">
+    <div>
+      <h2>Past Picks</h2>
+      <span class="history-count" id="history-count"></span>
+    </div>
+    <div class="history-filters">
+      <button class="btn-sm amber" id="hf-all"   onclick="setHistoryFilter('all')">All</button>
+      <button class="btn-sm"       id="hf-daily" onclick="setHistoryFilter('daily')">🎵 Daily</button>
+      <button class="btn-sm"       id="hf-user"  onclick="setHistoryFilter('user')">♥ My Picks</button>
+    </div>
+  </div>
+  <div id="history-grid"></div>
+</div>
+
+<!-- BROWSE -->
+<div id="view-browse" class="view" style="display:none">
+  <div class="history-header">
+    <h2>Collection</h2>
+    <span class="history-count" id="browse-count"></span>
+  </div>
+  <div class="browse-toolbar">
+    <input type="text" id="browse-search" placeholder="Filter by artist or title…" oninput="filterBrowse()" autocomplete="off">
+    <select class="browse-sort" id="browse-sort" onchange="filterBrowse()">
+      <option value="artist">Sort: Artist</option>
+      <option value="title">Sort: Title</option>
+      <option value="year-asc">Sort: Year ↑</option>
+      <option value="year-desc">Sort: Year ↓</option>
+    </select>
+  </div>
+  <div id="browse-list"></div>
+</div>
+
+<!-- VALUES -->
+<div id="view-values" class="view" style="display:none">
+  <div class="values-header">
+    <div>
+      <h2>Collection Value</h2>
+      <div class="values-last-capture" id="values-last-capture">No captures yet</div>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end; align-items:flex-start;">
+      <button class="btn" id="values-capture-btn" onclick="captureCollectionValue()" style="width:auto; min-width:170px;">
+        📸 Capture Value Now
+      </button>
+      <label for="values-csv-input" class="btn secondary" style="width:auto; min-width:130px; cursor:pointer; margin-bottom:0;">
+        📂 Import CSV
+      </label>
+      <input type="file" id="values-csv-input" accept=".csv,.txt" style="display:none" onchange="loadValueCSV(event)">
+    </div>
+  </div>
+  <div id="values-import-preview" style="display:none; margin-bottom:20px;"></div>
+  <div class="values-stats" id="values-stats"></div>
+  <div class="values-chart-wrap" id="values-chart-wrap">
+    <div class="values-span-btns" id="values-span-btns" style="display:none"></div>
+    <div class="chart-tooltip" id="chart-tooltip"></div>
+    <div id="values-chart"></div>
+    <div class="values-chart-legend" id="values-chart-legend" style="display:none">
+      <div class="values-chart-legend-item">
+        <div class="values-chart-legend-line" style="background:#4a8c5c;"></div>Max
+      </div>
+      <div class="values-chart-legend-item">
+        <div class="values-chart-legend-line" style="background:#c8922a; height:3px;"></div>Median
+      </div>
+      <div class="values-chart-legend-item">
+        <div class="values-chart-legend-line" style="background:#b84040;"></div>Min
+      </div>
+    </div>
+  </div>
+  <div id="values-log" style="display:none"></div>
+</div>
+
+<!-- ARCHIVE -->
+<div id="view-archive" class="view" style="display:none">
+  <div class="archive-header">
+    <div>
+      <h2>Archive</h2>
+      <div class="archive-meta" id="archive-meta">No file loaded</div>
+    </div>
+    <div class="archive-toolbar">
+      <div class="history-filters">
+        <button class="btn-sm amber" id="af-all"   onclick="setArchiveFilter('all')">All</button>
+        <button class="btn-sm"       id="af-daily" onclick="setArchiveFilter('daily')">🎵 Daily</button>
+        <button class="btn-sm"       id="af-user"  onclick="setArchiveFilter('user')">♥ My Picks</button>
+      </div>
+      <button class="archive-close" onclick="closeArchive()">✕ Close</button>
+    </div>
+  </div>
+  <div id="archive-grid"></div>
+</div>
+
+<!-- SETTINGS -->
+<div id="view-settings" class="view" style="display:none">
+  <div class="settings-card">
+    <h2>Settings</h2>
+
+    <!-- ── Discogs ── -->
+    <div class="settings-section">
+      <div class="settings-section-header">
+        <span class="setting-label" style="color:var(--amber);">Discogs</span>
+        <span id="s-discogs-status" style="font-family:'DM Mono',monospace; font-size:0.68rem;"></span>
+      </div>
+      <p style="font-size:0.78rem; color:var(--muted); line-height:1.6; margin-bottom:16px;">
+        CrateDig connects to your Discogs collection using your username and a personal access token.
+        To get a token, go to <a href="https://www.discogs.com/settings/developers" target="_blank" rel="noopener noreferrer" style="color:var(--amber);">discogs.com/settings/developers</a>
+        and click <strong style="color:var(--cream);">Generate new token</strong>.
+      </p>
+      <label for="s-discogs-username">Discogs Username</label>
+      <input type="text" id="s-discogs-username" placeholder="your_discogs_username" autocomplete="off" style="margin-bottom:10px;">
+      <label for="s-discogs-token">Personal Access Token</label>
+      <input type="password" id="s-discogs-token" placeholder="enter token to update" autocomplete="off" style="margin-bottom:10px;">
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px;">
+        <button class="btn secondary" style="flex:1; margin-bottom:0;" onclick="saveDiscogsConfig()">Save</button>
+        <button class="btn secondary" style="flex:1; margin-bottom:0;" onclick="testDiscogsConnection()">Test Connection</button>
+      </div>
+
+      <div class="setting-row">
+        <span class="setting-label">Collection</span>
+        <span class="setting-val" id="s-collection">—</span>
+      </div>
+      <div class="setting-row">
+        <span class="setting-label">Last Synced</span>
+        <span class="setting-val" id="s-synced">—</span>
+      </div>
+      <div class="setting-row" style="border-bottom:none;">
+        <span class="setting-label">History</span>
+        <span class="setting-val" id="s-history">—</span>
+      </div>
+
+      <div style="margin-top:16px;">
+        <button class="btn secondary" style="width:100%; margin-bottom:0;" onclick="refreshCollection()">↻ Resync Collection from Discogs</button>
+      </div>
+    </div>
+
+    <!-- ── AI Features ── -->
+    <div class="settings-section">
+      <div class="settings-section-header">
+        <span class="setting-label" style="color:var(--amber);">AI Features</span>
+        <span id="s-claude-status" style="font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--green);"></span>
+      </div>
+      <p style="font-size:0.78rem; color:var(--muted); line-height:1.6; margin-bottom:16px;">
+        Add an Anthropic API key to unlock Claude's Take, Fun Facts, and Tracklist Highlights on each pick.
+        Get a key at <a href="https://console.anthropic.com/" target="_blank" rel="noopener noreferrer" style="color:var(--amber);">console.anthropic.com</a>.
+      </p>
+      <label for="s-claude-key">Anthropic API Key</label>
+      <input type="password" id="s-claude-key" placeholder="sk-ant-…" style="margin-bottom:10px;">
+      <div style="display:flex; gap:8px;">
+        <button class="btn secondary" style="flex:1; margin-bottom:0;" onclick="saveClaudeKey()">Save Key</button>
+        <button class="btn secondary danger" id="s-claude-clear" style="flex:1; margin-bottom:0; display:none;" onclick="clearClaudeKey()">Remove Key</button>
+      </div>
+    </div>
+
+    <!-- ── WordPress Publishing ── -->
+    <div class="settings-section">
+      <div class="settings-section-header">
+        <span class="setting-label" style="color:var(--amber);">WordPress Publishing</span>
+        <span id="s-wp-status" style="font-family:'DM Mono',monospace; font-size:0.68rem;"></span>
+      </div>
+      <p style="font-size:0.78rem; color:var(--muted); line-height:1.6; margin-bottom:16px;">
+        Publish picks to your WordPress site. Install the <strong style="color:var(--cream);">CrateDig plugin</strong> on your site, then generate an
+        <a href="https://wordpress.com/support/security/two-step-authentication/application-specific-passwords/" target="_blank" rel="noopener noreferrer" style="color:var(--amber);">Application Password</a>
+        in your WordPress user profile.
+      </p>
+      <label for="s-wp-url">Site URL</label>
+      <input type="text" id="s-wp-url" placeholder="https://yoursite.com" style="margin-bottom:10px;">
+      <label for="s-wp-user">WordPress Username</label>
+      <input type="text" id="s-wp-user" placeholder="your_wp_username" autocomplete="off" style="margin-bottom:10px;">
+      <label for="s-wp-pass">Application Password</label>
+      <input type="password" id="s-wp-pass" placeholder="xxxx xxxx xxxx xxxx xxxx xxxx" style="margin-bottom:10px;">
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn secondary" style="flex:1; margin-bottom:0;" onclick="saveWpConfig()">Save</button>
+        <button class="btn secondary" style="flex:1; margin-bottom:0;" onclick="testWpConnection()">Test Connection</button>
+        <button class="btn secondary danger" id="s-wp-clear" style="flex:1; margin-bottom:0; display:none;" onclick="clearWpConfig()">Disconnect</button>
+      </div>
+      <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--label);">
+        <p style="font-size:0.75rem; color:var(--muted); line-height:1.5; margin-bottom:10px;">
+          Accidentally removed local picks? Pull them back from your WordPress site into CrateDig history.
+        </p>
+        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+          <button class="btn secondary" style="margin-bottom:0; white-space:nowrap;" onclick="importFromWordPress()">↓ Import from WordPress</button>
+          <span id="s-wp-import-status" style="font-family:'DM Mono',monospace; font-size:0.68rem;"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Export & Archive ── -->
+    <div class="settings-section">
+      <div class="settings-section-header">
+        <span class="setting-label" style="color:var(--amber);">Export &amp; Archive</span>
+      </div>
+      <p style="font-size:0.78rem; color:var(--muted); line-height:1.6; margin-bottom:16px;">
+        Export your history year-by-year as JSON files to keep a permanent local record. Load an exported file into the Archive view to browse it read-only.
+      </p>
+      <div class="export-row">
+        <select id="export-year-select">
+          <option value="">— choose year —</option>
+        </select>
+        <button class="btn secondary" style="margin-bottom:0; white-space:nowrap;" onclick="exportHistory()">⬇ Export Year</button>
+      </div>
+      <div style="margin-top:10px;">
+        <label for="archive-file-input" class="btn secondary" style="display:inline-block; cursor:pointer; margin-bottom:0;">
+          📂 Load Archive File
+        </label>
+        <input type="file" id="archive-file-input" accept=".json" style="display:none" onchange="loadArchive(event)">
+      </div>
+    </div>
+
+    <!-- ── Value Tracking ── -->
+    <div class="settings-section">
+      <div class="settings-section-header">
+        <span class="setting-label" style="color:var(--amber);">Value Tracking</span>
+        <span id="s-values-count" style="font-family:'DM Mono',monospace; font-size:0.68rem; color:var(--muted);"></span>
+      </div>
+      <p style="font-size:0.78rem; color:var(--muted); line-height:1.6; margin-bottom:16px;">
+        Export your collection value snapshots as a JSON backup. Import a CSV (date, low, median, high) to load historical data.
+      </p>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <button class="btn secondary" style="flex:1; margin-bottom:0;" onclick="exportValueHistory()">⬇ Export</button>
+        <label for="s-values-csv-input" class="btn secondary" style="flex:1; margin-bottom:0; cursor:pointer; text-align:center;">📂 Import CSV</label>
+        <input type="file" id="s-values-csv-input" accept=".csv,.txt" style="display:none" onchange="loadValueCSV(event)">
+        <button class="btn secondary danger" id="s-values-clear" style="flex:1; margin-bottom:0; display:none;" onclick="clearValueHistory()">Clear</button>
+      </div>
+    </div>
+
+    <!-- ── Danger Zone ── -->
+    <div class="settings-section" style="border-color: rgba(184,64,64,0.25);">
+      <div class="settings-section-header" style="margin-bottom:12px;">
+        <span class="setting-label" style="color:var(--red);">Danger Zone</span>
+      </div>
+      <p style="font-size:0.78rem; color:var(--muted); line-height:1.6; margin-bottom:16px;">
+        Reset &amp; Disconnect removes all settings, credentials, collection data, and history from this browser. This cannot be undone.
+      </p>
+      <button class="btn secondary danger" style="width:100%; margin-bottom:0;" onclick="resetAll()">Reset &amp; Disconnect</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ── STATE ──
+const STORAGE = {
+  CREDS:      'cratedig_creds',
+  COLLECTION: 'cratedig_collection',
+  META:       'cratedig_meta',
+  HISTORY:    'cratedig_history',
+  CLAUDE_KEY: 'cratedig_claude_key',
+  WP:         'cratedig_wp',
+  VALUES:     'cratedig_values',
+};
+
+let creds          = null;
+let collection     = [];
+let history        = [];
+let meta           = null;
+let claudeKey      = null;
+let wpConfig       = null;
+let historyFilter  = 'all';
+let activeEdit     = null;   // { requestedAt, field: 'date'|'note' }
+let archiveData    = null;   // loaded archive JSON { year, picks, … }
+let archiveFilter  = 'all';
+let valueHistory    = [];     // [ { capturedAt, minimum, median, maximum, currency, note? } ]
+let pendingImport   = null;   // { rows, dupeCount, errors } while CSV preview is shown
+let activeValueEdit = null;   // capturedAt of the value entry whose note is being edited
+let valueChartSpan  = 'ALL';  // '3M' | '6M' | '1Y' | '2Y' | 'ALL'
+let valuePage       = 1;      // current page of the capture log
+const VALUE_PAGE_SIZE = 20;
+
+// ── INIT ──
+async function init() {
+  creds        = loadJSON(STORAGE.CREDS);
+  collection   = loadJSON(STORAGE.COLLECTION) ?? [];
+  meta         = loadJSON(STORAGE.META);
+  history      = loadJSON(STORAGE.HISTORY) ?? [];
+  claudeKey    = localStorage.getItem(STORAGE.CLAUDE_KEY);
+  wpConfig     = loadJSON(STORAGE.WP);
+  valueHistory = loadJSON(STORAGE.VALUES) ?? [];
+
+  if (!creds || !collection.length) {
+    showView('setup', true);
+    return;
+  }
+
+  updateStatusBar();
+  showView('today', true);
+  setTodayContent(`
+    <div style="text-align:center; padding:60px 20px;">
+      ${vinylSVG(80)}
+      <p style="font-family:'DM Mono',monospace; font-size:0.75rem; letter-spacing:0.1em;
+                text-transform:uppercase; color:var(--muted); margin:24px 0 28px;">
+        Ready to dig
+      </p>
+      <button class="btn" onclick="pickAlbum()" style="min-width:180px;">
+        🎵 Pick Today's Album
+      </button>
+    </div>
+  `);
+}
+
+// ── STORAGE HELPERS ──
+function loadJSON(key) {
+  try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
+}
+function saveJSON(key, val) {
+  localStorage.setItem(key, JSON.stringify(val));
+}
+
+// ── VIEW ROUTING ──
+function showView(name, skipNav = false) {
+  document.querySelectorAll('.view').forEach(v => {
+    v.style.display = 'none';
+    v.classList.remove('active');
+  });
+  const el = document.getElementById('view-' + name);
+  el.style.display = 'block';
+  el.classList.add('active');
+
+  if (!skipNav) {
+    // Named nav buttons (excludes the hidden archive btn from index-based logic)
+    ['today','history','browse','values','settings'].forEach(n => {
+      const btn = document.querySelector(`.nav-btn[onclick="showView('${n}')"]`);
+      if (btn) btn.classList.toggle('active', n === name);
+    });
+    const archiveBtn = document.getElementById('nav-archive');
+    if (archiveBtn) archiveBtn.classList.toggle('active', name === 'archive');
+
+    if (name === 'history')  renderHistory();
+    if (name === 'browse')   renderBrowse();
+    if (name === 'values')   renderValues();
+    if (name === 'settings') renderSettings();
+    if (name === 'archive')  renderArchive();
+  }
+}
+
+// ── SETUP ──
+async function handleSetup() {
+  const username = document.getElementById('setup-username').value.trim();
+  const token    = document.getElementById('setup-token').value.trim();
+  const errEl    = document.getElementById('setup-error');
+  errEl.style.display = 'none';
+
+  if (!username || !token) {
+    errEl.textContent = 'Please enter both your username and token.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  document.getElementById('setup-btn').disabled = true;
+  document.getElementById('setup-progress').style.display = 'block';
+
+  try {
+    const releases = await fetchFullCollection(username, token);
+    creds = { username, token };
+    collection = releases;
+    meta = { username, cachedAt: new Date().toISOString(), totalItems: releases.length };
+    saveJSON(STORAGE.CREDS, creds);
+    saveJSON(STORAGE.COLLECTION, collection);
+    saveJSON(STORAGE.META, meta);
+
+    updateStatusBar();
+    showView('today');
+    document.querySelectorAll('.nav-btn')[0].classList.add('active');
+    await pickAlbum();
+  } catch (e) {
+    errEl.textContent = e.message;
+    errEl.style.display = 'block';
+    document.getElementById('setup-btn').disabled = false;
+  }
+}
+
+// ── FETCH COLLECTION ──
+async function fetchFullCollection(username, token) {
+  const headers = {
+    'Authorization': `Discogs token=${token}`,
+    'User-Agent': 'CrateDig/1.0',
+  };
+  const base = `https://api.discogs.com/users/${username}/collection/folders/0/releases`;
+
+  setProgress(0, 'Connecting to Discogs…');
+
+  const r1 = await discogsGet(base, { page: 1, per_page: 100 }, headers);
+  if (r1.message) throw new Error(`Discogs error: ${r1.message}`);
+
+  const totalPages = r1.pagination.pages;
+  const totalItems = r1.pagination.items;
+  let releases = extractReleases(r1.releases);
+
+  setProgress(Math.round(100 / totalPages), `Page 1 of ${totalPages}…`);
+
+  for (let page = 2; page <= totalPages; page++) {
+    const data = await discogsGet(base, { page, per_page: 100 }, headers);
+    releases = releases.concat(extractReleases(data.releases));
+    setProgress(Math.round((page / totalPages) * 100), `Page ${page} of ${totalPages}…`);
+  }
+
+  setProgress(100, `Loaded ${releases.length} records ✓`);
+  return releases;
+}
+
+function extractReleases(raw) {
+  return raw.map(rel => {
+    const bi = rel.basic_information ?? {};
+    return {
+      id:     rel.id,
+      title:  bi.title ?? 'Unknown',
+      artist: (bi.artists ?? [{}])[0]?.name?.replace(/\s*\(\d+\)$/, '') ?? 'Unknown',
+      year:   bi.year,
+      genres: bi.genres ?? [],
+      styles: bi.styles ?? [],
+      label:  (bi.labels ?? [{}])[0]?.name ?? '',
+      country: bi.country ?? '',
+      thumb:  bi.thumb ?? '',
+    };
+  });
+}
+
+function setProgress(pct, text) {
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-text').textContent = text;
+}
+
+// ── DISCOGS API ──
+async function discogsGet(url, params, headers) {
+  const qs = new URLSearchParams(params).toString();
+  const res = await fetch(`${url}?${qs}`, { headers });
+  if (res.status === 401) throw new Error('Invalid token — please check your Discogs API token.');
+  if (res.status === 404) throw new Error('User not found — please check your Discogs username.');
+  if (res.status === 429) {
+    await sleep(2000);
+    return discogsGet(url, params, headers);
+  }
+  if (!res.ok) throw new Error(`Discogs returned ${res.status}`);
+  return res.json();
+}
+
+async function discogsGetRelease(releaseId) {
+  const headers = {
+    'Authorization': `Discogs token=${creds.token}`,
+    'User-Agent': 'CrateDig/1.0',
+  };
+  const res = await fetch(`https://api.discogs.com/releases/${releaseId}`, { headers });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+// ── PICK ALBUM ──
+async function pickAlbum() {
+  if (!collection.length) return;
+
+  setTodayContent(`
+    <div class="loading-wrap">
+      <div class="spinner"></div>
+      <div class="loading-text">Pulling a record…</div>
+    </div>
+  `);
+
+  const seenIds = new Set(history.map(h => h.id));
+  const pool = collection.filter(r => !seenIds.has(r.id));
+  const pick = pool.length > 0
+    ? pool[Math.floor(Math.random() * pool.length)]
+    : collection[Math.floor(Math.random() * collection.length)];
+
+  // Fetch full release details + artwork
+  let releaseData = null;
+  let imgDataUrl  = null;
+
+  try {
+    releaseData = await discogsGetRelease(pick.id);
+  } catch(e) { /* proceed without */ }
+
+  const tracklist = releaseData?.tracklist?.map(t => t.title) ?? [];
+  const rating    = releaseData?.community?.rating?.average ?? null;
+  const imageUri  = releaseData?.images?.[0]?.uri ?? null;
+
+  if (imageUri) {
+    try {
+      // Discogs images require auth header — proxy via fetch with auth
+      const imgRes = await fetch(imageUri, {
+        headers: {
+          'Authorization': `Discogs token=${creds.token}`,
+          'User-Agent': 'CrateDig/1.0',
+        }
+      });
+      if (imgRes.ok) {
+        const blob = await imgRes.blob();
+        imgDataUrl = await blobToDataUrl(blob);
+      }
+    } catch(e) { /* no image */ }
+  }
+
+  // Fallback to thumb
+  if (!imgDataUrl && pick.thumb) {
+    imgDataUrl = pick.thumb;
+  }
+
+  // Generate commentary via Claude API
+  const { take, facts, highlights } = await generateCommentary(pick, tracklist, rating);
+
+  // Save to history
+  history.unshift({
+    id:          pick.id,
+    title:       pick.title,
+    artist:      pick.artist,
+    year:        pick.year,
+    genres:      pick.genres,
+    styles:      pick.styles,
+    label:       pick.label,
+    country:     pick.country,
+    rating:      rating,
+    tracklist:   tracklist,
+    imgDataUrl:  pick.thumb || '',   // thumbnail URL only — never store base64 in history
+    requestedAt: new Date().toISOString(),
+    source:      'daily',
+  });
+  saveJSON(STORAGE.HISTORY, history.slice(0, 1000));
+
+  renderAlbumCard({ pick, rating, tracklist, imgDataUrl, take, facts, highlights });
+}
+
+// ── CLAUDE COMMENTARY ──
+async function generateCommentary(pick, tracklist, rating) {
+  const prompt = `You are a warm, knowledgeable music lover recommending a vinyl record to a friend.
+
+Album: "${pick.title}" by ${pick.artist}
+Year: ${pick.year ?? 'unknown'}
+Genre: ${[...pick.genres, ...pick.styles].join(', ') || 'unknown'}
+Label: ${pick.label || 'unknown'}
+Community rating: ${rating ? rating.toFixed(1) + '/5' : 'not rated'}
+Tracklist: ${tracklist.slice(0, 20).join(', ') || 'unknown'}
+
+Respond ONLY with a JSON object (no markdown, no backticks) with exactly these keys:
+{
+  "take": "2-3 sentences of warm, genuine commentary. Reference the genre, era, or emotional vibe. Sound like a knowledgeable friend, not Wikipedia.",
+  "facts": ["fact 1", "fact 2", "fact 3"],
+  "highlights": [
+    {"track": "Track Name", "note": "why it's worth a listen"},
+    {"track": "Track Name", "note": "why it's worth a listen"},
+    {"track": "Track Name", "note": "why it's worth a listen"}
+  ]
+}
+
+For facts: genuinely interesting tidbits — recording history, personnel, cultural context, chart performance, legacy. Make them surprising and specific.
+For highlights: pick real tracks from the tracklist if provided. If no tracklist, pick tracks you know. Keep notes to one punchy sentence.`;
+
+  if (!claudeKey) return { take: null, facts: null, highlights: null };
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': claudeKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }],
+      }),
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text ?? '';
+    return JSON.parse(text);
+  } catch(e) {
+    return { take: null, facts: null, highlights: null };
+  }
+}
+
+// ── RENDER CARD ──
+function renderAlbumCard({ pick, rating, tracklist, imgDataUrl, take, facts, highlights }) {
+  const today = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+  const stars  = rating ? renderStars(rating) : null;
+  const genres = [...(pick.genres ?? []), ...(pick.styles ?? [])].slice(0, 3);
+
+  const artHtml = imgDataUrl
+    ? `<img src="${imgDataUrl}" alt="${esc(pick.title)} cover">`
+    : `<div class="art-placeholder">${vinylSVG()}</div>`;
+
+  const factsHtml = (facts ?? []).map(f => `<li>${esc(f)}</li>`).join('');
+
+  const highlightsHtml = (highlights ?? []).map(h => `
+    <li>
+      <span class="track-name">${esc(h.track)}</span>
+      <span class="track-note">${esc(h.note)}</span>
+    </li>
+  `).join('');
+
+  const pillsHtml = [
+    pick.year ? `<span class="pill year">${pick.year}</span>` : '',
+    ...genres.map(g => `<span class="pill">${esc(g)}</span>`),
+    pick.label ? `<span class="pill">${esc(pick.label)}</span>` : '',
+    pick.country ? `<span class="pill">${esc(pick.country)}</span>` : '',
+  ].filter(Boolean).join('');
+
+  const ratingHtml = stars ? `
+    <div class="rating-row">
+      <span class="stars">${stars}</span>
+      <span>${rating.toFixed(1)} / 5 community rating</span>
+    </div>` : '';
+
+  setTodayContent(`
+    <div class="album-card">
+      <div class="card-header">
+        <div class="card-badge">🎵 Album of the Day · ${today}</div>
+        <div class="album-art-wrap">${artHtml}</div>
+        <div class="card-meta">
+          <div class="card-artist">${esc(pick.artist)}</div>
+          <div class="card-title">${esc(pick.title)}</div>
+          <div class="card-pills">${pillsHtml}</div>
+          ${ratingHtml}
+        </div>
+      </div>
+
+      ${take ? `
+      <div class="card-section">
+        <div class="section-label">Claude's Take</div>
+        <p class="take-text">${esc(take)}</p>
+      </div>` : ''}
+
+      ${factsHtml ? `
+      <div class="card-section">
+        <div class="section-label">Fun Facts</div>
+        <ul class="facts-list">${factsHtml}</ul>
+      </div>` : ''}
+
+      ${highlightsHtml ? `
+      <div class="card-section">
+        <div class="section-label">Tracklist Highlights</div>
+        <ul class="tracks-list">${highlightsHtml}</ul>
+      </div>` : ''}
+
+      <div class="card-footer">
+        <button class="btn ghost" onclick="pickAlbum()" style="flex:1">↺ Pick Another</button>
+        <button class="btn secondary" onclick="showView('history')" style="flex:1">View History</button>
+      </div>
+    </div>
+  `);
+}
+
+function renderStars(rating) {
+  const full  = Math.floor(rating);
+  const half  = rating % 1 >= 0.5 ? 1 : 0;
+  const empty = 5 - full - half;
+  return '★'.repeat(full) + (half ? '½' : '') + '☆'.repeat(empty);
+}
+
+// ── HISTORY ──
+function setHistoryFilter(filter) {
+  historyFilter = filter;
+  document.querySelectorAll('.history-filters .btn-sm').forEach(b => b.classList.remove('amber'));
+  document.getElementById('hf-' + filter).classList.add('amber');
+  renderHistory();
+}
+
+function renderHistory() {
+  const grid    = document.getElementById('history-grid');
+  const countEl = document.getElementById('history-count');
+
+  const filtered = historyFilter === 'all'
+    ? history
+    : history.filter(h => (h.source ?? 'daily') === historyFilter);
+
+  const totalLabel = historyFilter === 'all'
+    ? (history.length ? `${history.length} picks` : '')
+    : `${filtered.length} of ${history.length} picks`;
+  countEl.textContent = totalLabel;
+
+  if (!history.length) {
+    grid.innerHTML = '<p class="history-empty">No picks yet — go find something to listen to!</p>';
+    return;
+  }
+  if (!filtered.length) {
+    const label = historyFilter === 'daily' ? 'daily picks' : 'personal picks';
+    grid.innerHTML = `<p class="history-empty">No ${label} yet.</p>`;
+    return;
+  }
+
+  grid.innerHTML = `<div class="history-grid">
+    ${filtered.map(h => {
+      const source         = h.source ?? 'daily';
+      const displayDateStr = h.pickedDate ?? h.requestedAt;
+      const isEditDate     = activeEdit?.requestedAt === h.requestedAt && activeEdit?.field === 'date';
+      const isEditNote     = activeEdit?.requestedAt === h.requestedAt && activeEdit?.field === 'note';
+
+      const artHtml = h.imgDataUrl
+        ? `<img src="${h.imgDataUrl}" alt="${esc(h.title)}">`
+        : vinylSVG(48);
+
+      const dateHtml = isEditDate
+        ? `<div class="hist-edit-row">
+             <input type="date" id="edit-date-${h.requestedAt}"
+               value="${toDateInputValue(displayDateStr)}" class="hist-date-input">
+             <button class="hist-edit-action" onclick="saveDate('${h.requestedAt}', document.getElementById('edit-date-${h.requestedAt}').value)">Save</button>
+             <button class="hist-edit-action" onclick="cancelEdit()">Cancel</button>
+           </div>`
+        : `<div class="hist-picked-on">Picked on: ${fmtPickedDate(displayDateStr)}
+             <button class="hist-edit-btn" onclick="startEdit('${h.requestedAt}','date')" title="Edit date">✎</button>
+           </div>`;
+
+      const noteHtml = isEditNote
+        ? `<div class="hist-note-wrap">
+             <textarea id="edit-note-${h.requestedAt}" class="hist-note-input"
+               rows="2" placeholder="Add a note…">${esc(h.note ?? '')}</textarea>
+             <div style="display:flex;gap:6px;margin-top:4px;">
+               <button class="hist-edit-action" onclick="saveNote('${h.requestedAt}', document.getElementById('edit-note-${h.requestedAt}').value)">Save</button>
+               <button class="hist-edit-action" onclick="cancelEdit()">Cancel</button>
+             </div>
+           </div>`
+        : h.note
+          ? `<div class="hist-note">${esc(h.note)}
+               <button class="hist-edit-btn" onclick="startEdit('${h.requestedAt}','note')" title="Edit note">✎</button>
+             </div>`
+          : `<button class="hist-note-add" onclick="startEdit('${h.requestedAt}','note')">+ Add note</button>`;
+
+      const artWrap = h.id
+        ? `<a class="hist-art-link" href="https://www.discogs.com/release/${h.id}" target="_blank" rel="noopener noreferrer" title="View on Discogs"><div class="hist-art">${artHtml}</div></a>`
+        : `<div class="hist-art-nolink"><div class="hist-art">${artHtml}</div></div>`;
+
+      return `
+        <div class="hist-card">
+          ${artWrap}
+          <div class="hist-info">
+            <div class="hist-artist">${esc(h.artist)}</div>
+            <div class="hist-title">${esc(h.title)}${h.year ? ` (${h.year})` : ''}</div>
+            <div class="hist-footer">
+              <span class="hist-source ${source}">${source === 'daily' ? '🎵 Daily Pick' : '♥ My Pick'}</span>
+              <button class="hist-remove" onclick="removeFromHistory('${h.requestedAt}')" title="Remove from history">×</button>
+            </div>
+            ${dateHtml}
+            ${noteHtml}
+            ${wpConfig ? `
+            <div class="hist-wp">
+              ${h.wpPostId
+                ? `<span class="hist-published">✓ Published</span>
+                   <button class="hist-wp-btn danger" onclick="unpublishEntry('${h.requestedAt}')">Remove</button>`
+                : `<button class="hist-wp-btn" onclick="publishEntry('${h.requestedAt}')">↑ Publish</button>`
+              }
+            </div>` : ''}
+          </div>
+        </div>
+      `;
+    }).join('')}
+  </div>`;
+}
+
+function removeFromHistory(requestedAt) {
+  history = history.filter(h => h.requestedAt !== requestedAt);
+  saveJSON(STORAGE.HISTORY, history);
+  renderHistory();
+  const el = document.getElementById('s-history');
+  if (el) el.textContent = history.length ? `${history.length} picks` : 'None';
+}
+
+// ── DATE / NOTE EDITING ──
+function fmtPickedDate(dateStr) {
+  if (!dateStr) return '—';
+  if (dateStr.length === 10) {
+    // "YYYY-MM-DD" — parse as local to avoid UTC midnight shifting the day
+    const [y, m, d] = dateStr.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  }
+  return fmtDate(dateStr); // ISO timestamp — use existing helper
+}
+
+function toDateInputValue(dateStr) {
+  if (!dateStr) return '';
+  if (dateStr.length === 10) return dateStr; // already "YYYY-MM-DD"
+  const d = new Date(dateStr);
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function startEdit(requestedAt, field) {
+  activeEdit = { requestedAt, field };
+  renderHistory();
+  setTimeout(() => {
+    const el = document.getElementById(`edit-${field}-${requestedAt}`);
+    if (el) el.focus();
+  }, 0);
+}
+
+function cancelEdit() {
+  activeEdit = null;
+  renderHistory();
+}
+
+function saveDate(requestedAt, value) {
+  if (!value) { cancelEdit(); return; }
+  const idx = history.findIndex(h => h.requestedAt === requestedAt);
+  if (idx >= 0) {
+    history[idx].pickedDate = value; // stored as "YYYY-MM-DD"
+    saveJSON(STORAGE.HISTORY, history.slice(0, 1000));
+  }
+  activeEdit = null;
+  renderHistory();
+}
+
+function saveNote(requestedAt, value) {
+  const idx = history.findIndex(h => h.requestedAt === requestedAt);
+  if (idx >= 0) {
+    history[idx].note = value.trim();
+    saveJSON(STORAGE.HISTORY, history.slice(0, 1000));
+  }
+  activeEdit = null;
+  renderHistory();
+}
+
+// ── BROWSE ──
+function renderBrowse() {
+  document.getElementById('browse-search').value = '';
+  filterBrowse();
+}
+
+function filterBrowse() {
+  const query   = (document.getElementById('browse-search')?.value ?? '').toLowerCase().trim();
+  const sortKey = document.getElementById('browse-sort')?.value ?? 'artist';
+
+  let items = query
+    ? collection.filter(r =>
+        r.artist.toLowerCase().includes(query) ||
+        r.title.toLowerCase().includes(query)
+      )
+    : [...collection];
+
+  items.sort((a, b) => {
+    if (sortKey === 'title')     return a.title.localeCompare(b.title);
+    if (sortKey === 'year-asc')  return (a.year ?? 0) - (b.year ?? 0);
+    if (sortKey === 'year-desc') return (b.year ?? 0) - (a.year ?? 0);
+    return a.artist.localeCompare(b.artist);
+  });
+
+  const countEl = document.getElementById('browse-count');
+  countEl.textContent = query
+    ? `${items.length} of ${collection.length} records`
+    : `${collection.length} records`;
+
+  const listEl = document.getElementById('browse-list');
+  if (!items.length) {
+    listEl.innerHTML = '<p class="history-empty">No records match your filter.</p>';
+    return;
+  }
+
+  // Build a map of id → most-recent history entry (history is newest-first)
+  const lastPickMap = new Map();
+  history.forEach(h => { if (!lastPickMap.has(h.id)) lastPickMap.set(h.id, h); });
+
+  listEl.innerHTML = `<div class="browse-list">${items.map(r => {
+    const tags      = [...(r.genres ?? []), ...(r.styles ?? [])].slice(0, 4);
+    const pillsHtml = [
+      r.year ? `<span class="pill year">${r.year}</span>` : '',
+      ...tags.map(g => `<span class="pill">${esc(g)}</span>`),
+    ].filter(Boolean).join('');
+
+    const subParts = [r.label, r.country].filter(Boolean);
+    const subHtml  = subParts.length
+      ? `<div class="browse-sub">${subParts.map(esc).join(' · ')}</div>`
+      : '';
+
+    const thumbHtml = r.thumb
+      ? `<img src="${esc(r.thumb)}" alt="${esc(r.artist)} – ${esc(r.title)}" loading="lazy">`
+      : vinylSVG(36);
+
+    const lastPick   = lastPickMap.get(r.id);
+    const lastAdded  = lastPick
+      ? `<div class="browse-last-added">↪ ${fmtDate(lastPick.requestedAt)}</div>`
+      : '';
+
+    return `
+      <div class="browse-item">
+        <a class="browse-thumb" href="https://www.discogs.com/release/${r.id}" target="_blank" rel="noopener noreferrer" title="View on Discogs">
+          ${thumbHtml}
+        </a>
+        <div class="browse-info">
+          <div class="browse-artist">${esc(r.artist)}</div>
+          <div class="browse-title">${esc(r.title)}</div>
+          <div class="browse-pills">${pillsHtml}</div>
+          ${subHtml}
+        </div>
+        <div class="browse-actions">
+          <button class="btn-sm" onclick="addToHistory(${r.id})" title="Add to listen history">+ History</button>
+          ${lastAdded}
+        </div>
+      </div>`;
+  }).join('')}</div>`;
+}
+
+function addToHistory(id) {
+  const record = collection.find(r => r.id === id);
+  if (!record) return;
+  history.unshift({
+    id:          record.id,
+    title:       record.title,
+    artist:      record.artist,
+    year:        record.year,
+    genres:      record.genres,
+    styles:      record.styles,
+    label:       record.label,
+    country:     record.country,
+    rating:      null,
+    tracklist:   [],
+    imgDataUrl:  record.thumb,
+    requestedAt: new Date().toISOString(),
+    source:      'user',
+  });
+  saveJSON(STORAGE.HISTORY, history.slice(0, 1000));
+  filterBrowse(); // refresh button states in place
+}
+
+// ── SETTINGS ──
+function renderSettings() {
+  // Discogs section
+  const discogsUser  = document.getElementById('s-discogs-username');
+  const discogsToken = document.getElementById('s-discogs-token');
+  const discogsStatus = document.getElementById('s-discogs-status');
+  if (discogsUser)  discogsUser.value       = creds?.username ?? '';
+  if (discogsToken) discogsToken.placeholder = creds?.token ? '••••••••••••' : 'enter token';
+  if (discogsToken) discogsToken.value       = '';
+  if (discogsStatus && !discogsStatus.dataset.testing) {
+    discogsStatus.textContent = creds?.token ? '✓ Connected' : '';
+    discogsStatus.style.color = 'var(--green)';
+  }
+  document.getElementById('s-collection').textContent = collection.length ? `${collection.length} records` : '—';
+  document.getElementById('s-synced').textContent     = meta?.cachedAt ? fmtDate(meta.cachedAt) : '—';
+  document.getElementById('s-history').textContent    = history.length ? `${history.length} picks` : 'None';
+
+  const statusEl = document.getElementById('s-claude-status');
+  const clearBtn = document.getElementById('s-claude-clear');
+  const keyInput = document.getElementById('s-claude-key');
+  if (claudeKey) {
+    statusEl.textContent  = '✓ Key saved';
+    clearBtn.style.display = '';
+    keyInput.placeholder  = '••••••••••••••••••••';
+  } else {
+    statusEl.textContent  = '';
+    clearBtn.style.display = 'none';
+    keyInput.placeholder  = 'sk-ant-…';
+  }
+  keyInput.value = '';
+
+  // WordPress config
+  const wpStatusEl = document.getElementById('s-wp-status');
+  const wpClearBtn = document.getElementById('s-wp-clear');
+  if (wpConfig?.siteUrl) {
+    wpStatusEl.textContent = '✓ Connected';
+    wpStatusEl.style.color = 'var(--green)';
+    wpClearBtn.style.display = '';
+    document.getElementById('s-wp-url').value  = wpConfig.siteUrl;
+    document.getElementById('s-wp-user').value = wpConfig.username;
+  } else {
+    wpStatusEl.textContent   = '';
+    wpClearBtn.style.display = 'none';
+    document.getElementById('s-wp-url').value  = '';
+    document.getElementById('s-wp-user').value = '';
+  }
+  document.getElementById('s-wp-pass').value = '';
+
+  // Value tracking
+  const valCountEl = document.getElementById('s-values-count');
+  const valClearBtn = document.getElementById('s-values-clear');
+  if (valCountEl)  valCountEl.textContent  = valueHistory.length ? `${valueHistory.length} capture${valueHistory.length === 1 ? '' : 's'}` : 'No captures yet';
+  if (valClearBtn) valClearBtn.style.display = valueHistory.length ? '' : 'none';
+
+  // Populate year export dropdown
+  const yearSel = document.getElementById('export-year-select');
+  if (yearSel) {
+    // Tally picks per year from history
+    const yearCounts = {};
+    history.forEach(h => {
+      const dateStr = h.pickedDate || h.requestedAt || '';
+      const yr = dateStr.slice(0, 4);
+      if (yr && /^\d{4}$/.test(yr)) yearCounts[yr] = (yearCounts[yr] || 0) + 1;
+    });
+    const years = Object.keys(yearCounts).sort().reverse();
+    yearSel.innerHTML = '<option value="">— choose year —</option>' +
+      years.map(y => `<option value="${y}">${y} (${yearCounts[y]} pick${yearCounts[y] === 1 ? '' : 's'})</option>`).join('');
+  }
+}
+
+function saveClaudeKey() {
+  const val = document.getElementById('s-claude-key').value.trim();
+  if (!val) return;
+  claudeKey = val;
+  localStorage.setItem(STORAGE.CLAUDE_KEY, claudeKey);
+  renderSettings();
+}
+
+function clearClaudeKey() {
+  if (!confirm('Remove your Anthropic API key? AI features will be hidden until you add one again.')) return;
+  claudeKey = null;
+  localStorage.removeItem(STORAGE.CLAUDE_KEY);
+  renderSettings();
+}
+
+// ── DISCOGS CREDENTIALS ──
+function saveDiscogsConfig() {
+  const username  = document.getElementById('s-discogs-username').value.trim();
+  const tokenVal  = document.getElementById('s-discogs-token').value.trim();
+  const statusEl  = document.getElementById('s-discogs-status');
+
+  if (!username) {
+    statusEl.textContent = 'Username is required.';
+    statusEl.style.color = 'var(--red)';
+    return;
+  }
+  // If token field is blank, keep the existing token (user only updated username)
+  const token = tokenVal || creds?.token || '';
+  if (!token) {
+    statusEl.textContent = 'Token is required.';
+    statusEl.style.color = 'var(--red)';
+    return;
+  }
+  creds = { username, token };
+  saveJSON(STORAGE.CREDS, creds);
+  statusEl.textContent = '✓ Saved';
+  statusEl.style.color = 'var(--green)';
+  renderSettings();
+}
+
+async function testDiscogsConnection() {
+  const username = document.getElementById('s-discogs-username').value.trim() || creds?.username;
+  const tokenVal = document.getElementById('s-discogs-token').value.trim()    || creds?.token;
+  const statusEl = document.getElementById('s-discogs-status');
+
+  if (!username || !tokenVal) {
+    statusEl.textContent = 'Enter username and token first.';
+    statusEl.style.color = 'var(--red)';
+    return;
+  }
+  statusEl.textContent          = 'Testing…';
+  statusEl.style.color          = 'var(--amber)';
+  statusEl.dataset.testing      = '1';
+
+  try {
+    const res = await fetch(`https://api.discogs.com/users/${encodeURIComponent(username)}`, {
+      headers: {
+        'Authorization': `Discogs token=${tokenVal}`,
+        'User-Agent': 'CrateDig/1.0',
+      },
+    });
+    if (res.status === 401) throw new Error('Invalid token');
+    if (res.status === 404) throw new Error('Username not found');
+    if (!res.ok)            throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    const count = data.num_collection != null ? ` · ${data.num_collection} in collection` : '';
+    statusEl.textContent = `✓ Connected${count}`;
+    statusEl.style.color = 'var(--green)';
+  } catch(err) {
+    statusEl.textContent = '✗ ' + err.message;
+    statusEl.style.color = 'var(--red)';
+  } finally {
+    delete statusEl.dataset.testing;
+  }
+}
+
+// ── WORDPRESS PUBLISHING ──
+function wpAuthHeader() {
+  return 'Basic ' + btoa(wpConfig.username + ':' + wpConfig.appPassword);
+}
+
+function wpBase() {
+  return wpConfig.siteUrl.replace(/\/$/, '') + '/wp-json/cratedig/v1';
+}
+
+function saveWpConfig() {
+  const url  = document.getElementById('s-wp-url').value.trim().replace(/\/$/, '');
+  const user = document.getElementById('s-wp-user').value.trim();
+  const pass = document.getElementById('s-wp-pass').value.trim();
+  const statusEl = document.getElementById('s-wp-status');
+
+  if (!url || !user || !pass) {
+    statusEl.textContent = 'Fill in all three fields.';
+    statusEl.style.color = 'var(--red)';
+    return;
+  }
+
+  wpConfig = { siteUrl: url, username: user, appPassword: pass };
+  saveJSON(STORAGE.WP, wpConfig);
+  renderSettings();
+}
+
+function clearWpConfig() {
+  if (!confirm('Disconnect from WordPress? Published entries will remain on your site.')) return;
+  wpConfig = null;
+  localStorage.removeItem(STORAGE.WP);
+  renderSettings();
+  renderHistory();
+}
+
+async function testWpConnection() {
+  const url  = document.getElementById('s-wp-url').value.trim().replace(/\/$/, '');
+  const user = document.getElementById('s-wp-user').value.trim();
+  const pass = document.getElementById('s-wp-pass').value.trim();
+  const statusEl = document.getElementById('s-wp-status');
+
+  if (!url || !user || !pass) {
+    statusEl.textContent = 'Fill in all three fields first.';
+    statusEl.style.color = 'var(--red)';
+    return;
+  }
+
+  statusEl.textContent = 'Testing…';
+  statusEl.style.color = 'var(--muted)';
+
+  try {
+    const res = await fetch(`${url}/wp-json/cratedig/v1/entries`, {
+      headers: { 'Authorization': 'Basic ' + btoa(user + ':' + pass) },
+    });
+    if (res.ok) {
+      statusEl.textContent = '✓ Connected';
+      statusEl.style.color = 'var(--green)';
+    } else if (res.status === 401) {
+      statusEl.textContent = '✗ Auth failed — check username & password';
+      statusEl.style.color = 'var(--red)';
+    } else if (res.status === 404) {
+      statusEl.textContent = '✗ Plugin not found — is CrateDig installed & active?';
+      statusEl.style.color = 'var(--red)';
+    } else {
+      statusEl.textContent = `✗ HTTP ${res.status}`;
+      statusEl.style.color = 'var(--red)';
+    }
+  } catch {
+    statusEl.textContent = '✗ Could not reach site — check the URL';
+    statusEl.style.color = 'var(--red)';
+  }
+}
+
+async function publishEntry(requestedAt) {
+  if (!wpConfig) return;
+  const entry = history.find(h => h.requestedAt === requestedAt);
+  if (!entry) return;
+
+  // Prefer the small thumb URL; skip base64 data URLs (too large to store in WP)
+  const collRecord  = collection.find(r => r.id === entry.id);
+  const artworkUrl  = collRecord?.thumb
+    || (entry.imgDataUrl?.startsWith('http') ? entry.imgDataUrl : '');
+
+  const payload = {
+    artist:      entry.artist              ?? '',
+    title:       entry.title               ?? '',
+    year:        String(entry.year         ?? ''),
+    genres:      entry.genres              ?? [],
+    styles:      entry.styles              ?? [],
+    label:       entry.label               ?? '',
+    country:     entry.country             ?? '',
+    artwork_url: artworkUrl,
+    discogs_url: entry.id ? `https://www.discogs.com/release/${entry.id}` : '',
+    pick_date:   entry.pickedDate          ?? entry.requestedAt,  // respects edited date
+    note:        entry.note                ?? '',
+    source:      entry.source              ?? 'daily',
+    cratedig_id: entry.requestedAt,        // immutable unique key
+  };
+
+  try {
+    const res = await fetch(wpBase() + '/entries', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': wpAuthHeader() },
+      body:    JSON.stringify(payload),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    const idx  = history.findIndex(h => h.requestedAt === requestedAt);
+    if (idx >= 0) {
+      history[idx].wpPostId = data.id;
+      saveJSON(STORAGE.HISTORY, history.slice(0, 1000));
+    }
+    renderHistory();
+  } catch(e) {
+    alert(`Publish failed: ${e.message}`);
+  }
+}
+
+async function unpublishEntry(requestedAt) {
+  if (!wpConfig) return;
+  const entry = history.find(h => h.requestedAt === requestedAt);
+  if (!entry?.wpPostId) return;
+
+  try {
+    const res = await fetch(`${wpBase()}/entries/${entry.wpPostId}`, {
+      method:  'DELETE',
+      headers: { 'Authorization': wpAuthHeader() },
+    });
+    // 404 means already gone — treat as success
+    if (!res.ok && res.status !== 404) throw new Error(`HTTP ${res.status}`);
+    const idx = history.findIndex(h => h.requestedAt === requestedAt);
+    if (idx >= 0) {
+      delete history[idx].wpPostId;
+      saveJSON(STORAGE.HISTORY, history.slice(0, 1000));
+    }
+    renderHistory();
+  } catch(e) {
+    alert(`Unpublish failed: ${e.message}`);
+  }
+}
+
+async function importFromWordPress() {
+  if (!wpConfig) {
+    alert('Configure and save your WordPress connection in Settings first.');
+    return;
+  }
+  const statusEl = document.getElementById('s-wp-import-status');
+  statusEl.textContent = 'Fetching…';
+  statusEl.style.color = 'var(--amber)';
+
+  try {
+    const res = await fetch(wpBase() + '/entries', {
+      headers: { 'Authorization': wpAuthHeader() },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const wpEntries = await res.json();
+
+    let imported = 0; // brand-new entries pulled from WP
+    let linked   = 0; // already local but wpPostId was missing — now linked
+    let skipped  = 0; // already fully in sync
+
+    const toAdd = [];
+
+    for (const e of wpEntries) {
+      const key   = e.cratedig_id;
+      const local = key ? history.find(h => h.requestedAt === key) : null;
+
+      if (local) {
+        // Already present locally — just wire up wpPostId if it's missing
+        if (!local.wpPostId && e.id) { local.wpPostId = e.id; linked++; }
+        else skipped++;
+        continue;
+      }
+
+      // Try to recover the Discogs release ID: first from stored discogs_url,
+      // then by artist+title match in the local collection (case-insensitive).
+      let discogsId = null;
+      if (e.discogs_url) {
+        const m = String(e.discogs_url).match(/\/release\/(\d+)/);
+        if (m) discogsId = parseInt(m[1], 10);
+      }
+      if (!discogsId) {
+        const needle = (s) => (s || '').toLowerCase().trim();
+        const collMatch = collection.find(r =>
+          needle(r.artist) === needle(e.artist) && needle(r.title) === needle(e.title)
+        );
+        discogsId = collMatch?.id ?? null;
+      }
+
+      // Normalise pickedDate to YYYY-MM-DD (WP may store an ISO timestamp)
+      let pickedDate = '';
+      if (e.pick_date) {
+        pickedDate = /^\d{4}-\d{2}-\d{2}$/.test(e.pick_date)
+          ? e.pick_date
+          : e.pick_date.slice(0, 10);
+      }
+
+      toAdd.push({
+        id:          discogsId,   // Discogs release ID (recovered from URL or collection)
+        title:       e.title             ?? '',
+        artist:      e.artist            ?? '',
+        year:        e.year              ?? '',
+        genres:      Array.isArray(e.genres) ? e.genres : [],
+        styles:      Array.isArray(e.styles) ? e.styles : [],
+        label:       e.label             ?? '',
+        country:     e.country           ?? '',
+        rating:      collMatch?.rating    ?? null,
+        tracklist:   collMatch?.tracklist ?? [],
+        imgDataUrl:  e.artwork_url        ?? '',
+        requestedAt: key || new Date().toISOString(),
+        source:      e.source             ?? 'daily',
+        pickedDate,
+        note:        e.note               ?? '',
+        wpPostId:    e.id,
+      });
+      imported++;
+    }
+
+    if (toAdd.length || linked) {
+      history = [...history, ...toAdd]
+        .sort((a, b) => {
+          const da = (a.pickedDate || a.requestedAt || '').slice(0, 10);
+          const db = (b.pickedDate || b.requestedAt || '').slice(0, 10);
+          return db.localeCompare(da); // newest first
+        });
+      saveJSON(STORAGE.HISTORY, history.slice(0, 1000));
+      renderSettings();
+    }
+
+    const parts = [];
+    if (imported) parts.push(`${imported} imported`);
+    if (linked)   parts.push(`${linked} linked`);
+    if (skipped)  parts.push(`${skipped} already local`);
+    statusEl.textContent = '✓ ' + (parts.join(', ') || 'Nothing to import');
+    statusEl.style.color = 'var(--green)';
+
+  } catch(err) {
+    statusEl.textContent = '✗ ' + err.message;
+    statusEl.style.color = 'var(--red)';
+  }
+}
+
+async function refreshCollection() {
+  if (!creds) return;
+  setTodayContent(`<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">Syncing collection…</div></div>`);
+  showView('today');
+  try {
+    const releases = await fetchFullCollection(creds.username, creds.token);
+    collection = releases;
+    meta = { username: creds.username, cachedAt: new Date().toISOString(), totalItems: releases.length };
+    saveJSON(STORAGE.COLLECTION, collection);
+    saveJSON(STORAGE.META, meta);
+    updateStatusBar();
+    await pickAlbum();
+  } catch(e) {
+    setTodayContent(`<div class="error-box">${esc(e.message)}</div>`);
+  }
+}
+
+function resetAll() {
+  if (!confirm('Disconnect and clear all local data?')) return;
+  Object.values(STORAGE).forEach(k => localStorage.removeItem(k));
+  location.reload();
+}
+
+// ── EXPORT & ARCHIVE ──
+
+function exportHistory() {
+  const yr = document.getElementById('export-year-select')?.value;
+  if (!yr) { alert('Please select a year to export.'); return; }
+
+  const picks = history.filter(h => {
+    const dateStr = h.pickedDate || h.requestedAt || '';
+    return dateStr.slice(0, 4) === yr;
+  });
+
+  if (!picks.length) { alert(`No history entries found for ${yr}.`); return; }
+
+  const payload = {
+    exported: new Date().toISOString(),
+    year: yr,
+    count: picks.length,
+    picks,
+  };
+
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  const exportDate = new Date().toISOString().slice(0, 10);
+  a.download = `cratedig-history-${yr}-${exportDate}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function loadArchive(evt) {
+  const file = evt.target.files?.[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!Array.isArray(data.picks)) throw new Error('Invalid archive format');
+      archiveData   = data;
+      archiveFilter = 'all';
+      // Reset filter buttons
+      ['all','daily','user'].forEach(f => {
+        const btn = document.getElementById('af-' + f);
+        if (btn) btn.classList.toggle('amber', f === 'all');
+      });
+      // Show archive button and navigate there
+      const archBtn = document.getElementById('nav-archive');
+      if (archBtn) archBtn.style.display = '';
+      showView('archive');
+    } catch(err) {
+      alert('Could not load archive: ' + err.message);
+    }
+    evt.target.value = ''; // reset so same file can be reloaded
+  };
+  reader.readAsText(file);
+}
+
+function closeArchive() {
+  archiveData = null;
+  const archBtn = document.getElementById('nav-archive');
+  if (archBtn) { archBtn.style.display = 'none'; archBtn.classList.remove('active'); }
+  showView('history');
+}
+
+function setArchiveFilter(filter) {
+  archiveFilter = filter;
+  ['all','daily','user'].forEach(f => {
+    const btn = document.getElementById('af-' + f);
+    if (btn) btn.classList.toggle('amber', f === filter);
+  });
+  renderArchive();
+}
+
+function renderArchive() {
+  const metaEl = document.getElementById('archive-meta');
+  const gridEl = document.getElementById('archive-grid');
+  if (!archiveData) {
+    if (metaEl) metaEl.textContent = 'No file loaded';
+    if (gridEl) gridEl.innerHTML = `<div class="archive-empty">Load an exported archive file from Settings to browse it here.</div>`;
+    return;
+  }
+
+  const { year, count, exported, picks } = archiveData;
+  const exportedFmt = exported ? new Date(exported).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+  if (metaEl) metaEl.textContent = `${year} · ${count} pick${count === 1 ? '' : 's'}${exportedFmt ? ' · exported ' + exportedFmt : ''}`;
+
+  const filtered = archiveFilter === 'all'
+    ? picks
+    : picks.filter(h => (h.source || 'daily') === archiveFilter);
+
+  if (!filtered.length) {
+    gridEl.innerHTML = `<div class="archive-empty">No picks match the selected filter.</div>`;
+    return;
+  }
+
+  // Reuse the same card renderer as history (read-only: no remove/edit/publish controls)
+  gridEl.innerHTML = `<div class="history-grid">${filtered.map(h => {
+    const artHtml = h.imgDataUrl
+      ? `<img src="${esc(h.imgDataUrl)}" alt="${esc(h.artist)} – ${esc(h.title)}" loading="lazy">`
+      : vinylSVG(80);
+    const source      = h.source || 'daily';
+    const sourceLabel = source === 'daily' ? '🎵 Daily Pick' : '♥ My Pick';
+    const dateFmt     = h.pickedDate ? fmtPickedDate(h.pickedDate)
+                       : h.requestedAt ? fmtPickedDate(h.requestedAt) : '';
+    const tags = [...(h.genres || []), ...(h.styles || [])].slice(0, 3);
+    const artWrap = h.id
+      ? `<a class="hist-art-link" href="https://www.discogs.com/release/${h.id}" target="_blank" rel="noopener noreferrer" title="View on Discogs"><div class="hist-art">${artHtml}</div></a>`
+      : `<div class="hist-art-nolink"><div class="hist-art">${artHtml}</div></div>`;
+
+    return `
+      <div class="hist-card">
+        ${artWrap}
+        <div class="hist-info">
+          <div class="hist-artist">${esc(h.artist)}</div>
+          <div class="hist-title">${esc(h.title)}${h.year ? ` (${h.year})` : ''}</div>
+          <div class="hist-footer">
+            <span class="hist-source ${esc(source)}">${esc(sourceLabel)}</span>
+          </div>
+          ${tags.length ? `<div class="hist-tags">${tags.map(t => `<span class="hist-tag">${esc(t)}</span>`).join('')}</div>` : ''}
+          ${dateFmt ? `<div class="hist-picked-on">Picked on: ${esc(dateFmt)}</div>` : ''}
+          ${h.note ? `<div class="hist-note-ro" style="font-style:italic;color:var(--muted);font-size:0.8rem;margin-top:6px;line-height:1.5;">${esc(h.note)}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('')}</div>`;
+}
+
+// ── COLLECTION VALUE ──
+
+async function captureCollectionValue() {
+  if (!creds) { alert('Connect your Discogs account in Settings first.'); return; }
+
+  // Same-day guard
+  const today = new Date().toISOString().slice(0, 10);
+  const last  = valueHistory.length ? valueHistory[valueHistory.length - 1] : null;
+  if (last && last.capturedAt.slice(0, 10) === today) {
+    const lastMed = fmtCurrency(last.median, last.currency);
+    if (!confirm(`You already captured today's value (${lastMed} median).\n\nCapture again to overwrite?`)) return;
+    // Remove today's existing entry before adding the fresh one
+    valueHistory = valueHistory.filter(v => v.capturedAt.slice(0, 10) !== today);
+  }
+
+  const btn = document.getElementById('values-capture-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Capturing…'; }
+
+  try {
+    const res = await fetch(
+      `https://api.discogs.com/users/${encodeURIComponent(creds.username)}/collection/value`,
+      { headers: { 'Authorization': `Discogs token=${creds.token}`, 'User-Agent': 'CrateDig/1.0' } }
+    );
+    if (res.status === 401) throw new Error('Invalid token — check your Discogs credentials in Settings.');
+    if (res.status === 404) throw new Error('User not found — check your Discogs username in Settings.');
+    if (!res.ok) throw new Error(`Discogs returned ${res.status}`);
+    const data = await res.json();
+
+    // Discogs returns plain numeric strings e.g. "1234.56"
+    const parseVal = s => parseFloat(String(s ?? '0').replace(/[^0-9.]/g, '')) || 0;
+
+    const snapshot = {
+      capturedAt: new Date().toISOString(),
+      minimum:    parseVal(data.minimum),
+      median:     parseVal(data.median),
+      maximum:    parseVal(data.maximum),
+      currency:   'USD',  // Discogs respects the user's profile currency but doesn't return the code here
+    };
+
+    valueHistory.push(snapshot);
+    saveJSON(STORAGE.VALUES, valueHistory);
+    valuePage = 1;
+    renderValues();
+  } catch(e) {
+    alert('Could not capture collection value:\n' + e.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '📸 Capture Value Now'; }
+  }
+}
+
+function renderValues() {
+  const last = valueHistory.length ? valueHistory[valueHistory.length - 1] : null;
+
+  // Subtitle
+  const lastEl = document.getElementById('values-last-capture');
+  if (lastEl) {
+    lastEl.textContent = last
+      ? `Last captured: ${fmtDate(last.capturedAt)} · ${fmtCurrency(last.median, last.currency)} median`
+      : 'No captures yet — click the button above to take your first snapshot.';
+  }
+
+  // Stats strip
+  const statsEl = document.getElementById('values-stats');
+  if (statsEl) {
+    if (!valueHistory.length) {
+      statsEl.innerHTML = '';
+    } else {
+      const currency  = last.currency || 'USD';
+      const allMedian = valueHistory.map(d => d.median);
+      const allMax    = valueHistory.map(d => d.maximum);
+      const allMin    = valueHistory.map(d => d.minimum);
+      statsEl.innerHTML = `
+        <div class="values-stat">
+          <div class="values-stat-label">Current Median</div>
+          <div class="values-stat-value med">${fmtCurrency(last.median, currency)}</div>
+        </div>
+        <div class="values-stat">
+          <div class="values-stat-label">All-Time High</div>
+          <div class="values-stat-value hi">${fmtCurrency(Math.max(...allMax), currency)}</div>
+        </div>
+        <div class="values-stat">
+          <div class="values-stat-label">All-Time Low</div>
+          <div class="values-stat-value lo">${fmtCurrency(Math.min(...allMin), currency)}</div>
+        </div>
+        <div class="values-stat">
+          <div class="values-stat-label">Captures</div>
+          <div class="values-stat-value">${valueHistory.length}</div>
+        </div>
+      `;
+    }
+  }
+
+  // ── Span filter buttons ──
+  const spanBtnsEl = document.getElementById('values-span-btns');
+  if (spanBtnsEl) {
+    if (valueHistory.length < 2) {
+      spanBtnsEl.style.display = 'none';
+    } else {
+      spanBtnsEl.style.display = '';
+      const spanDefs = [
+        { key: '3M',  label: '3 Months' },
+        { key: '6M',  label: '6 Months' },
+        { key: '1Y',  label: '1 Year'   },
+        { key: '2Y',  label: '2 Years'  },
+        { key: 'ALL', label: 'All Time' },
+      ];
+      spanBtnsEl.innerHTML = `
+        <span class="values-span-label">View</span>
+        <div class="history-filters">
+          ${spanDefs.map(s => `
+            <button class="btn-sm ${valueChartSpan === s.key ? 'amber' : ''}"
+              onclick="setValueSpan('${s.key}')">${s.label}</button>
+          `).join('')}
+        </div>`;
+    }
+  }
+
+  // ── Chart ──
+  const chartEl  = document.getElementById('values-chart');
+  const legendEl = document.getElementById('values-chart-legend');
+  if (chartEl) {
+    const chartData = getChartDataBySpan(valueHistory);
+    if (chartData.length < 2) {
+      chartEl.innerHTML = `<div class="values-empty">${
+        valueHistory.length === 0
+          ? 'No captures yet — click <strong style="color:var(--cream)">Capture Value Now</strong> to record your first snapshot.'
+          : chartData.length === 0
+            ? 'No captures in this time period. Try a wider span or switch to All Time.'
+            : 'Only one capture in this period. Capture again or try a wider span to see the trend.'
+      }</div>`;
+      if (legendEl) legendEl.style.display = 'none';
+    } else {
+      chartEl.innerHTML = buildValueChart(chartData);
+      if (legendEl) legendEl.style.display = '';
+      initChartHover(chartData);
+    }
+  }
+
+  // ── Log table (all captures, paginated) ──
+  const logEl = document.getElementById('values-log');
+  if (logEl) {
+    if (!valueHistory.length) {
+      logEl.style.display = 'none';
+    } else {
+      const currency     = last.currency || 'USD';
+      const reversed     = [...valueHistory].reverse();
+      const totalPages   = Math.max(1, Math.ceil(reversed.length / VALUE_PAGE_SIZE));
+      // Clamp page to valid range (data may have shrunk)
+      valuePage          = Math.max(1, Math.min(valuePage, totalPages));
+      const pageStart    = (valuePage - 1) * VALUE_PAGE_SIZE;
+      const pageEnd      = pageStart + VALUE_PAGE_SIZE;
+      const pageEntries  = reversed.slice(pageStart, pageEnd);
+
+      logEl.style.display = '';
+
+      const entriesHtml = pageEntries.map(d => {
+        const isEditing = activeValueEdit === d.capturedAt;
+        const safeId    = 've-' + d.capturedAt.replace(/[:.]/g, '_');
+
+        const noteArea = isEditing
+          ? `<div class="values-note-area">
+               <textarea class="values-note-input" id="${safeId}"
+                 rows="2" placeholder="Why did the value change? e.g. Added 5 jazz records…">${esc(d.note ?? '')}</textarea>
+               <div class="values-note-save-row">
+                 <button class="hist-edit-action"
+                   onclick="saveValueNote('${d.capturedAt}', document.getElementById('${safeId}').value)">Save</button>
+                 <button class="hist-edit-action" onclick="cancelValueNoteEdit()">Cancel</button>
+               </div>
+             </div>`
+          : d.note
+            ? `<div class="values-note-area">
+                 <div class="values-note-text">
+                   ${esc(d.note)}
+                   <button class="values-note-edit-btn"
+                     onclick="startValueNoteEdit('${d.capturedAt}')" title="Edit note">✎</button>
+                 </div>
+               </div>`
+            : `<div class="values-note-area">
+                 <button class="values-note-add"
+                   onclick="startValueNoteEdit('${d.capturedAt}')">+ add note</button>
+               </div>`;
+
+        return `
+          <div class="values-log-entry">
+            <div class="values-log-row">
+              <span>${fmtDate(d.capturedAt)}</span>
+              <span class="vl-min" style="color:var(--red)">${fmtCurrency(d.minimum, currency)}</span>
+              <span style="color:var(--amber)">${fmtCurrency(d.median, currency)}</span>
+              <span style="color:var(--green)">${fmtCurrency(d.maximum, currency)}</span>
+              <button class="values-del-btn" onclick="deleteValueCapture('${d.capturedAt}')"
+                title="Delete this capture">×</button>
+            </div>
+            ${noteArea}
+          </div>`;
+      }).join('');
+
+      // Pagination controls (only when needed)
+      const paginationHtml = totalPages > 1 ? `
+        <div class="values-log-pagination">
+          <button class="btn-sm" onclick="setValuePage(${valuePage - 1})" ${valuePage === 1 ? 'disabled' : ''}>‹ Prev</button>
+          <span class="values-page-info">
+            ${pageStart + 1}–${Math.min(pageEnd, reversed.length)} of ${reversed.length} captures
+            &nbsp;·&nbsp; page ${valuePage} of ${totalPages}
+          </span>
+          <button class="btn-sm" onclick="setValuePage(${valuePage + 1})" ${valuePage === totalPages ? 'disabled' : ''}>Next ›</button>
+        </div>` : '';
+
+      logEl.innerHTML = `
+        <div class="values-log-title">Capture Log</div>
+        <div class="values-log-row col-head">
+          <span>Date &amp; Time</span>
+          <span class="vl-min">Min</span>
+          <span>Median</span>
+          <span>Max</span>
+          <span></span>
+        </div>
+        ${entriesHtml}
+        ${paginationHtml}
+      `;
+
+      // Auto-focus the textarea if we just opened an edit
+      if (activeValueEdit) {
+        const safeId = 've-' + activeValueEdit.replace(/[:.]/g, '_');
+        const ta = document.getElementById(safeId);
+        if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+      }
+    }
+  }
+}
+
+function buildValueChart(data) {
+  const W = 700, H = 210;
+  const PAD = { top: 16, right: 20, bottom: 36, left: 72 };
+  const cW  = W - PAD.left - PAD.right;
+  const cH  = H - PAD.top  - PAD.bottom;
+
+  const allVals = data.flatMap(d => [d.minimum, d.median, d.maximum]);
+  const rawMin  = Math.min(...allVals);
+  const rawMax  = Math.max(...allVals);
+  // Pad the Y range slightly so dots aren't clipped
+  const pad     = (rawMax - rawMin) * 0.08 || rawMax * 0.1 || 10;
+  const yMin    = rawMin - pad;
+  const yMax    = rawMax + pad;
+  const yRange  = yMax - yMin;
+
+  const toY = v => PAD.top + cH - ((v - yMin) / yRange) * cH;
+  const toX = i => PAD.left + (data.length > 1 ? (i / (data.length - 1)) * cW : cW / 2);
+
+  // Y grid ticks (4 lines)
+  const ticks  = 4;
+  const gridLines = Array.from({ length: ticks + 1 }, (_, i) => {
+    const v  = yMin + (yRange * i / ticks);
+    const y  = toY(v);
+    const lbl = fmtCurrency(v, data[0]?.currency || 'USD');
+    return `
+      <line x1="${PAD.left}" y1="${y}" x2="${W - PAD.right}" y2="${y}"
+            stroke="${i === 0 ? '#3a3530' : '#2a2825'}" stroke-width="1" ${i > 0 ? 'stroke-dasharray="4,4"' : ''}/>
+      <text x="${PAD.left - 8}" y="${y + 4}" fill="#7a7368" font-size="11" text-anchor="end" font-family="monospace">${lbl}</text>
+    `;
+  }).join('');
+
+  // X labels: show up to 7 evenly spaced, always include first and last
+  const xLabels = data.map((d, i) => {
+    const step = Math.max(1, Math.ceil((data.length - 1) / 6));
+    if (i === 0 || i === data.length - 1 || i % step === 0) {
+      const dt  = new Date(d.capturedAt);
+      const lbl = dt.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      return `<text x="${toX(i)}" y="${H - 6}" fill="#7a7368" font-size="10" text-anchor="middle" font-family="monospace">${lbl}</text>`;
+    }
+    return '';
+  }).join('');
+
+  // Polyline point strings
+  const maxPts = data.map((d, i) => `${toX(i)},${toY(d.maximum)}`).join(' ');
+  const medPts = data.map((d, i) => `${toX(i)},${toY(d.median)}`).join(' ');
+  const minPts = data.map((d, i) => `${toX(i)},${toY(d.minimum)}`).join(' ');
+
+  // Dots
+  const dots = data.map((d, i) => {
+    const isLast = i === data.length - 1;
+    return `
+      <circle cx="${toX(i)}" cy="${toY(d.maximum)}" r="${isLast ? 4 : 3}"   fill="#4a8c5c" ${isLast ? 'stroke="#161410" stroke-width="1.5"' : ''}/>
+      <circle cx="${toX(i)}" cy="${toY(d.median)}"  r="${isLast ? 4.5 : 3.5}" fill="#c8922a" ${isLast ? 'stroke="#161410" stroke-width="1.5"' : ''}/>
+      <circle cx="${toX(i)}" cy="${toY(d.minimum)}" r="${isLast ? 4 : 3}"   fill="#b84040" ${isLast ? 'stroke="#161410" stroke-width="1.5"' : ''}/>
+    `;
+  }).join('');
+
+  // Store point data for hover (as serialized JSON on the SVG element)
+  const pointData = JSON.stringify(data.map((d, i) => ({
+    x: toX(i), yMax: toY(d.maximum), yMed: toY(d.median), yMin: toY(d.minimum), d,
+  })));
+
+  return `
+    <svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"
+         id="value-chart-svg" style="width:100%;display:block;overflow:visible;"
+         data-pts='${pointData.replace(/'/g, '&#39;')}'>
+      <!-- Grid -->
+      ${gridLines}
+      <line x1="${PAD.left}" y1="${PAD.top}" x2="${PAD.left}" y2="${H - PAD.bottom}" stroke="#3a3530" stroke-width="1"/>
+      <!-- X labels -->
+      ${xLabels}
+      <!-- Hairline (shown on hover) -->
+      <line id="chart-hairline" x1="0" y1="${PAD.top}" x2="0" y2="${H - PAD.bottom}"
+            stroke="#7a7368" stroke-width="1" stroke-dasharray="3,3" opacity="0"/>
+      <!-- Max line (green dashed) -->
+      <polyline points="${maxPts}" fill="none" stroke="#4a8c5c" stroke-width="2"
+                stroke-dasharray="6,3" stroke-linejoin="round" stroke-linecap="round"/>
+      <!-- Median line (amber solid, thicker) -->
+      <polyline points="${medPts}" fill="none" stroke="#c8922a" stroke-width="2.5"
+                stroke-linejoin="round" stroke-linecap="round"/>
+      <!-- Min line (red dashed) -->
+      <polyline points="${minPts}" fill="none" stroke="#b84040" stroke-width="2"
+                stroke-dasharray="6,3" stroke-linejoin="round" stroke-linecap="round"/>
+      <!-- Dots -->
+      ${dots}
+      <!-- Invisible hover overlay -->
+      <rect id="chart-hover-rect" x="${PAD.left}" y="${PAD.top}" width="${cW}" height="${cH}"
+            fill="transparent" style="cursor:crosshair;"/>
+    </svg>`;
+}
+
+function initChartHover(data) {
+  const svg     = document.getElementById('value-chart-svg');
+  const rect    = document.getElementById('chart-hover-rect');
+  const hairline= document.getElementById('chart-hairline');
+  const tooltip = document.getElementById('chart-tooltip');
+  const wrap    = document.getElementById('values-chart-wrap');
+  if (!svg || !rect || !tooltip || !wrap) return;
+
+  const pts = JSON.parse(svg.dataset.pts || '[]');
+
+  rect.addEventListener('mousemove', e => {
+    const svgRect  = svg.getBoundingClientRect();
+    const scaleX   = 700 / svgRect.width;   // viewBox width = 700
+    const mouseX   = (e.clientX - svgRect.left) * scaleX;
+
+    // Nearest point
+    let nearest = null, minDist = Infinity;
+    pts.forEach(p => {
+      const dist = Math.abs(p.x - mouseX);
+      if (dist < minDist) { minDist = dist; nearest = p; }
+    });
+    if (!nearest) return;
+
+    // Move hairline
+    if (hairline) {
+      hairline.setAttribute('x1', nearest.x);
+      hairline.setAttribute('x2', nearest.x);
+      hairline.setAttribute('opacity', '0.6');
+    }
+
+    // Build tooltip content
+    const d        = nearest.d;
+    const currency = d.currency || 'USD';
+    const dateStr  = new Date(d.capturedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+    // Look up the live note (user may have added it after chart was built)
+    const liveEntry = valueHistory.find(v => v.capturedAt === d.capturedAt);
+    const note      = liveEntry?.note ?? d.note ?? '';
+    tooltip.innerHTML = `
+      <div class="chart-tooltip-date">${dateStr}</div>
+      <div class="chart-tooltip-row">
+        <div class="chart-tooltip-dot" style="background:#4a8c5c"></div>
+        <span class="chart-tooltip-lbl">Max</span>
+        <span class="chart-tooltip-val">${fmtCurrency(d.maximum, currency)}</span>
+      </div>
+      <div class="chart-tooltip-row">
+        <div class="chart-tooltip-dot" style="background:#c8922a"></div>
+        <span class="chart-tooltip-lbl">Med</span>
+        <span class="chart-tooltip-val">${fmtCurrency(d.median, currency)}</span>
+      </div>
+      <div class="chart-tooltip-row">
+        <div class="chart-tooltip-dot" style="background:#b84040"></div>
+        <span class="chart-tooltip-lbl">Min</span>
+        <span class="chart-tooltip-val">${fmtCurrency(d.minimum, currency)}</span>
+      </div>
+      ${note ? `<div style="margin-top:8px; padding-top:8px; border-top:1px solid #3a3530;
+                             font-style:italic; color:var(--muted); font-size:0.7rem;
+                             max-width:200px; line-height:1.5; white-space:normal;">${esc(note)}</div>` : ''}
+    `;
+
+    // Position tooltip relative to the chart-wrap
+    const wrapRect  = wrap.getBoundingClientRect();
+    const screenX   = svgRect.left + (nearest.x / 700) * svgRect.width - wrapRect.left;
+    const screenY   = e.clientY - wrapRect.top;
+    // When there's a note, allow more width for wrapping text
+    const tipW      = note ? 210 : 165;
+    tooltip.style.maxWidth = note ? '220px' : '';
+    let   left      = screenX + 14;
+    if (left + tipW > wrapRect.width - 8) left = screenX - tipW - 14;
+    tooltip.style.left = Math.max(4, left) + 'px';
+    tooltip.style.top  = Math.max(4, screenY - 30) + 'px';
+    tooltip.classList.add('visible');
+  });
+
+  rect.addEventListener('mouseleave', () => {
+    tooltip.classList.remove('visible');
+    if (hairline) hairline.setAttribute('opacity', '0');
+  });
+}
+
+// ── VALUE HISTORY MANAGEMENT ──
+
+function setValueSpan(span) {
+  valueChartSpan = span;
+  renderValues();
+}
+
+function setValuePage(page) {
+  const total = Math.max(1, Math.ceil(valueHistory.length / VALUE_PAGE_SIZE));
+  valuePage = Math.max(1, Math.min(page, total));
+  renderValues();
+  // Scroll the log into view smoothly
+  document.getElementById('values-log')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function getChartDataBySpan(data) {
+  if (valueChartSpan === 'ALL' || !data.length) return data;
+  const months  = { '3M': 3, '6M': 6, '1Y': 12, '2Y': 24 }[valueChartSpan] ?? 12;
+  const cutoff  = new Date();
+  cutoff.setMonth(cutoff.getMonth() - months);
+  return data.filter(d => new Date(d.capturedAt) >= cutoff);
+}
+
+function startValueNoteEdit(capturedAt) {
+  activeValueEdit = capturedAt;
+  renderValues();
+}
+
+function saveValueNote(capturedAt, text) {
+  const idx = valueHistory.findIndex(v => v.capturedAt === capturedAt);
+  if (idx >= 0) {
+    valueHistory[idx].note = text.trim();
+    saveJSON(STORAGE.VALUES, valueHistory);
+  }
+  activeValueEdit = null;
+  renderValues();
+}
+
+function cancelValueNoteEdit() {
+  activeValueEdit = null;
+  renderValues();
+}
+
+function deleteValueCapture(capturedAt) {
+  if (!confirm('Delete this capture? This cannot be undone.')) return;
+  valueHistory = valueHistory.filter(v => v.capturedAt !== capturedAt);
+  saveJSON(STORAGE.VALUES, valueHistory);
+  renderValues();
+}
+
+function exportValueHistory() {
+  if (!valueHistory.length) { alert('No value history to export.'); return; }
+  const payload = {
+    exported:  new Date().toISOString(),
+    count:     valueHistory.length,
+    snapshots: valueHistory,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  const valExportDate = new Date().toISOString().slice(0, 10);
+  a.download = `cratedig-values-${valExportDate}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function clearValueHistory() {
+  if (!valueHistory.length) return;
+  if (!confirm(`Clear all ${valueHistory.length} value capture${valueHistory.length === 1 ? '' : 's'}? This cannot be undone.`)) return;
+  valueHistory = [];
+  saveJSON(STORAGE.VALUES, valueHistory);
+  renderSettings();
+  renderValues();
+}
+
+// ── VALUE CSV IMPORT ──
+
+function loadValueCSV(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  event.target.value = ''; // reset so same file can be re-selected
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const text  = e.target.result.trim();
+      const lines = text.split(/\r?\n/).filter(l => l.trim());
+      if (!lines.length) throw new Error('File is empty.');
+
+      // ── Detect headers ──
+      // Strip BOM that Excel sometimes prepends to the first byte
+      const firstLine = lines[0].replace(/^﻿/, '');
+      const rawHeader = firstLine.split(',').map(h =>
+        h.trim().replace(/^["']|["']$/g, '').toLowerCase()
+      );
+
+      // Two-pass column finder:
+      //   1. Exact match against any of the candidate names
+      //   2. Partial match — header contains any candidate name as a substring
+      const findCol = (...names) => {
+        let idx = rawHeader.findIndex(h => names.includes(h));
+        if (idx >= 0) return idx;
+        idx = rawHeader.findIndex(h => names.some(n => h.includes(n)));
+        return idx;
+      };
+
+      let hDate = findCol('date');
+      let hMin  = findCol('low', 'min', 'minimum');
+      let hMed  = findCol('median', 'med', 'average', 'avg', 'value');
+      let hMax  = findCol('high', 'max', 'maximum');
+
+      // Treat row 0 as a header row only when we can identify at least date + one value column
+      const hasHeaders = hDate >= 0 && (hMed >= 0 || hMin >= 0 || hMax >= 0);
+
+      // Start with header-detected or positional indices
+      let iDate = hasHeaders ? hDate : 0;
+      let iMed  = hasHeaders ? (hMed >= 0 ? hMed : -1) : 2;
+      let iMin  = hasHeaders ? hMin  : 1;
+      let iMax  = hasHeaders ? hMax  : 3;
+
+      // Positional fallback: if headers were found but min/max/median weren't all identified,
+      // assign the leftover column positions in order to fill any gaps.
+      if (hasHeaders && (iMin < 0 || iMed < 0 || iMax < 0)) {
+        const used      = new Set([iDate, iMin, iMed, iMax].filter(i => i >= 0));
+        const remaining = rawHeader.map((_, i) => i).filter(i => !used.has(i));
+        // Assign from smallest index (low) to largest (high) for any missing slots
+        if (iMin < 0 && remaining.length) { iMin = remaining.shift(); }
+        if (iMed < 0 && remaining.length) { iMed = remaining.shift(); }
+        if (iMax < 0 && remaining.length) { iMax = remaining.pop() ?? remaining.shift(); }
+      }
+
+      const dataStart = hasHeaders ? 1 : 0;
+
+      const rows   = [];
+      const errors = [];
+
+      for (let i = dataStart; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+
+        const cols = parseCSVLine(line);
+
+        const capturedAt = parseCSVDate(cols[iDate]);
+        const minimum    = iMin >= 0 ? parseCSVNumber(cols[iMin]) : null;
+        const median     = iMed >= 0 ? parseCSVNumber(cols[iMed]) : null;
+        const maximum    = iMax >= 0 ? parseCSVNumber(cols[iMax]) : null;
+
+        if (!capturedAt) {
+          errors.push(`Row ${i + 1}: unrecognised date "${(cols[iDate] ?? '').slice(0, 20)}"`);
+          continue;
+        }
+        // Require at least one numeric value; use it to fill any missing slots
+        const anyVal = median ?? minimum ?? maximum;
+        if (anyVal === null) {
+          errors.push(`Row ${i + 1}: no numeric values found`);
+          continue;
+        }
+
+        rows.push({
+          capturedAt,
+          minimum:  minimum  ?? anyVal,
+          median:   median   ?? anyVal,
+          maximum:  maximum  ?? anyVal,
+          currency: 'USD',
+        });
+      }
+
+      if (!rows.length) {
+        const colMap = `Detected columns → date:${iDate} low:${iMin} median:${iMed} high:${iMax}`;
+        const detail = errors.length
+          ? '\n\n' + errors.slice(0, 5).join('\n') + '\n\n' + colMap
+          : '\n\nCould not find numeric data. ' + colMap;
+        throw new Error('No valid rows found.' + detail);
+      }
+
+      // Count duplicates by calendar date
+      const existingDates = new Set(valueHistory.map(v => v.capturedAt.slice(0, 10)));
+      const dupeCount     = rows.filter(r => existingDates.has(r.capturedAt.slice(0, 10))).length;
+
+      pendingImport = { rows, dupeCount, errors };
+
+      // Navigate to Values view so the preview is visible
+      showView('values');
+      renderValueImportPreview();
+
+    } catch(err) {
+      alert('Could not parse CSV:\n\n' + err.message);
+    }
+  };
+  reader.readAsText(file);
+}
+
+// Splits one CSV line respecting double-quoted fields
+function parseCSVLine(line) {
+  const cols = [];
+  let cur = '', inQuote = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') { inQuote = !inQuote; continue; }
+    if (ch === ',' && !inQuote) { cols.push(cur.trim()); cur = ''; continue; }
+    cur += ch;
+  }
+  cols.push(cur.trim());
+  return cols;
+}
+
+// Parses many common date string formats → ISO "YYYY-MM-DDT12:00:00.000Z"
+// Noon UTC is used so no timezone can roll the day forwards or backwards.
+function parseCSVDate(str) {
+  str = (str ?? '').trim().replace(/^["']|["']$/g, '');
+  if (!str) return null;
+
+  // YYYY-MM-DD
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) return str + 'T12:00:00.000Z';
+
+  // MM/DD/YYYY or M/D/YYYY
+  const mdy = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (mdy) {
+    const [, m, d, y] = mdy;
+    return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}T12:00:00.000Z`;
+  }
+
+  // DD-MM-YYYY or D-M-YYYY
+  const dmy = str.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if (dmy) {
+    const [, d, m, y] = dmy;
+    return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}T12:00:00.000Z`;
+  }
+
+  // Fall back to native Date parse (handles "Jan 5, 2024", "5 January 2024", etc.)
+  const parsed = new Date(str);
+  if (!isNaN(parsed)) {
+    // Extract parts in UTC to stay consistent with the noon-UTC approach
+    const y = parsed.getUTCFullYear();
+    const m = String(parsed.getUTCMonth() + 1).padStart(2, '0');
+    const d = String(parsed.getUTCDate()).padStart(2, '0');
+    return `${y}-${m}-${d}T12:00:00.000Z`;
+  }
+
+  return null;
+}
+
+// Strips $, commas, and whitespace then parses to float
+function parseCSVNumber(str) {
+  const n = parseFloat(String(str ?? '').replace(/[$,\s]/g, ''));
+  return isNaN(n) ? null : n;
+}
+
+function renderValueImportPreview() {
+  const el = document.getElementById('values-import-preview');
+  if (!el) return;
+  if (!pendingImport) { el.style.display = 'none'; return; }
+
+  const { rows, dupeCount, errors } = pendingImport;
+  const preview  = rows.slice(0, 5);
+  const currency = 'USD';
+
+  const errHtml = errors.length ? `
+    <div class="values-import-err-notice">
+      ⚠ ${errors.length} row${errors.length === 1 ? '' : 's'} could not be parsed and will be skipped:<br>
+      ${errors.slice(0, 3).map(esc).join('<br>')}
+      ${errors.length > 3 ? `<br>… and ${errors.length - 3} more` : ''}
+    </div>` : '';
+
+  const dupeHtml = dupeCount ? `
+    <div class="values-import-dupe-notice">
+      ⚠ ${dupeCount} date${dupeCount === 1 ? '' : 's'} already exist in your capture history.
+      Choose how to handle them below.
+    </div>` : '';
+
+  const actionHtml = dupeCount ? `
+    <button class="btn secondary" onclick="confirmValueImport('skip')">
+      ↑ Import · Skip ${dupeCount} duplicate${dupeCount === 1 ? '' : 's'}
+    </button>
+    <button class="btn secondary" onclick="confirmValueImport('overwrite')">
+      ↑ Import · Overwrite ${dupeCount} duplicate${dupeCount === 1 ? '' : 's'}
+    </button>` : `
+    <button class="btn" onclick="confirmValueImport('skip')" style="flex:2;">
+      ↑ Import ${rows.length} row${rows.length === 1 ? '' : 's'}
+    </button>`;
+
+  el.innerHTML = `
+    <div class="values-import-panel">
+      <div class="values-import-panel-header">
+        <span>Found <strong style="color:var(--cream)">${rows.length} row${rows.length === 1 ? '' : 's'}</strong> to import</span>
+        <button class="archive-close" onclick="cancelValueImport()">✕ Cancel</button>
+      </div>
+      ${errHtml}
+      <div class="values-import-table-wrap">
+        <table class="values-import-table">
+          <thead>
+            <tr><th>Date</th><th>Min</th><th>Median</th><th>Max</th></tr>
+          </thead>
+          <tbody>
+            ${preview.map(r => `
+              <tr>
+                <td>${esc(fmtDate(r.capturedAt))}</td>
+                <td style="color:var(--red)">${esc(fmtCurrency(r.minimum, currency))}</td>
+                <td style="color:var(--amber)">${esc(fmtCurrency(r.median, currency))}</td>
+                <td style="color:var(--green)">${esc(fmtCurrency(r.maximum, currency))}</td>
+              </tr>`).join('')}
+            ${rows.length > 5 ? `
+              <tr>
+                <td colspan="4" style="color:var(--muted);font-style:italic;text-align:center;">
+                  … and ${rows.length - 5} more row${rows.length - 5 === 1 ? '' : 's'}
+                </td>
+              </tr>` : ''}
+          </tbody>
+        </table>
+      </div>
+      ${dupeHtml}
+      <div class="values-import-actions">${actionHtml}</div>
+    </div>`;
+  el.style.display = '';
+}
+
+function confirmValueImport(strategy) {
+  if (!pendingImport) return;
+  const { rows } = pendingImport;
+
+  // For overwrite: remove existing entries whose date appears in the CSV
+  let overwritten = 0;
+  if (strategy === 'overwrite') {
+    const importDates = new Set(rows.map(r => r.capturedAt.slice(0, 10)));
+    const before = valueHistory.length;
+    valueHistory = valueHistory.filter(v => !importDates.has(v.capturedAt.slice(0, 10)));
+    overwritten  = before - valueHistory.length;
+  }
+
+  // Merge rows, skipping dates that still exist (handles both skip strategy and
+  // intra-CSV duplicates after overwrite removes the history ones)
+  const nowHas = new Set(valueHistory.map(v => v.capturedAt.slice(0, 10)));
+  let imported = 0, skipped = 0;
+
+  for (const row of rows) {
+    const day = row.capturedAt.slice(0, 10);
+    if (nowHas.has(day)) { skipped++; continue; }
+    valueHistory.push(row);
+    nowHas.add(day);   // prevent intra-CSV date collisions
+    imported++;
+  }
+
+  // Sort chronologically so the chart reads left-to-right
+  valueHistory.sort((a, b) => a.capturedAt.localeCompare(b.capturedAt));
+  saveJSON(STORAGE.VALUES, valueHistory);
+  valuePage = 1;
+
+  pendingImport = null;
+
+  // Flash success message in place of the preview panel
+  const el = document.getElementById('values-import-preview');
+  if (el) {
+    const parts = [];
+    if (imported)    parts.push(`${imported} imported`);
+    if (overwritten) parts.push(`${overwritten} overwritten`);
+    if (skipped)     parts.push(`${skipped} skipped`);
+    el.innerHTML = `<div class="values-import-success">✓ ${parts.join(' · ')}</div>`;
+    el.style.display = '';
+    setTimeout(() => { el.style.display = 'none'; el.innerHTML = ''; }, 4000);
+  }
+
+  renderValues();
+  renderSettings();
+}
+
+function cancelValueImport() {
+  pendingImport = null;
+  const el = document.getElementById('values-import-preview');
+  if (el) { el.style.display = 'none'; el.innerHTML = ''; }
+}
+
+// ── HELPERS ──
+function updateStatusBar() {
+  if (!meta) return;
+  document.getElementById('collection-size').textContent = meta.totalItems ?? collection.length;
+  document.getElementById('synced-date').textContent     = fmtDate(meta.cachedAt);
+}
+
+function setTodayContent(html) {
+  document.getElementById('today-content').innerHTML = html;
+}
+
+function fmtDate(iso) {
+  return new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+function fmtCurrency(amount, currency) {
+  try {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency || 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  } catch {
+    return '$' + Math.round(amount).toLocaleString();
+  }
+}
+
+function esc(str) {
+  return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function blobToDataUrl(blob) {
+  return new Promise((res, rej) => {
+    const r = new FileReader();
+    r.onload  = () => res(r.result);
+    r.onerror = rej;
+    r.readAsDataURL(blob);
+  });
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+function vinylSVG(size = 64) {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="48" stroke="#3a3530" stroke-width="2" fill="#1f1d19"/>
+    <circle cx="50" cy="50" r="38" stroke="#3a3530" stroke-width="1" fill="none"/>
+    <circle cx="50" cy="50" r="28" stroke="#3a3530" stroke-width="1" fill="none"/>
+    <circle cx="50" cy="50" r="18" stroke="#3a3530" stroke-width="1" fill="none"/>
+    <circle cx="50" cy="50" r="6" fill="#c8922a" opacity="0.6"/>
+    <circle cx="50" cy="50" r="3" fill="#0e0d0b"/>
+  </svg>`;
+}
+
+// ── BOOT ──
+init();
+</script>
+</body>
+</html>

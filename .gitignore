@@ -1,0 +1,13 @@
+.DS_Store
+Thumbs.db
+
+# UI direction prototypes (working files, not release artifacts)
+sleeve-preview.html
+log-preview.html
+press-preview.html
+chart-preview.html
+
+# Legacy files from pre-rename era
+cratedig.php
+cratedig.zip
+discogs-album-of-the-day.html
