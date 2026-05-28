@@ -1657,11 +1657,13 @@ function renderHistory() {
         <button class="press-row-btn danger" onclick="removeFromHistory('${h.requestedAt}')">Remove</button>
       </div>`;
 
-    const badge = h.wpPostId
+    const sourceBadge = source === 'user'
+      ? `<span class="press-archive-badge pick">My Pick</span>`
+      : `<span class="press-archive-badge">Daily</span>`;
+    const publishBadge = h.wpPostId
       ? `<span class="press-archive-badge published">Published</span>`
-      : (source === 'user'
-          ? `<span class="press-archive-badge pick">My Pick</span>`
-          : `<span class="press-archive-badge">Daily</span>`);
+      : '';
+    const badge = sourceBadge + publishBadge;
 
     return `
       <div class="press-archive-row">
@@ -2139,8 +2141,9 @@ async function importFromCrateDig() {
       || parseInt((e.discogs_url || '').match(/\/release\/(\d+)/)?.[1])
       || null;
 
-    // Normalize source: WP plugin may return '' or 'manual'; only trust explicit 'user'
-    const wpSource = (e.source === 'user') ? 'user' : 'daily';
+    // Normalize source: WP plugin may use 'user', 'manual', or other non-daily values.
+    // Treat anything non-empty and non-'daily' as a user pick.
+    const wpSource = (e.source && e.source !== 'daily') ? 'user' : 'daily';
 
     const mapped = {
       id:          discogsId,
@@ -2161,11 +2164,12 @@ async function importFromCrateDig() {
     };
 
     if (discogsId && idxById[String(discogsId)] !== undefined) {
-      // Upsert: update metadata from WP, but preserve the local source classification —
-      // the WP plugin may not reliably store source, and local data is authoritative.
+      // Upsert: update metadata from WP. For source, prefer WP value if it's a clear
+      // user-pick signal (non-empty, non-daily); otherwise keep the local value.
       const idx = idxById[String(discogsId)];
       const localSource = history[idx].source ?? 'daily';
-      history[idx] = Object.assign({}, history[idx], mapped, { source: localSource });
+      const finalSource = wpSource === 'user' ? 'user' : localSource;
+      history[idx] = Object.assign({}, history[idx], mapped, { source: finalSource });
       updated++;
     } else {
       // New entry: use the normalized WP source
