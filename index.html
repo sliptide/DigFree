@@ -203,6 +203,25 @@
   .press-filter { font-family: 'Space Mono', monospace; font-size: 0.78rem; letter-spacing: 0.12em; text-transform: uppercase; background: none; border: 1px solid var(--rule); color: var(--mid); padding: 9px 22px; margin-right: -1px; cursor: pointer; transition: all 0.1s; }
   .press-filter:hover { color: var(--ink); border-color: var(--ink); z-index:1; position: relative; }
   .press-filter.active { background: var(--ink); color: var(--paper); border-color: var(--ink); z-index: 1; position: relative; }
+  /* View toggle (list / grid) */
+  .press-filter-bar { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--rule); }
+  .press-filter-bar .press-filter-strip { border-bottom: none; padding-bottom: 14px; }
+  .press-view-toggle { display: flex; gap: 0; padding: 14px 0; }
+  .press-view-btn { font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; background: none; border: 1px solid var(--rule); color: var(--mid); padding: 7px 14px; margin-right: -1px; cursor: pointer; transition: all 0.1s; }
+  .press-view-btn:hover { color: var(--ink); border-color: var(--ink); z-index:1; position:relative; }
+  .press-view-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); z-index:1; position:relative; }
+  /* Art grid */
+  .press-art-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 3px; padding: 20px 0; }
+  .press-art-grid-item { aspect-ratio: 1; overflow: hidden; position: relative; background: var(--lift); cursor: pointer; }
+  .press-art-grid-item img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.25s; }
+  .press-art-grid-item:hover img { transform: scale(1.05); }
+  .press-art-grid-item .press-art-ph { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:2rem; color:var(--rule); }
+  .press-art-grid-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.82) 0%, transparent 55%); opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+  .press-art-grid-item:hover .press-art-grid-overlay { opacity: 1; }
+  .press-art-grid-label { position: absolute; bottom: 10px; left: 10px; right: 10px; color: #fff; opacity: 0; transition: opacity 0.2s; pointer-events: none; }
+  .press-art-grid-item:hover .press-art-grid-label { opacity: 1; }
+  .press-art-grid-label strong { display: block; font-family: 'Bebas Neue', sans-serif; font-size: 0.95rem; letter-spacing: 0.04em; line-height: 1.2; }
+  .press-art-grid-label span { font-family: 'Space Mono', monospace; font-size: 0.55rem; letter-spacing: 0.06em; color: rgba(255,255,255,0.7); }
   .press-archive-row { display: grid; grid-template-columns: 64px 1fr auto; gap: 0 20px; padding: 18px 0; border-bottom: 1px solid var(--rule); align-items: start; cursor: pointer; transition: background 0.1s; }
   .press-archive-row:hover { background: var(--lift); margin: 0 -14px; padding-left: 14px; padding-right: 14px; }
   .press-archive-art { width: 64px; height: 64px; flex-shrink: 0; }
@@ -500,10 +519,16 @@
       <div class="press-archive-title">The Archive</div>
       <div class="press-archive-sub" id="history-count"></div>
     </div>
-    <div class="press-filter-strip">
-      <button class="press-filter active" id="hf-all"   onclick="setHistoryFilter('all')">All</button>
-      <button class="press-filter"        id="hf-daily" onclick="setHistoryFilter('daily')">Daily</button>
-      <button class="press-filter"        id="hf-user"  onclick="setHistoryFilter('user')">My Picks</button>
+    <div class="press-filter-bar">
+      <div class="press-filter-strip">
+        <button class="press-filter active" id="hf-all"   onclick="setHistoryFilter('all')">All</button>
+        <button class="press-filter"        id="hf-daily" onclick="setHistoryFilter('daily')">Daily</button>
+        <button class="press-filter"        id="hf-user"  onclick="setHistoryFilter('user')">My Picks</button>
+      </div>
+      <div class="press-view-toggle">
+        <button class="press-view-btn active" id="hv-list" onclick="setHistoryView('list')">≡ List</button>
+        <button class="press-view-btn"        id="hv-grid" onclick="setHistoryView('grid')">⊞ Grid</button>
+      </div>
     </div>
     <div id="history-grid"></div>
   </div>
@@ -524,6 +549,10 @@
         <option value="year-asc">Sort: Year ↑</option>
         <option value="year-desc">Sort: Year ↓</option>
       </select>
+      <div class="press-view-toggle">
+        <button class="press-view-btn active" id="bv-list" onclick="setBrowseView('list')">≡ List</button>
+        <button class="press-view-btn"        id="bv-grid" onclick="setBrowseView('grid')">⊞ Grid</button>
+      </div>
     </div>
     <div id="browse-list"></div>
   </div>
@@ -775,6 +804,8 @@ let aiKey          = null;   // API key for AI commentary (any provider)
 let aiProvider     = 'anthropic'; // 'anthropic' | 'openai' | 'gemini' | 'groq'
 let wpConfig       = null;
 let historyFilter  = 'all';
+let historyViewMode = 'list'; // 'list' | 'grid'
+let browseViewMode  = 'list'; // 'list' | 'grid'
 let activeEdit     = null;   // { requestedAt, field: 'date'|'note' }
 let archiveData    = null;   // loaded archive JSON { year, picks, … }
 let archiveFilter  = 'all';
@@ -1231,7 +1262,8 @@ async function pickAlbum() {
     } catch(e) { /* no HD image */ }
   }
 
-  // Fallback to thumb
+  // Fallback cascade: blob object URL → direct Discogs URI → 150px thumb
+  if (!imageDisplay && imageUri) imageDisplay = imageUri;
   if (!imageDisplay && pick.thumb) imageDisplay = pick.thumb;
 
   // Generate commentary via Claude API
@@ -1493,6 +1525,20 @@ function setHistoryFilter(filter) {
   renderHistory();
 }
 
+function setHistoryView(mode) {
+  historyViewMode = mode;
+  document.getElementById('hv-list').classList.toggle('active', mode === 'list');
+  document.getElementById('hv-grid').classList.toggle('active', mode === 'grid');
+  renderHistory();
+}
+
+function setBrowseView(mode) {
+  browseViewMode = mode;
+  document.getElementById('bv-list').classList.toggle('active', mode === 'list');
+  document.getElementById('bv-grid').classList.toggle('active', mode === 'grid');
+  filterBrowse();
+}
+
 function renderHistory() {
   const grid    = document.getElementById('history-grid');
   const countEl = document.getElementById('history-count');
@@ -1516,6 +1562,27 @@ function renderHistory() {
     return;
   }
 
+  // ── Grid view ──
+  if (historyViewMode === 'grid') {
+    grid.innerHTML = `<div class="press-art-grid">${filtered.map(h => {
+      const imgHtml = h.imgDataUrl
+        ? `<img src="${esc(h.imgDataUrl)}" alt="${esc(h.artist)}"${h.id ? ` data-release-id="${h.id}"` : ''} loading="lazy">`
+        : `<div class="press-art-ph">♫</div>`;
+      return `
+        <div class="press-art-grid-item" onclick="showView('today')" title="${esc(h.artist)} — ${esc(h.title)}">
+          ${imgHtml}
+          <div class="press-art-grid-overlay"></div>
+          <div class="press-art-grid-label">
+            <strong>${esc(h.artist)}</strong>
+            <span>${esc(h.title)}${h.year ? ' · ' + h.year : ''}</span>
+          </div>
+        </div>`;
+    }).join('')}</div>`;
+    initHistoryImageLazyLoad();
+    return;
+  }
+
+  // ── List view ──
   grid.innerHTML = filtered.map(h => {
     const source         = h.source ?? 'daily';
     const displayDateStr = h.pickedDate ?? h.requestedAt;
@@ -1725,6 +1792,28 @@ function filterBrowse() {
   const lastPickMap = new Map();
   history.forEach(h => { if (!lastPickMap.has(h.id)) lastPickMap.set(h.id, h); });
 
+  // ── Grid view ──
+  if (browseViewMode === 'grid') {
+    listEl.innerHTML = `<div class="press-art-grid">${items.map(r => {
+      const imgHtml = r.thumb
+        ? `<img src="${esc(r.thumb)}" alt="${esc(r.artist)}" loading="lazy">`
+        : `<div class="press-art-ph">♫</div>`;
+      return `
+        <div class="press-art-grid-item" title="${esc(r.artist)} — ${esc(r.title)}">
+          <a href="https://www.discogs.com/release/${r.id}" target="_blank" rel="noopener noreferrer" style="display:contents">
+            ${imgHtml}
+          </a>
+          <div class="press-art-grid-overlay"></div>
+          <div class="press-art-grid-label">
+            <strong>${esc(r.artist)}</strong>
+            <span>${esc(r.title)}${r.year ? ' · ' + r.year : ''}</span>
+          </div>
+        </div>`;
+    }).join('')}</div>`;
+    return;
+  }
+
+  // ── List view ──
   listEl.innerHTML = `<div class="browse-list">${items.map(r => {
     const tags      = [...(r.genres ?? []), ...(r.styles ?? [])].slice(0, 4);
     const pillsHtml = [
