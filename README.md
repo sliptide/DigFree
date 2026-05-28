@@ -34,7 +34,7 @@ Dig Free can generate a personal take, fun facts, and tracklist highlights for e
 |---|---|---|---|
 | **Anthropic** | Claude | ~$0.01 / pick | [console.anthropic.com](https://console.anthropic.com) |
 | **OpenAI** | GPT-4o mini | ~$0.01 / pick | [platform.openai.com](https://platform.openai.com) |
-| **Google Gemini** | Gemini Flash | Free tier available | [aistudio.google.com](https://aistudio.google.com) |
+| **Google Gemini** | Gemini 2.5 Flash | Free tier available | [aistudio.google.com](https://aistudio.google.com) |
 | **Groq** | Llama 3 | Free tier available | [console.groq.com](https://console.groq.com) |
 
 Select your provider and paste your key in the setup screen or under **Settings → AI Commentary**. You're billed directly by the provider — Dig Free sends no data to any intermediate server.

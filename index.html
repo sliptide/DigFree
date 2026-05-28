@@ -457,7 +457,7 @@
         <select id="setup-ai-provider" style="width:100%; margin-bottom:14px;">
           <option value="anthropic">Anthropic (Claude)</option>
           <option value="openai">OpenAI (ChatGPT)</option>
-          <option value="gemini">Google Gemini Flash (free)</option>
+          <option value="gemini">Google Gemini 2.5 Flash (free)</option>
           <option value="groq">Groq (free, fast)</option>
         </select>
         <label>API Key</label>
@@ -673,7 +673,7 @@
           <div class="press-provider-note">GPT-4o-mini · ~$0.01/pick</div>
         </div>
         <div class="press-provider-opt" data-provider="gemini" onclick="selectProvider('gemini')">
-          <div class="press-provider-name">Gemini Flash</div>
+          <div class="press-provider-name">Gemini 2.5 Flash</div>
           <div class="press-provider-note">Google · free tier available</div>
         </div>
         <div class="press-provider-opt" data-provider="groq" onclick="selectProvider('groq')">
@@ -1370,6 +1370,10 @@ async function fetchAnthropic(prompt) {
     }),
   });
   const data = await res.json();
+  if (!res.ok) {
+    const msg = data?.error?.message ?? `HTTP ${res.status}`;
+    throw new Error(`Anthropic API error: ${msg}`);
+  }
   return data.content?.[0]?.text ?? '';
 }
 
@@ -1384,12 +1388,16 @@ async function fetchOpenAI(prompt) {
     }),
   });
   const data = await res.json();
+  if (!res.ok) {
+    const msg = data?.error?.message ?? `HTTP ${res.status}`;
+    throw new Error(`OpenAI API error: ${msg}`);
+  }
   return data.choices?.[0]?.message?.content ?? '';
 }
 
 async function fetchGemini(prompt) {
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${aiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${aiKey}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1397,6 +1405,10 @@ async function fetchGemini(prompt) {
     }
   );
   const data = await res.json();
+  if (!res.ok) {
+    const msg = data?.error?.message ?? `HTTP ${res.status}`;
+    throw new Error(`Gemini API error: ${msg}`);
+  }
   return data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
 }
 
@@ -1411,6 +1423,10 @@ async function fetchGroq(prompt) {
     }),
   });
   const data = await res.json();
+  if (!res.ok) {
+    const msg = data?.error?.message ?? `HTTP ${res.status}`;
+    throw new Error(`Groq API error: ${msg}`);
+  }
   return data.choices?.[0]?.message?.content ?? '';
 }
 
