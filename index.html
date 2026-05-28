@@ -2139,6 +2139,9 @@ async function importFromCrateDig() {
       || parseInt((e.discogs_url || '').match(/\/release\/(\d+)/)?.[1])
       || null;
 
+    // Normalize source: WP plugin may return '' or 'manual'; only trust explicit 'user'
+    const wpSource = (e.source === 'user') ? 'user' : 'daily';
+
     const mapped = {
       id:          discogsId,
       title:       e.title       ?? '',
@@ -2153,18 +2156,20 @@ async function importFromCrateDig() {
       imgDataUrl:  e.artwork_url ?? '',
       requestedAt: e.pick_date ? new Date(e.pick_date).toISOString() : new Date().toISOString(),
       pickedDate:  e.pick_date   ?? null,
-      source:      e.source      ?? 'daily',
       note:        e.note        ?? '',
       wpPostId:    e.id          ?? null,
     };
 
     if (discogsId && idxById[String(discogsId)] !== undefined) {
-      // Upsert: update existing entry, preserving any locally-added fields
+      // Upsert: update metadata from WP, but preserve the local source classification —
+      // the WP plugin may not reliably store source, and local data is authoritative.
       const idx = idxById[String(discogsId)];
-      history[idx] = Object.assign({}, history[idx], mapped);
+      const localSource = history[idx].source ?? 'daily';
+      history[idx] = Object.assign({}, history[idx], mapped, { source: localSource });
       updated++;
     } else {
-      history.push(mapped);
+      // New entry: use the normalized WP source
+      history.push({ ...mapped, source: wpSource });
       if (discogsId) idxById[String(discogsId)] = history.length - 1;
       imported++;
     }
