@@ -724,6 +724,19 @@
       </div>
     </details>
 
+    <!-- ── Import from CrateDig ── -->
+    <div class="press-settings-section">
+      <div class="press-settings-label">Import from CrateDig</div>
+      <div style="font-family:'Source Serif 4',serif; font-size:0.9rem; color:var(--mid); margin-bottom:14px; line-height:1.6;">
+        Fetch your history from a WordPress site running the old CrateDig plugin. Requires your WordPress credentials to be saved above.
+      </div>
+      <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <input type="text" id="s-cratedig-url" placeholder="https://yoursite.com" autocomplete="off" style="flex:1; min-width:200px;">
+        <button class="btn secondary" style="width:auto; white-space:nowrap;" onclick="importFromCrateDig()">⬇ Import CrateDig History</button>
+      </div>
+      <div id="s-cratedig-status" style="font-family:'Space Mono',monospace; font-size:0.7rem; color:var(--mid); margin-top:10px; display:none;"></div>
+    </div>
+
     <!-- ── Export & Archive ── -->
     <div class="press-settings-section">
       <div class="press-settings-label">Export &amp; Archive</div>
@@ -1921,6 +1934,8 @@ function renderSettings() {
     wpClearBtn.style.display = '';
     document.getElementById('s-wp-url').value  = wpConfig.siteUrl;
     document.getElementById('s-wp-user').value = wpConfig.username;
+    const cdUrl = document.getElementById('s-cratedig-url');
+    if (cdUrl && !cdUrl.value) cdUrl.value = wpConfig.siteUrl;
   } else {
     wpStatusEl.textContent   = '';
     wpClearBtn.style.display = 'none';
@@ -2044,6 +2059,103 @@ function wpAuthHeader() {
 
 function wpBase() {
   return wpConfig.siteUrl.replace(/\/$/, '') + '/wp-json/digfree/v1';
+}
+
+// ── IMPORT FROM CRATEDDIG PLUGIN ──
+async function importFromCrateDig() {
+  const statusEl = document.getElementById('s-cratedig-status');
+  const urlInput = document.getElementById('s-cratedig-url');
+  const siteUrl  = (urlInput?.value.trim() || wpConfig?.siteUrl || '').replace(/\/$/, '');
+
+  if (!siteUrl) {
+    statusEl.textContent = 'Enter a WordPress site URL above.';
+    statusEl.style.display = 'block';
+    return;
+  }
+
+  // Build auth header — use saved WP credentials if available
+  const authHeader = wpConfig
+    ? ('Basic ' + btoa(wpConfig.username + ':' + wpConfig.appPassword))
+    : null;
+
+  statusEl.textContent = 'Fetching entries from CrateDig plugin…';
+  statusEl.style.display = 'block';
+
+  let entries = [];
+  try {
+    const headers = { 'Content-Type': 'application/json' };
+    if (authHeader) headers['Authorization'] = authHeader;
+
+    // Paginate — CrateDig plugin returns up to 100 per page
+    let page = 1;
+    while (true) {
+      const res = await fetch(`${siteUrl}/wp-json/cratedig/v1/entries?per_page=100&page=${page}`, { headers });
+      if (!res.ok) throw new Error(`HTTP ${res.status} — ${res.statusText}`);
+      const batch = await res.json();
+      if (!Array.isArray(batch) || !batch.length) break;
+      entries = entries.concat(batch);
+      if (batch.length < 100) break;
+      page++;
+    }
+  } catch (e) {
+    statusEl.textContent = `Failed: ${e.message}. Check the URL and that the CrateDig plugin is active.`;
+    return;
+  }
+
+  if (!entries.length) {
+    statusEl.textContent = 'No entries found on that site.';
+    return;
+  }
+
+  // Map CrateDig entry → Dig Free history entry
+  const existing = new Set(history.map(h => String(h.id)));
+  let imported = 0, skipped = 0;
+
+  const mapped = entries.map(e => {
+    // Extract Discogs release ID from discogs_url or cratedig_id field
+    const discogsId = parseInt(e.cratedig_id)
+      || parseInt((e.discogs_url || '').match(/\/release\/(\d+)/)?.[1])
+      || null;
+
+    return {
+      id:          discogsId,
+      title:       e.title       ?? '',
+      artist:      e.artist      ?? '',
+      year:        parseInt(e.year) || null,
+      genres:      [],
+      styles:      [],
+      label:       e.label       ?? '',
+      country:     e.country     ?? '',
+      rating:      null,
+      tracklist:   [],
+      imgDataUrl:  e.artwork_url ?? '',
+      requestedAt: e.pick_date ? new Date(e.pick_date).toISOString() : new Date().toISOString(),
+      pickedDate:  e.pick_date   ?? null,
+      source:      e.source      ?? 'daily',
+      note:        e.note        ?? '',
+      wpPostId:    e.id          ?? null,
+    };
+  });
+
+  // Merge: skip entries whose Discogs ID already exists in history
+  for (const entry of mapped) {
+    if (entry.id && existing.has(String(entry.id))) {
+      skipped++;
+    } else {
+      history.push(entry);
+      if (entry.id) existing.add(String(entry.id));
+      imported++;
+    }
+  }
+
+  // Sort history newest-first by requestedAt
+  history.sort((a, b) => new Date(b.requestedAt) - new Date(a.requestedAt));
+  saveJSON(STORAGE.HISTORY, history.slice(0, 1000));
+  renderHistory();
+
+  statusEl.style.color = 'var(--green)';
+  statusEl.textContent = `Imported ${imported} entries${skipped ? `, skipped ${skipped} duplicates` : ''}.`;
+  showToast(`Imported ${imported} picks from CrateDig ✓`);
 }
 
 async function saveWpConfig() {
