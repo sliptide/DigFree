@@ -16,9 +16,19 @@ This plugin lets you publish your vinyl listening picks from the [Dig Free](../R
 
 ## Installation
 
-1. Download `digfree.zip` from this folder
-2. In your WordPress admin, go to **Plugins → Add New → Upload Plugin**
-3. Upload `digfree.zip` and click **Install Now**, then **Activate**
+**Step 1 — Create the plugin zip**
+
+Download `digfree.php` from this folder, then create a zip with the file inside a folder named `digfree`:
+
+- **macOS (Finder):** Create a folder named `digfree`, put `digfree.php` inside it, then right-click the folder → **Compress "digfree"** → produces `digfree.zip`
+- **macOS / Linux (Terminal):** `mkdir digfree && cp digfree.php digfree/ && zip -r digfree.zip digfree/`
+
+The zip must contain `digfree/digfree.php` — WordPress requires the PHP file to be inside a folder.
+
+**Step 2 — Upload to WordPress**
+
+1. In your WordPress admin, go to **Plugins → Add New → Upload Plugin**
+2. Upload the `digfree.zip` you just created and click **Install Now**, then **Activate**
 
 ## Connecting Dig Free
 
