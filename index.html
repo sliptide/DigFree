@@ -175,6 +175,7 @@
   .press-pullquote { margin: 28px 0; padding: 18px 0; border-top: 2px solid var(--ink); border-bottom: 2px solid var(--ink); }
   .press-pullquote-text { font-family: 'Source Serif 4', serif; font-style: italic; font-size: 1.5rem; font-weight: 400; line-height: 1.55; color: var(--ink); }
   .press-pullquote-text::before { content: '\201C'; font-size: 3.5rem; line-height: 0.6; vertical-align: -0.55rem; margin-right: 4px; color: var(--press); }
+  .press-pullquote-text::after  { content: '\201D'; font-size: 3.5rem; line-height: 0.6; vertical-align: -0.55rem; margin-left:  4px; color: var(--press); }
   .press-side-col { border-left: 1px solid var(--rule); padding-left: 32px; }
   .press-side-label { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--mid); margin-bottom: 14px; padding-bottom: 8px; border-bottom: 1px solid var(--rule); }
   .press-track-item { padding: 10px 0; border-bottom: 1px solid var(--rule); }
@@ -222,6 +223,8 @@
   .press-art-grid-item:hover .press-art-grid-label { opacity: 1; }
   .press-art-grid-label strong { display: block; font-family: 'Bebas Neue', sans-serif; font-size: 0.95rem; letter-spacing: 0.04em; line-height: 1.2; }
   .press-art-grid-label span { font-family: 'Space Mono', monospace; font-size: 0.55rem; letter-spacing: 0.06em; color: rgba(255,255,255,0.7); }
+  .press-art-grid-add { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.65); color: #fff; border: 1px solid rgba(255,255,255,0.35); border-radius: 3px; font-family: 'Space Mono', monospace; font-size: 0.6rem; padding: 3px 7px; cursor: pointer; opacity: 0; transition: opacity 0.2s; pointer-events: none; white-space: nowrap; }
+  .press-art-grid-item:hover .press-art-grid-add { opacity: 1; pointer-events: auto; }
   .press-archive-row { display: grid; grid-template-columns: 120px 1fr auto; gap: 0 20px; padding: 18px 0; border-bottom: 1px solid var(--rule); align-items: start; cursor: pointer; transition: background 0.1s; }
   .press-archive-row:hover { background: var(--lift); margin: 0 -14px; padding-left: 14px; padding-right: 14px; }
   .press-archive-art { width: 120px; height: 120px; flex-shrink: 0; }
@@ -236,7 +239,7 @@
   .press-archive-badge.pick { color: var(--press); border-color: var(--press); }
   .press-archive-badge.published { color: var(--green); border-color: rgba(74,140,92,0.4); }
   .press-archive-actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; align-items: center; }
-  .press-row-btn { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; background: none; border: 1px solid var(--rule); color: var(--mid); padding: 4px 10px; cursor: pointer; transition: all 0.1s; }
+  .press-row-btn { font-family: 'Space Mono', monospace; font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; background: none; border: 1px solid var(--rule); color: var(--mid); padding: 4px 10px; cursor: pointer; transition: all 0.1s; text-decoration: none; display: inline-block; }
   .press-row-btn:hover { color: var(--ink); border-color: var(--ink); }
   .press-row-btn.danger:hover { color: var(--press); border-color: var(--press); }
   .hist-date-input { background: none; border: none; border-bottom: 1px solid var(--rule); color: var(--ink); font-family: 'Space Mono', monospace; font-size: 0.65rem; padding: 3px 0; outline: none; }
@@ -522,7 +525,7 @@
 <div id="view-history" class="view" style="display:none">
   <div class="press-archive-page">
     <div class="press-archive-head">
-      <div class="press-archive-title">The Archive</div>
+      <div class="press-archive-title">Dig History</div>
       <div class="press-archive-sub" id="history-count"></div>
     </div>
     <div class="press-filter-bar">
@@ -1553,7 +1556,7 @@ function renderAlbumCard({ pick, rating, tracklist, imgDataUrl, take, facts, hig
       : '';
     footerButtons = `
       <button class="press-btn primary" onclick="pickAlbum()">↺ Pick Another</button>
-      <button class="press-btn" onclick="showView('history')">Archive →</button>
+      <button class="press-btn" onclick="showView('history')">History →</button>
       ${wpBtn}
       ${refreshBtn}`;
   }
@@ -1786,7 +1789,7 @@ function renderHistory() {
       : `<div class="press-archive-art-ph" ${h.id ? `data-release-id="${h.id}"` : ''}>♫</div>`;
 
     const artWrap = h.id
-      ? `<a href="https://www.discogs.com/release/${h.id}" target="_blank" rel="noopener noreferrer" class="press-archive-art">${artHtml}</a>`
+      ? `<div class="press-archive-art" style="cursor:pointer;" onclick="showAlbumDetail(${h.id})" title="View album detail">${artHtml}</div>`
       : `<div class="press-archive-art">${artHtml}</div>`;
 
     // Genre/year tag pills for history
@@ -1823,6 +1826,7 @@ function renderHistory() {
       <div class="press-archive-actions">
         <button class="press-row-btn" onclick="startEdit('${h.requestedAt}','date')">Edit date</button>
         <button class="press-row-btn" onclick="startEdit('${h.requestedAt}','note')">${h.note ? 'Edit note' : '+ Note'}</button>
+        ${h.id ? `<a class="press-row-btn" href="https://www.discogs.com/release/${h.id}" target="_blank" rel="noopener noreferrer">↗ Discogs</a>` : ''}
         ${wpConfig ? (h.wpPostId
           ? `<button class="press-row-btn" onclick="unpublishEntry('${h.requestedAt}')">↓ Unpublish</button>`
           : `<button class="press-row-btn" onclick="publishEntry('${h.requestedAt}')">↑ Publish</button>`)
@@ -2014,11 +2018,10 @@ function filterBrowse() {
         ? `<img src="${esc(r.thumb)}" alt="${esc(r.artist)}" loading="lazy">`
         : `<div class="press-art-ph">♫</div>`;
       return `
-        <div class="press-art-grid-item" title="${esc(r.artist)} — ${esc(r.title)}">
-          <div onclick="showAlbumDetail(${r.id})" style="display:contents; cursor:pointer;">
-            ${imgHtml}
-          </div>
+        <div class="press-art-grid-item" onclick="showAlbumDetail(${r.id})" title="${esc(r.artist)} — ${esc(r.title)}">
+          ${imgHtml}
           <div class="press-art-grid-overlay"></div>
+          <button class="press-art-grid-add" onclick="event.stopPropagation(); addToHistory(${r.id})">+ History</button>
           <div class="press-art-grid-label">
             <strong>${esc(r.artist)}</strong>
             <span>${esc(r.title)}${r.year ? ' · ' + r.year : ''}</span>
