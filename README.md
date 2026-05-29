@@ -82,6 +82,22 @@ The `[digfree_history]` shortcode displays your published listening history on a
 
 ---
 
+## Storage limits
+
+| Collection size | History (capped at 1,000) | localStorage used | Status |
+|---|---|---|---|
+| 500 records | 1,000 entries | ~600 KB | ✅ Fine |
+| 2,000 records | 1,000 entries | ~1 MB | ✅ Fine |
+| 5,000 records | 1,000 entries | ~1.9 MB | ✅ Fine |
+| 10,000 records | 1,000 entries | ~3.3 MB | ⚠️ Getting close |
+| 17,000+ records | 1,000 entries | ~5 MB | ❌ Near limit |
+
+Collection data and history are stored in `localStorage` (5 MB browser limit). History is hard-capped at 1,000 entries. The collection is the only real variable — collectors with fewer than 10,000 records are well within limits.
+
+HD album artwork is cached in IndexedDB, which has no hard cap and is limited only by available disk space (~80 KB per cover).
+
+---
+
 ## Browser support
 
 Dig Free uses IndexedDB, Web Crypto API, and IntersectionObserver — all supported in:
