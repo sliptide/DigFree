@@ -124,7 +124,10 @@
   .press-pick-group { position: relative; display: inline-flex; }
   .press-pick-group .press-btn { border-radius: 0; }
   .press-pick-toggle { padding: 12px 13px !important; border-left: 1px solid rgba(255,255,255,0.25) !important; font-size: 0.65rem !important; }
+  .press-pick-toggle.btn-sm  { padding: 7px 10px !important; border-left: 1px solid var(--rule) !important; font-size: 0.65rem !important; }
+  .press-pick-toggle.btn     { padding: 12px 14px !important; border-left: 1px solid rgba(255,255,255,0.25) !important; font-size: 0.65rem !important; width: auto !important; }
   .press-pick-menu { position: absolute; bottom: calc(100% + 6px); left: 0; min-width: 210px; background: var(--ink); border: 1px solid #444; z-index: 200; display: none; box-shadow: 0 4px 16px rgba(0,0,0,0.4); }
+  .press-pick-menu.down { bottom: auto; top: calc(100% + 6px); }
   .press-pick-menu.open { display: block; }
   .press-pick-menu button { display: block; width: 100%; text-align: left; background: none; border: none; border-bottom: 1px solid #333; color: var(--paper); font-family: 'Space Mono', monospace; font-size: 0.68rem; letter-spacing: 0.07em; text-transform: uppercase; padding: 11px 16px; cursor: pointer; }
   .press-pick-menu button:last-child { border-bottom: none; }
@@ -522,7 +525,17 @@
         <strong id="collection-size">—</strong> records &nbsp;·&nbsp; synced <strong id="synced-date">—</strong>
       </div>
       <div class="btn-row">
-        <button class="btn-sm" onclick="pickAlbum()">↺ Re-roll</button>
+        <div class="press-pick-group">
+          <button class="btn-sm" onclick="pickAlbum()">↺ Re-roll</button>
+          <button class="btn-sm press-pick-toggle" onclick="togglePickMenu(event,'reroll-menu')" title="Pick by freshness">▾</button>
+          <div class="press-pick-menu down" id="reroll-menu">
+            <button onclick="pickAlbum(7);  togglePickMenu(null,'reroll-menu')">Not played in 1 week</button>
+            <button onclick="pickAlbum(30); togglePickMenu(null,'reroll-menu')">Not played in 1 month</button>
+            <button onclick="pickAlbum(90); togglePickMenu(null,'reroll-menu')">Not played in 3 months</button>
+            <button onclick="pickAlbum(180);togglePickMenu(null,'reroll-menu')">Not played in 6 months</button>
+            <button onclick="pickAlbum(365);togglePickMenu(null,'reroll-menu')">Not played in 1 year</button>
+          </div>
+        </div>
         <button class="btn-sm" onclick="refreshCollection()">↻ Sync</button>
       </div>
     </div>
@@ -1042,11 +1055,13 @@ function showToast(msg, duration = 3500) {
   el._t = setTimeout(() => { el.style.opacity = '0'; }, duration);
 }
 
-function togglePickMenu(e) {
+function togglePickMenu(e, menuId = 'pick-menu') {
   if (e) e.stopPropagation();
-  const menu = document.getElementById('pick-menu');
+  const menu = document.getElementById(menuId);
   if (!menu) return;
   const opening = !menu.classList.contains('open');
+  // Close any other open pick menus first
+  document.querySelectorAll('.press-pick-menu.open').forEach(m => m.classList.remove('open'));
   menu.classList.toggle('open', opening);
   if (opening) {
     const close = (ev) => {
@@ -1055,7 +1070,6 @@ function togglePickMenu(e) {
         document.removeEventListener('click', close);
       }
     };
-    // defer so the current click doesn't immediately close it
     setTimeout(() => document.addEventListener('click', close), 0);
   }
 }
@@ -1109,9 +1123,17 @@ async function init() {
     <div class="press-ready">
       <div class="press-ready-head">Ready to Dig</div>
       <p class="press-ready-sub">Your collection is loaded. Pick today's record.</p>
-      <button class="btn" onclick="pickAlbum()" style="width:auto; min-width:200px;">
-        Pick Today's Album
-      </button>
+      <div class="press-pick-group" style="min-width:200px;">
+        <button class="btn" onclick="pickAlbum()" style="flex:1;">Pick Today's Album</button>
+        <button class="btn press-pick-toggle" onclick="togglePickMenu(event,'ready-menu')" title="Pick by freshness">▾</button>
+        <div class="press-pick-menu down" id="ready-menu">
+          <button onclick="pickAlbum(7);  togglePickMenu(null,'ready-menu')">Not played in 1 week</button>
+          <button onclick="pickAlbum(30); togglePickMenu(null,'ready-menu')">Not played in 1 month</button>
+          <button onclick="pickAlbum(90); togglePickMenu(null,'ready-menu')">Not played in 3 months</button>
+          <button onclick="pickAlbum(180);togglePickMenu(null,'ready-menu')">Not played in 6 months</button>
+          <button onclick="pickAlbum(365);togglePickMenu(null,'ready-menu')">Not played in 1 year</button>
+        </div>
+      </div>
     </div>
   `);
 }
@@ -1597,13 +1619,13 @@ function renderAlbumCard({ pick, rating, tracklist, imgDataUrl, take, facts, hig
     footerButtons = `
       <div class="press-pick-group">
         <button class="press-btn primary" onclick="pickAlbum()">↺ Pick Another</button>
-        <button class="press-btn primary press-pick-toggle" onclick="togglePickMenu(event)" title="Pick by freshness">▾</button>
+        <button class="press-btn primary press-pick-toggle" onclick="togglePickMenu(event,'pick-menu')" title="Pick by freshness">▾</button>
         <div class="press-pick-menu" id="pick-menu">
-          <button onclick="pickAlbum(7);  togglePickMenu()">Not played in 1 week</button>
-          <button onclick="pickAlbum(30); togglePickMenu()">Not played in 1 month</button>
-          <button onclick="pickAlbum(90); togglePickMenu()">Not played in 3 months</button>
-          <button onclick="pickAlbum(180);togglePickMenu()">Not played in 6 months</button>
-          <button onclick="pickAlbum(365);togglePickMenu()">Not played in 1 year</button>
+          <button onclick="pickAlbum(7);  togglePickMenu(null,'pick-menu')">Not played in 1 week</button>
+          <button onclick="pickAlbum(30); togglePickMenu(null,'pick-menu')">Not played in 1 month</button>
+          <button onclick="pickAlbum(90); togglePickMenu(null,'pick-menu')">Not played in 3 months</button>
+          <button onclick="pickAlbum(180);togglePickMenu(null,'pick-menu')">Not played in 6 months</button>
+          <button onclick="pickAlbum(365);togglePickMenu(null,'pick-menu')">Not played in 1 year</button>
         </div>
       </div>
       <button class="press-btn" onclick="showView('history')">History →</button>
