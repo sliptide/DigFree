@@ -578,7 +578,7 @@
 <!-- DETAIL (album detail from Browse) -->
 <div id="view-detail" class="view" style="display:none">
   <div class="press-detail-back">
-    <button class="press-btn" onclick="showView('browse')">← Back to Collection</button>
+    <button class="press-btn" id="detail-back-btn" onclick="showView('browse')">← Back to Collection</button>
   </div>
   <div id="detail-content"></div>
 </div>
@@ -1472,9 +1472,9 @@ async function fetchGroq(prompt) {
 }
 
 // ── RENDER CARD — THE MUSIC PRESS ──
-function renderAlbumCard({ pick, rating, tracklist, imgDataUrl, take, facts, highlights, mode = 'today' }) {
+function renderAlbumCard({ pick, rating, tracklist, imgDataUrl, take, facts, highlights, mode = 'today', fromView = 'browse' }) {
   // Capture state for refresh and sync-restore
-  currentCardState = { pick, tracklist, rating, imgDataUrl, mode };
+  currentCardState = { pick, tracklist, rating, imgDataUrl, mode, fromView };
 
   const today = new Date().toLocaleDateString('en-US', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
   const genres = [...(pick.genres ?? []), ...(pick.styles ?? [])].slice(0, 4);
@@ -1540,8 +1540,10 @@ function renderAlbumCard({ pick, rating, tracklist, imgDataUrl, take, facts, hig
           ? `<button class="press-btn press-refresh-btn" onclick="refreshCommentary()">↺ Refresh review</button>`
           : `<button class="press-btn primary" onclick="generateDetailCommentary(${pick.id})">✦ Generate review</button>`)
       : '';
+    const backView  = fromView === 'history' ? 'history' : 'browse';
+    const backLabel = fromView === 'history' ? '← Back to History' : '← Back to Collection';
     footerButtons = `
-      <button class="press-btn" onclick="showView('browse')">← Back to Collection</button>
+      <button class="press-btn" onclick="showView('${backView}')">${backLabel}</button>
       ${pick.id ? `<a class="press-btn" href="https://www.discogs.com/release/${pick.id}" target="_blank" rel="noopener noreferrer">↗ Discogs</a>` : ''}
       ${aiBtn}`;
   } else {
@@ -1611,7 +1613,7 @@ function renderAlbumCard({ pick, rating, tracklist, imgDataUrl, take, facts, hig
 
 async function refreshCommentary() {
   if (!currentCardState) return;
-  const { pick, tracklist, rating, imgDataUrl, mode } = currentCardState;
+  const { pick, tracklist, rating, imgDataUrl, mode, fromView } = currentCardState;
   // Disable button while working
   const btn = document.querySelector('.press-refresh-btn');
   if (btn) { btn.textContent = '…'; btn.disabled = true; }
@@ -1619,25 +1621,30 @@ async function refreshCommentary() {
   if (db) await idbDelete(db, 'ai_commentary', pick.id);
   const { take, facts, highlights } = await generateCommentary(pick, tracklist, rating);
   if (take || facts || highlights) await setAiCache(pick.id, { take, facts, highlights });
-  renderAlbumCard({ pick, rating, tracklist, imgDataUrl, take, facts, highlights, mode });
+  renderAlbumCard({ pick, rating, tracklist, imgDataUrl, take, facts, highlights, mode, fromView });
 }
 
 async function generateDetailCommentary(releaseId) {
   if (!currentCardState) return;
-  const { pick, tracklist, rating, imgDataUrl } = currentCardState;
+  const { pick, tracklist, rating, imgDataUrl, fromView } = currentCardState;
   const btn = document.querySelector('#detail-content .press-btn.primary');
   if (btn) { btn.textContent = 'Generating…'; btn.disabled = true; }
   const { take, facts, highlights } = await generateCommentary(pick, tracklist, rating);
   if (take || facts || highlights) await setAiCache(releaseId, { take, facts, highlights });
-  renderAlbumCard({ pick, rating, tracklist, imgDataUrl, take, facts, highlights, mode: 'detail' });
+  renderAlbumCard({ pick, rating, tracklist, imgDataUrl, take, facts, highlights, mode: 'detail', fromView });
 }
 
-async function showAlbumDetail(releaseId) {
+async function showAlbumDetail(releaseId, fromView = 'browse') {
   showView('detail', true);
-  // Keep Browse nav button highlighted
+  // Highlight the originating nav button
   document.querySelectorAll('.press-nav button').forEach(b => b.classList.remove('active'));
-  const browseBtn = document.getElementById('nav-browse');
-  if (browseBtn) browseBtn.classList.add('active');
+  const navId  = fromView === 'history' ? 'nav-history' : 'nav-browse';
+  const navBtn = document.getElementById(navId);
+  if (navBtn) navBtn.classList.add('active');
+  // Update the static top back button
+  const backLabel = fromView === 'history' ? '← Back to History' : '← Back to Collection';
+  const backBtn = document.getElementById('detail-back-btn');
+  if (backBtn) { backBtn.textContent = backLabel; backBtn.onclick = () => showView(fromView); }
 
   document.getElementById('detail-content').innerHTML =
     `<div class="loading-wrap"><div class="spinner"></div><div class="loading-text">Loading record…</div></div>`;
@@ -1672,6 +1679,7 @@ async function showAlbumDetail(releaseId) {
     facts:      aiCached?.facts      ?? null,
     highlights: aiCached?.highlights ?? null,
     mode:       'detail',
+    fromView,
   });
 }
 
@@ -1789,7 +1797,7 @@ function renderHistory() {
       : `<div class="press-archive-art-ph" ${h.id ? `data-release-id="${h.id}"` : ''}>♫</div>`;
 
     const artWrap = h.id
-      ? `<div class="press-archive-art" style="cursor:pointer;" onclick="showAlbumDetail(${h.id})" title="View album detail">${artHtml}</div>`
+      ? `<div class="press-archive-art" style="cursor:pointer;" onclick="showAlbumDetail(${h.id}, 'history')" title="View album detail">${artHtml}</div>`
       : `<div class="press-archive-art">${artHtml}</div>`;
 
     // Genre/year tag pills for history
