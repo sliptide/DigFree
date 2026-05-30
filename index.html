@@ -1920,11 +1920,13 @@ function renderHistory() {
   // ── Grid view ──
   if (historyViewMode === 'grid') {
     grid.innerHTML = `<div class="press-art-grid">${filtered.map(h => {
-      const imgHtml = h.imgDataUrl
-        ? `<img src="${esc(h.imgDataUrl)}" alt="${esc(h.artist)}"${h.id ? ` data-release-id="${h.id}"` : ''} loading="lazy">`
-        : `<div class="press-art-ph">♫</div>`;
+      const collRec = h.id ? collection.find(r => r.id === h.id) : null;
+      const imgSrc  = collRec?.cover_image || collRec?.thumb || h.imgDataUrl || '';
+      const imgHtml = imgSrc
+        ? `<img src="${esc(imgSrc)}" alt="${esc(h.artist)}"${h.id ? ` data-release-id="${h.id}"` : ''} loading="lazy">`
+        : `<div class="press-art-ph"${h.id ? ` data-release-id="${h.id}"` : ''}>♫</div>`;
       return `
-        <div class="press-art-grid-item" onclick="showView('today')" title="${esc(h.artist)} — ${esc(h.title)}">
+        <div class="press-art-grid-item"${h.id ? ` onclick="showAlbumDetail(${h.id}, 'history')"` : ''} title="${esc(h.artist)} — ${esc(h.title)}">
           ${imgHtml}
           <div class="press-art-grid-overlay"></div>
           <div class="press-art-grid-label">
@@ -1945,9 +1947,11 @@ function renderHistory() {
     const isEditDate     = activeEdit?.requestedAt === h.requestedAt && activeEdit?.field === 'date';
     const isEditNote     = activeEdit?.requestedAt === h.requestedAt && activeEdit?.field === 'note';
 
-    const artHtml = h.imgDataUrl
-      ? `<img src="${h.imgDataUrl}" alt="${esc(h.title)}"${h.id ? ` data-release-id="${h.id}"` : ''} loading="lazy" style="width:120px;height:120px;object-fit:cover;display:block;">`
-      : `<div class="press-archive-art-ph" ${h.id ? `data-release-id="${h.id}"` : ''}>♫</div>`;
+    const collRec = h.id ? collection.find(r => r.id === h.id) : null;
+    const artSrc  = collRec?.cover_image || collRec?.thumb || h.imgDataUrl || '';
+    const artHtml = artSrc
+      ? `<img src="${esc(artSrc)}" alt="${esc(h.title)}"${h.id ? ` data-release-id="${h.id}"` : ''} loading="lazy" style="width:120px;height:120px;object-fit:cover;display:block;">`
+      : `<div class="press-archive-art-ph"${h.id ? ` data-release-id="${h.id}"` : ''}>♫</div>`;
 
     const artWrap = h.id
       ? `<div class="press-archive-art" style="cursor:pointer;" onclick="showAlbumDetail(${h.id}, 'history')" title="View album detail">${artHtml}</div>`
@@ -2041,7 +2045,7 @@ function renderHistory() {
 function initHistoryImageLazyLoad() {
   if (!db) return;
   const targets = document.querySelectorAll(
-    '#history-grid img[data-release-id], #history-grid .press-archive-art-ph[data-release-id]'
+    '#history-grid img[data-release-id], #history-grid .press-archive-art-ph[data-release-id], #history-grid .press-art-ph[data-release-id]'
   );
   if (!targets.length) return;
 
