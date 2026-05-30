@@ -293,6 +293,8 @@
   .press-detail-back { padding: 20px 40px 0; max-width: 900px; margin: 0 auto; }
   .browse-actions { flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 5px; }
   .browse-last-added { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--mid); letter-spacing: 0.04em; }
+  .browse-copies { font-family: 'Space Mono', monospace; font-size: 0.65rem; color: var(--mid); letter-spacing: 0.04em; margin-top: 2px; }
+  .press-art-grid-copies { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.65); color: #fff; border-radius: 3px; font-family: 'Space Mono', monospace; font-size: 0.58rem; padding: 2px 6px; pointer-events: none; }
   .browse-count { font-family: 'Space Mono', monospace; font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--mid); }
 
   /* ═══════════════════════════════
@@ -588,6 +590,10 @@
         <button class="press-view-btn active" id="bv-list" onclick="setBrowseView('list')">≡ List</button>
         <button class="press-view-btn"        id="bv-grid" onclick="setBrowseView('grid')">⊞ Grid</button>
       </div>
+      <div class="press-view-toggle">
+        <button class="press-view-btn" id="bv-unique"  onclick="setBrowseDedupe(true)">Unique</button>
+        <button class="press-view-btn" id="bv-all"     onclick="setBrowseDedupe(false)">All versions</button>
+      </div>
     </div>
     <div id="browse-tag-bar" class="tag-filter-bar" style="display:none">
       Filtering by tag: <strong id="browse-tag-label"></strong>
@@ -857,6 +863,7 @@ let historyFilter    = 'all';
 let historyTagFilter = null;   // active genre/year tag filter in history
 let historyPage      = 1;      // current pagination page (reset on filter change)
 let browseTagFilter  = null;   // active genre/year tag filter in browse
+let browseDedupe     = true;   // collapse duplicate albums in Browse
 let historyViewMode  = 'list'; // 'list' | 'grid'
 let browseViewMode   = 'list'; // 'list' | 'grid'
 let activeEdit     = null;   // { requestedAt, field: 'date'|'note' }
@@ -1149,6 +1156,7 @@ async function init() {
   collection   = loadJSON(STORAGE.COLLECTION) ?? [];
   meta         = loadJSON(STORAGE.META);
   valueHistory = loadJSON(STORAGE.VALUES) ?? [];
+  browseDedupe = loadJSON('digfree_browse_dedupe') ?? true;
 
   // 4b. Migrate history from localStorage → IndexedDB (one-time), then load
   await migrateHistoryToIndexedDB();
@@ -1837,6 +1845,18 @@ function setBrowseView(mode) {
   filterBrowse();
 }
 
+function setBrowseDedupe(val) {
+  browseDedupe = val;
+  saveJSON('digfree_browse_dedupe', val);
+  updateDedupeBtn();
+  filterBrowse();
+}
+
+function updateDedupeBtn() {
+  document.getElementById('bv-unique')?.classList.toggle('active', browseDedupe);
+  document.getElementById('bv-all')?.classList.toggle('active', !browseDedupe);
+}
+
 function setHistoryTagFilter(tag) {
   historyTagFilter = tag;
   historyPage      = 1;
@@ -2118,6 +2138,7 @@ async function saveNote(requestedAt, value) {
 // ── BROWSE ──
 function renderBrowse() {
   document.getElementById('browse-search').value = '';
+  updateDedupeBtn();
   filterBrowse();
 }
 
@@ -2147,10 +2168,35 @@ function filterBrowse() {
     return a.artist.localeCompare(b.artist);
   });
 
+  // ── Deduplication ──
+  if (browseDedupe) {
+    const countMap = new Map();
+    const bestMap  = new Map();
+    for (const r of items) {
+      const key = `${r.artist.toLowerCase().trim()}|||${r.title.toLowerCase().trim()}`;
+      countMap.set(key, (countMap.get(key) ?? 0) + 1);
+      const cur = bestMap.get(key);
+      const better = !cur
+        || (r.thumb && !cur.thumb)
+        || (!cur.thumb && (r.genres?.length ?? 0) > (cur.genres?.length ?? 0));
+      if (better) bestMap.set(key, r);
+    }
+    items = [...bestMap.values()].map(r => {
+      const key   = `${r.artist.toLowerCase().trim()}|||${r.title.toLowerCase().trim()}`;
+      const count = countMap.get(key);
+      return count > 1 ? { ...r, _copies: count } : r;
+    });
+  }
+
   const countEl = document.getElementById('browse-count');
-  countEl.textContent = (query || browseTagFilter)
-    ? `${items.length} of ${collection.length} records`
-    : `${collection.length} records`;
+  const totalRecords = collection.length;
+  if (browseDedupe && items.length < totalRecords && !query && !browseTagFilter) {
+    countEl.textContent = `${items.length} albums (${totalRecords} in collection)`;
+  } else {
+    countEl.textContent = (query || browseTagFilter)
+      ? `${items.length} of ${totalRecords} records`
+      : `${totalRecords} records`;
+  }
 
   const listEl = document.getElementById('browse-list');
   if (!items.length) {
@@ -2173,6 +2219,7 @@ function filterBrowse() {
           ${imgHtml}
           <div class="press-art-grid-overlay"></div>
           <button class="press-art-grid-add" onclick="event.stopPropagation(); addToHistory(${r.id})">+ History</button>
+          ${r._copies ? `<div class="press-art-grid-copies">×${r._copies}</div>` : ''}
           <div class="press-art-grid-label">
             <strong>${esc(r.artist)}</strong>
             <span>${esc(r.title)}${r.year ? ' · ' + r.year : ''}</span>
@@ -2218,6 +2265,7 @@ function filterBrowse() {
           <div class="browse-title">${esc(r.title)}</div>
           <div class="browse-pills">${pillsHtml}</div>
           ${subHtml}
+          ${r._copies ? `<div class="browse-copies">× ${r._copies} copies</div>` : ''}
         </div>
         <div class="browse-actions">
           <button class="btn-sm" onclick="addToHistory(${r.id})" title="Add to listen history">+ History</button>
