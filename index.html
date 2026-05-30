@@ -563,10 +563,7 @@
         <button class="press-view-btn"        id="hv-grid" onclick="setHistoryView('grid')">⊞ Grid</button>
       </div>
     </div>
-    <div id="history-tag-bar" class="tag-filter-bar" style="display:none">
-      Filtering by tag: <strong id="history-tag-label"></strong>
-      <button class="tag-filter-clear" onclick="setHistoryTagFilter(null)">× Clear</button>
-    </div>
+    <div id="history-tag-bar" class="tag-filter-bar" style="display:none"></div>
     <div id="history-grid"></div>
   </div>
 </div>
@@ -595,10 +592,7 @@
         <button class="press-view-btn" id="bv-all"     onclick="setBrowseDedupe(false)">All versions</button>
       </div>
     </div>
-    <div id="browse-tag-bar" class="tag-filter-bar" style="display:none">
-      Filtering by tag: <strong id="browse-tag-label"></strong>
-      <button class="tag-filter-clear" onclick="setBrowseTagFilter(null)">× Clear</button>
-    </div>
+    <div id="browse-tag-bar" class="tag-filter-bar" style="display:none"></div>
     <div id="browse-list"></div>
   </div>
 </div>
@@ -813,8 +807,9 @@
       <div class="press-settings-label">Data &amp; Storage</div>
       <div style="font-family:'Space Mono',monospace; font-size:0.72rem; letter-spacing:0.06em; color:var(--mid); line-height:2.2;">
         <div>Credentials &nbsp;·&nbsp; AES-256 encrypted, IndexedDB</div>
-        <div>Images &nbsp;·&nbsp; HD artwork cached, IndexedDB</div>
-        <div>Collection &amp; History &nbsp;·&nbsp; localStorage</div>
+        <div>Images &amp; AI commentary &nbsp;·&nbsp; IndexedDB</div>
+        <div>History &nbsp;·&nbsp; IndexedDB (no cap)</div>
+        <div>Collection &amp; values &nbsp;·&nbsp; localStorage</div>
       </div>
     </div>
 
@@ -860,9 +855,9 @@ let aiKey          = null;   // API key for AI commentary (any provider)
 let aiProvider     = 'anthropic'; // 'anthropic' | 'openai' | 'gemini' | 'groq'
 let wpConfig       = null;
 let historyFilter    = 'all';
-let historyTagFilter = null;   // active genre/year tag filter in history
+let historyTagFilter = new Set(); // active genre/year tag filters in history (multi-select)
 let historyPage      = 1;      // current pagination page (reset on filter change)
-let browseTagFilter  = null;   // active genre/year tag filter in browse
+let browseTagFilter  = new Set(); // active genre/year tag filters in browse (multi-select)
 let browseDedupe     = true;   // collapse duplicate albums in Browse
 let historyViewMode  = 'list'; // 'list' | 'grid'
 let browseViewMode   = 'list'; // 'list' | 'grid'
@@ -1858,14 +1853,32 @@ function updateDedupeBtn() {
   document.getElementById('bv-all')?.classList.toggle('active', !browseDedupe);
 }
 
-function setHistoryTagFilter(tag) {
-  historyTagFilter = tag;
-  historyPage      = 1;
-  const bar   = document.getElementById('history-tag-bar');
-  const label = document.getElementById('history-tag-label');
-  if (bar) bar.style.display = tag ? '' : 'none';
-  if (label) label.textContent = tag ?? '';
+function toggleHistoryTagFilter(tag) {
+  if (tag === null) {
+    historyTagFilter.clear();
+  } else if (historyTagFilter.has(tag)) {
+    historyTagFilter.delete(tag);
+  } else {
+    historyTagFilter.add(tag);
+  }
+  historyPage = 1;
+  updateHistoryTagBar();
   renderHistory();
+}
+
+function updateHistoryTagBar() {
+  const bar = document.getElementById('history-tag-bar');
+  if (!bar) return;
+  if (!historyTagFilter.size) { bar.style.display = 'none'; bar.innerHTML = ''; return; }
+  bar.style.display = '';
+  const chips = [...historyTagFilter].map(t => {
+    const safe = t.replace(/'/g, "\\'");
+    return `<button class="tag-filter-clear" onclick="toggleHistoryTagFilter('${safe}')">${esc(t)} ×</button>`;
+  }).join('');
+  const clearAll = historyTagFilter.size > 1
+    ? `<button class="tag-filter-clear" onclick="toggleHistoryTagFilter(null)">Clear all</button>`
+    : '';
+  bar.innerHTML = `<span>Filtering:</span>${chips}${clearAll}`;
 }
 
 function loadMoreHistory() {
@@ -1873,13 +1886,31 @@ function loadMoreHistory() {
   renderHistory();
 }
 
-function setBrowseTagFilter(tag) {
-  browseTagFilter = tag;
-  const bar   = document.getElementById('browse-tag-bar');
-  const label = document.getElementById('browse-tag-label');
-  if (bar) bar.style.display = tag ? '' : 'none';
-  if (label) label.textContent = tag ?? '';
+function toggleBrowseTagFilter(tag) {
+  if (tag === null) {
+    browseTagFilter.clear();
+  } else if (browseTagFilter.has(tag)) {
+    browseTagFilter.delete(tag);
+  } else {
+    browseTagFilter.add(tag);
+  }
+  updateBrowseTagBar();
   filterBrowse();
+}
+
+function updateBrowseTagBar() {
+  const bar = document.getElementById('browse-tag-bar');
+  if (!bar) return;
+  if (!browseTagFilter.size) { bar.style.display = 'none'; bar.innerHTML = ''; return; }
+  bar.style.display = '';
+  const chips = [...browseTagFilter].map(t => {
+    const safe = t.replace(/'/g, "\\'");
+    return `<button class="tag-filter-clear" onclick="toggleBrowseTagFilter('${safe}')">${esc(t)} ×</button>`;
+  }).join('');
+  const clearAll = browseTagFilter.size > 1
+    ? `<button class="tag-filter-clear" onclick="toggleBrowseTagFilter(null)">Clear all</button>`
+    : '';
+  bar.innerHTML = `<span>Filtering:</span>${chips}${clearAll}`;
 }
 
 function renderHistory() {
@@ -1889,18 +1920,20 @@ function renderHistory() {
   let filtered = historyFilter === 'all'
     ? history
     : history.filter(h => (h.source ?? 'daily') === historyFilter);
-  if (historyTagFilter) {
-    const tf = historyTagFilter.toLowerCase();
+  if (historyTagFilter.size) {
     filtered = filtered.filter(h =>
-      String(h.year) === tf ||
-      (h.genres ?? []).some(g => g.toLowerCase() === tf) ||
-      (h.styles ?? []).some(s => s.toLowerCase() === tf)
+      [...historyTagFilter].every(tf => {
+        const t = tf.toLowerCase();
+        return String(h.year) === t ||
+          (h.genres ?? []).some(g => g.toLowerCase() === t) ||
+          (h.styles ?? []).some(s => s.toLowerCase() === t);
+      })
     );
   }
 
   const base = historyFilter === 'all' ? history.length : history.filter(h => (h.source ?? 'daily') === historyFilter).length;
   const showing = Math.min(historyPage * HISTORY_PAGE_SIZE, filtered.length);
-  const totalLabel = historyTagFilter
+  const totalLabel = historyTagFilter.size
     ? `${filtered.length} of ${base} picks`
     : (historyFilter === 'all'
         ? (history.length ? `${history.length} picks` : '')
@@ -1920,11 +1953,13 @@ function renderHistory() {
   // ── Grid view ──
   if (historyViewMode === 'grid') {
     grid.innerHTML = `<div class="press-art-grid">${filtered.map(h => {
-      const imgHtml = h.imgDataUrl
-        ? `<img src="${esc(h.imgDataUrl)}" alt="${esc(h.artist)}"${h.id ? ` data-release-id="${h.id}"` : ''} loading="lazy">`
-        : `<div class="press-art-ph">♫</div>`;
+      const collRec = h.id ? collection.find(r => r.id === h.id) : null;
+      const imgSrc  = collRec?.cover_image || collRec?.thumb || h.imgDataUrl || '';
+      const imgHtml = imgSrc
+        ? `<img src="${esc(imgSrc)}" alt="${esc(h.artist)}"${h.id ? ` data-release-id="${h.id}"` : ''} loading="lazy">`
+        : `<div class="press-art-ph"${h.id ? ` data-release-id="${h.id}"` : ''}>♫</div>`;
       return `
-        <div class="press-art-grid-item" onclick="showView('today')" title="${esc(h.artist)} — ${esc(h.title)}">
+        <div class="press-art-grid-item"${h.id ? ` onclick="showAlbumDetail(${h.id}, 'history')"` : ''} title="${esc(h.artist)} — ${esc(h.title)}">
           ${imgHtml}
           <div class="press-art-grid-overlay"></div>
           <div class="press-art-grid-label">
@@ -1945,9 +1980,11 @@ function renderHistory() {
     const isEditDate     = activeEdit?.requestedAt === h.requestedAt && activeEdit?.field === 'date';
     const isEditNote     = activeEdit?.requestedAt === h.requestedAt && activeEdit?.field === 'note';
 
-    const artHtml = h.imgDataUrl
-      ? `<img src="${h.imgDataUrl}" alt="${esc(h.title)}"${h.id ? ` data-release-id="${h.id}"` : ''} loading="lazy" style="width:120px;height:120px;object-fit:cover;display:block;">`
-      : `<div class="press-archive-art-ph" ${h.id ? `data-release-id="${h.id}"` : ''}>♫</div>`;
+    const collRec = h.id ? collection.find(r => r.id === h.id) : null;
+    const artSrc  = collRec?.cover_image || collRec?.thumb || h.imgDataUrl || '';
+    const artHtml = artSrc
+      ? `<img src="${esc(artSrc)}" alt="${esc(h.title)}"${h.id ? ` data-release-id="${h.id}"` : ''} loading="lazy" style="width:120px;height:120px;object-fit:cover;display:block;">`
+      : `<div class="press-archive-art-ph"${h.id ? ` data-release-id="${h.id}"` : ''}>♫</div>`;
 
     const artWrap = h.id
       ? `<div class="press-archive-art" style="cursor:pointer;" onclick="showAlbumDetail(${h.id}, 'history')" title="View album detail">${artHtml}</div>`
@@ -1956,11 +1993,11 @@ function renderHistory() {
     // Genre/year tag pills for history
     const histTags = [...(h.genres ?? []), ...(h.styles ?? [])].slice(0, 4);
     const histPillsHtml = [
-      h.year ? `<span class="pill year${historyTagFilter === String(h.year) ? ' tag-active' : ''}" onclick="setHistoryTagFilter(historyTagFilter === '${h.year}' ? null : '${h.year}')">${h.year}</span>` : '',
+      h.year ? `<span class="pill year${historyTagFilter.has(String(h.year)) ? ' tag-active' : ''}" onclick="toggleHistoryTagFilter('${h.year}')">${h.year}</span>` : '',
       ...histTags.map(g => {
         const safe = g.replace(/'/g, "\\'");
-        const active = historyTagFilter === g;
-        return `<span class="pill${active ? ' tag-active' : ''}" onclick="setHistoryTagFilter(${active ? 'null' : `'${safe}'`})">${esc(g)}</span>`;
+        const active = historyTagFilter.has(g);
+        return `<span class="pill${active ? ' tag-active' : ''}" onclick="toggleHistoryTagFilter('${safe}')">${esc(g)}</span>`;
       }),
     ].filter(Boolean).join('');
     const histPillsWrap = histPillsHtml ? `<div class="browse-pills" style="margin-top:4px;">${histPillsHtml}</div>` : '';
@@ -2041,7 +2078,7 @@ function renderHistory() {
 function initHistoryImageLazyLoad() {
   if (!db) return;
   const targets = document.querySelectorAll(
-    '#history-grid img[data-release-id], #history-grid .press-archive-art-ph[data-release-id]'
+    '#history-grid img[data-release-id], #history-grid .press-archive-art-ph[data-release-id], #history-grid .press-art-ph[data-release-id]'
   );
   if (!targets.length) return;
 
@@ -2179,12 +2216,14 @@ function filterBrowse() {
         r.title.toLowerCase().includes(query)
       )
     : [...collection];
-  if (browseTagFilter) {
-    const tf = browseTagFilter.toLowerCase();
+  if (browseTagFilter.size) {
     items = items.filter(r =>
-      String(r.year) === tf ||
-      (r.genres ?? []).some(g => g.toLowerCase() === tf) ||
-      (r.styles ?? []).some(s => s.toLowerCase() === tf)
+      [...browseTagFilter].every(tf => {
+        const t = tf.toLowerCase();
+        return String(r.year) === t ||
+          (r.genres ?? []).some(g => g.toLowerCase() === t) ||
+          (r.styles ?? []).some(s => s.toLowerCase() === t);
+      })
     );
   }
 
@@ -2218,10 +2257,10 @@ function filterBrowse() {
 
   const countEl = document.getElementById('browse-count');
   const totalRecords = collection.length;
-  if (browseDedupe && items.length < totalRecords && !query && !browseTagFilter) {
+  if (browseDedupe && items.length < totalRecords && !query && !browseTagFilter.size) {
     countEl.textContent = `${items.length} albums (${totalRecords} in collection)`;
   } else {
-    countEl.textContent = (query || browseTagFilter)
+    countEl.textContent = (query || browseTagFilter.size)
       ? `${items.length} of ${totalRecords} records`
       : `${totalRecords} records`;
   }
@@ -2263,11 +2302,11 @@ function filterBrowse() {
   listEl.innerHTML = `<div class="browse-list">${items.map(r => {
     const tags      = [...(r.genres ?? []), ...(r.styles ?? [])].slice(0, 4);
     const pillsHtml = [
-      r.year ? `<span class="pill year${browseTagFilter === String(r.year) ? ' tag-active' : ''}" onclick="setBrowseTagFilter(browseTagFilter === '${r.year}' ? null : '${r.year}')">${r.year}</span>` : '',
+      r.year ? `<span class="pill year${browseTagFilter.has(String(r.year)) ? ' tag-active' : ''}" onclick="toggleBrowseTagFilter('${r.year}')">${r.year}</span>` : '',
       ...tags.map(g => {
         const safe = g.replace(/'/g, "\\'");
-        const active = browseTagFilter === g;
-        return `<span class="pill${active ? ' tag-active' : ''}" onclick="setBrowseTagFilter(${active ? 'null' : `'${safe}'`})">${esc(g)}</span>`;
+        const active = browseTagFilter.has(g);
+        return `<span class="pill${active ? ' tag-active' : ''}" onclick="toggleBrowseTagFilter('${safe}')">${esc(g)}</span>`;
       }),
     ].filter(Boolean).join('');
 
