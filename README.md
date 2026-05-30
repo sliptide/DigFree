@@ -54,7 +54,7 @@ All credentials (Discogs token, Claude API key, WordPress password) are:
 - **Never transmitted to Dig Free** — there are no Dig Free servers
 - Only sent directly to Discogs, your chosen AI provider, and your own WordPress site
 
-Your collection data, listening history, and value snapshots are stored in `localStorage` in your browser. None of it leaves your device except through the APIs you configure.
+Your collection data and value snapshots are stored in `localStorage`. Your listening history, HD artwork, and AI commentary are stored in `IndexedDB`. None of it leaves your device except through the APIs you configure.
 
 ---
 
@@ -84,17 +84,18 @@ The `[digfree_history]` shortcode displays your published listening history on a
 
 ## Storage limits
 
-| Collection size | History (capped at 1,000) | localStorage used | Status |
-|---|---|---|---|
-| 500 records | 1,000 entries | ~600 KB | ✅ Fine |
-| 2,000 records | 1,000 entries | ~1 MB | ✅ Fine |
-| 5,000 records | 1,000 entries | ~1.9 MB | ✅ Fine |
-| 10,000 records | 1,000 entries | ~3.3 MB | ⚠️ Getting close |
-| 17,000+ records | 1,000 entries | ~5 MB | ❌ Near limit |
+| What | Storage | Limit |
+|---|---|---|
+| Collection | localStorage | 5 MB origin limit (shared with values/meta) |
+| Value snapshots | localStorage | Same 5 MB pool |
+| **History** | **IndexedDB** | **No cap — disk-bounded (gigabytes)** |
+| HD artwork | IndexedDB | ~80 KB per cover |
+| AI commentary | IndexedDB | ~1 KB per album |
+| Credentials | IndexedDB (AES-256) | Negligible |
 
-Collection data and history are stored in `localStorage` (5 MB browser limit). History is hard-capped at 1,000 entries. The collection is the only real variable — collectors with fewer than 10,000 records are well within limits.
+**localStorage** holds only collection and value data (~200 bytes/record). At 5,000 records that's ~1 MB — well within the 5 MB origin limit for typical collections.
 
-HD album artwork is cached in IndexedDB, which has no hard cap and is limited only by available disk space (~80 KB per cover).
+**IndexedDB** holds history, artwork, and commentary. There is no entry cap: a pick-a-day habit for 10 years produces ~3,650 entries at ~500 bytes each — under 2 MB of history data. HD artwork is the largest contributor at ~80 KB per cover image cached.
 
 ---
 
