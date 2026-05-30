@@ -1322,15 +1322,16 @@ function extractReleases(raw) {
   return raw.map(rel => {
     const bi = rel.basic_information ?? {};
     return {
-      id:     rel.id,
-      title:  bi.title ?? 'Unknown',
-      artist: (bi.artists ?? [{}])[0]?.name?.replace(/\s*\(\d+\)$/, '') ?? 'Unknown',
-      year:   bi.year,
-      genres: bi.genres ?? [],
-      styles: bi.styles ?? [],
-      label:  (bi.labels ?? [{}])[0]?.name ?? '',
-      country: bi.country ?? '',
-      thumb:  bi.thumb ?? '',
+      id:          rel.id,
+      title:       bi.title ?? 'Unknown',
+      artist:      (bi.artists ?? [{}])[0]?.name?.replace(/\s*\(\d+\)$/, '') ?? 'Unknown',
+      year:        bi.year,
+      genres:      bi.genres ?? [],
+      styles:      bi.styles ?? [],
+      label:       (bi.labels ?? [{}])[0]?.name ?? '',
+      country:     bi.country ?? '',
+      thumb:       bi.thumb        ?? '',
+      cover_image: bi.cover_image  ?? '',  // 600px — same API response, no extra calls
     };
   });
 }
@@ -2074,6 +2075,32 @@ function initHistoryImageLazyLoad() {
   targets.forEach(el => observer.observe(el));
 }
 
+// ── LAZY-LOAD HD IMAGES IN BROWSE FROM INDEXEDDB ──
+function initBrowseImageLazyLoad() {
+  if (!db) return;
+  const targets = document.querySelectorAll('#browse-list img[data-release-id]');
+  if (!targets.length) return;
+
+  const observer = new IntersectionObserver(async (entries) => {
+    for (const entry of entries) {
+      if (!entry.isIntersecting) continue;
+      const el        = entry.target;
+      const releaseId = parseInt(el.dataset.releaseId, 10);
+      if (!releaseId || el.dataset.hdLoaded) { observer.unobserve(el); continue; }
+      observer.unobserve(el);
+      try {
+        const cached = await idbGet(db, 'images', releaseId);
+        if (!cached?.blob) continue;
+        const blobUrl = URL.createObjectURL(cached.blob);
+        el.src = blobUrl;
+        el.dataset.hdLoaded = '1';
+      } catch(e) { /* keep cover_image / thumb */ }
+    }
+  }, { rootMargin: '120px' });
+
+  targets.forEach(el => observer.observe(el));
+}
+
 async function removeFromHistory(requestedAt) {
   history = history.filter(h => h.requestedAt !== requestedAt);
   await deleteHistoryEntry(requestedAt);
@@ -2177,8 +2204,9 @@ function filterBrowse() {
       countMap.set(key, (countMap.get(key) ?? 0) + 1);
       const cur = bestMap.get(key);
       const better = !cur
-        || (r.thumb && !cur.thumb)
-        || (!cur.thumb && (r.genres?.length ?? 0) > (cur.genres?.length ?? 0));
+        || (r.cover_image && !cur.cover_image)
+        || (!cur.cover_image && r.thumb && !cur.thumb)
+        || (!cur.cover_image && !cur.thumb && (r.genres?.length ?? 0) > (cur.genres?.length ?? 0));
       if (better) bestMap.set(key, r);
     }
     items = [...bestMap.values()].map(r => {
@@ -2211,8 +2239,9 @@ function filterBrowse() {
   // ── Grid view ──
   if (browseViewMode === 'grid') {
     listEl.innerHTML = `<div class="press-art-grid">${items.map(r => {
-      const imgHtml = r.thumb
-        ? `<img src="${esc(r.thumb)}" alt="${esc(r.artist)}" loading="lazy">`
+      const imgSrc  = r.cover_image || r.thumb || '';
+      const imgHtml = imgSrc
+        ? `<img src="${esc(imgSrc)}" alt="${esc(r.artist)}" loading="lazy"${r.id ? ` data-release-id="${r.id}"` : ''}>`
         : `<div class="press-art-ph">♫</div>`;
       return `
         <div class="press-art-grid-item" onclick="showAlbumDetail(${r.id})" title="${esc(r.artist)} — ${esc(r.title)}">
@@ -2226,6 +2255,7 @@ function filterBrowse() {
           </div>
         </div>`;
     }).join('')}</div>`;
+    initBrowseImageLazyLoad();
     return;
   }
 
@@ -2246,8 +2276,9 @@ function filterBrowse() {
       ? `<div class="browse-sub">${subParts.map(esc).join(' · ')}</div>`
       : '';
 
-    const thumbHtml = r.thumb
-      ? `<img src="${esc(r.thumb)}" alt="${esc(r.artist)} – ${esc(r.title)}" loading="lazy">`
+    const browseImgSrc = r.cover_image || r.thumb;
+    const thumbHtml = browseImgSrc
+      ? `<img src="${esc(browseImgSrc)}" alt="${esc(r.artist)} – ${esc(r.title)}" loading="lazy"${r.id ? ` data-release-id="${r.id}"` : ''}>`
       : `<span style="font-size:1.2rem;color:var(--mid);">♫</span>`;
 
     const lastPick   = lastPickMap.get(r.id);
@@ -2274,6 +2305,7 @@ function filterBrowse() {
         </div>
       </div>`;
   }).join('')}</div>`;
+  initBrowseImageLazyLoad();
 }
 
 function addToHistory(id) {
