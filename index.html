@@ -590,7 +590,10 @@
         <button class="press-view-btn active" id="bv-list" onclick="setBrowseView('list')">≡ List</button>
         <button class="press-view-btn"        id="bv-grid" onclick="setBrowseView('grid')">⊞ Grid</button>
       </div>
-      <button class="press-view-btn" id="bv-dedupe" onclick="setBrowseDedupe(!browseDedupe)" title="Toggle duplicate albums"></button>
+      <div class="press-view-toggle">
+        <button class="press-view-btn" id="bv-unique"  onclick="setBrowseDedupe(true)">Unique</button>
+        <button class="press-view-btn" id="bv-all"     onclick="setBrowseDedupe(false)">All versions</button>
+      </div>
     </div>
     <div id="browse-tag-bar" class="tag-filter-bar" style="display:none">
       Filtering by tag: <strong id="browse-tag-label"></strong>
@@ -1850,10 +1853,8 @@ function setBrowseDedupe(val) {
 }
 
 function updateDedupeBtn() {
-  const btn = document.getElementById('bv-dedupe');
-  if (!btn) return;
-  btn.textContent = browseDedupe ? 'All versions' : 'Unique';
-  btn.title       = browseDedupe ? 'Show all pressings' : 'Collapse duplicates';
+  document.getElementById('bv-unique')?.classList.toggle('active', browseDedupe);
+  document.getElementById('bv-all')?.classList.toggle('active', !browseDedupe);
 }
 
 function setHistoryTagFilter(tag) {
