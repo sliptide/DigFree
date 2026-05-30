@@ -829,9 +829,10 @@
 const STORAGE = {
   COLLECTION: 'digfree_collection',
   META:       'digfree_meta',
-  HISTORY:    'digfree_history',
   VALUES:     'digfree_values',
+  // HISTORY moved to IndexedDB — see loadAllHistory / saveHistoryEntry
 };
+const HISTORY_LS_KEY = 'digfree_history'; // kept for migration only
 // Legacy keys from v1 (cratedig_*) — used only during one-time migration
 const LEGACY = {
   CREDS:      'cratedig_creds',
@@ -852,11 +853,12 @@ let meta           = null;
 let aiKey          = null;   // API key for AI commentary (any provider)
 let aiProvider     = 'anthropic'; // 'anthropic' | 'openai' | 'gemini' | 'groq'
 let wpConfig       = null;
-let historyFilter  = 'all';
-let historyTagFilter = null;  // active genre/year tag filter in history
-let browseTagFilter  = null;  // active genre/year tag filter in browse
-let historyViewMode = 'list'; // 'list' | 'grid'
-let browseViewMode  = 'list'; // 'list' | 'grid'
+let historyFilter    = 'all';
+let historyTagFilter = null;   // active genre/year tag filter in history
+let historyPage      = 1;      // current pagination page (reset on filter change)
+let browseTagFilter  = null;   // active genre/year tag filter in browse
+let historyViewMode  = 'list'; // 'list' | 'grid'
+let browseViewMode   = 'list'; // 'list' | 'grid'
 let activeEdit     = null;   // { requestedAt, field: 'date'|'note' }
 let archiveData    = null;   // loaded archive JSON { year, picks, … }
 let archiveFilter  = 'all';
@@ -870,7 +872,7 @@ const VALUE_PAGE_SIZE = 20;
 
 // ── INDEXEDDB HELPERS ──
 const DB_NAME    = 'DigFree';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 function openDB() {
   return new Promise((resolve, reject) => {
@@ -881,6 +883,10 @@ function openDB() {
       if (!d.objectStoreNames.contains('credentials'))   d.createObjectStore('credentials',   { keyPath: 'id' });
       if (!d.objectStoreNames.contains('images'))        d.createObjectStore('images',        { keyPath: 'releaseId' });
       if (!d.objectStoreNames.contains('ai_commentary')) d.createObjectStore('ai_commentary', { keyPath: 'releaseId' });
+      if (!d.objectStoreNames.contains('history')) {
+        const hs = d.createObjectStore('history', { keyPath: 'requestedAt' });
+        hs.createIndex('by_id', 'id', { unique: false });
+      }
     };
     req.onsuccess = e => resolve(e.target.result);
     req.onerror   = e => reject(e.target.error);
@@ -921,6 +927,45 @@ function idbClearStore(database, store) {
     req.onsuccess = () => resolve();
     req.onerror   = () => reject(req.error);
   });
+}
+
+function idbGetAll(database, store) {
+  return new Promise((resolve, reject) => {
+    const tx  = database.transaction(store, 'readonly');
+    const req = tx.objectStore(store).getAll();
+    req.onsuccess = () => resolve(req.result ?? []);
+    req.onerror   = () => reject(req.error);
+  });
+}
+
+// ── HISTORY PERSISTENCE (IndexedDB) ──
+const HISTORY_PAGE_SIZE = 100;
+
+async function loadAllHistory() {
+  if (!db) return [];
+  const all = await idbGetAll(db, 'history');
+  return all.sort((a, b) => b.requestedAt.localeCompare(a.requestedAt));
+}
+
+async function saveHistoryEntry(entry) {
+  if (!db) return;
+  await idbPut(db, 'history', entry);
+}
+
+async function deleteHistoryEntry(requestedAt) {
+  if (!db) return;
+  await idbDelete(db, 'history', requestedAt);
+}
+
+async function migrateHistoryToIndexedDB() {
+  if (!db) return;
+  const lsHistory = loadJSON(HISTORY_LS_KEY);
+  if (!lsHistory?.length) return;
+  const existing = await idbGetAll(db, 'history');
+  if (existing.length > 0) return; // already migrated
+  await Promise.all(lsHistory.map(e => idbPut(db, 'history', e)));
+  localStorage.removeItem(HISTORY_LS_KEY);
+  showToast(`History migrated — ${lsHistory.length} picks moved to expanded storage ✓`);
 }
 
 // ── AI COMMENTARY CACHE ──
@@ -988,7 +1033,7 @@ async function migrateFromV1() {
   const keyMap = [
     [LEGACY.COLLECTION, STORAGE.COLLECTION],
     [LEGACY.META,       STORAGE.META],
-    [LEGACY.HISTORY,    STORAGE.HISTORY],
+    [LEGACY.HISTORY,    HISTORY_LS_KEY],   // staging key; migrateHistoryToIndexedDB() moves it to IDB
     [LEGACY.VALUES,     STORAGE.VALUES],
   ];
   let migrated = false;
@@ -1099,8 +1144,11 @@ async function init() {
   // 4. Load collection data from localStorage (sync, non-sensitive)
   collection   = loadJSON(STORAGE.COLLECTION) ?? [];
   meta         = loadJSON(STORAGE.META);
-  history      = loadJSON(STORAGE.HISTORY) ?? [];
   valueHistory = loadJSON(STORAGE.VALUES) ?? [];
+
+  // 4b. Migrate history from localStorage → IndexedDB (one-time), then load
+  await migrateHistoryToIndexedDB();
+  history = await loadAllHistory();
 
   // 5. Hide boot loader
   const loader = document.getElementById('boot-loader');
@@ -1401,7 +1449,7 @@ async function pickAlbum(sincedays = null) {
     requestedAt: new Date().toISOString(),
     source:      'daily',
   });
-  saveJSON(STORAGE.HISTORY, history.slice(0, 1000));
+  await saveHistoryEntry(history[0]);
 
   renderAlbumCard({ pick, rating, tracklist, imgDataUrl: imageDisplay, take, facts, highlights });
 }
@@ -1763,6 +1811,7 @@ function renderStars(rating) {
 // ── HISTORY ──
 function setHistoryFilter(filter) {
   historyFilter = filter;
+  historyPage   = 1;
   document.querySelectorAll('.press-filter-strip .press-filter').forEach(b => b.classList.remove('active'));
   const btn = document.getElementById('hf-' + filter);
   if (btn) btn.classList.add('active');
@@ -1771,6 +1820,7 @@ function setHistoryFilter(filter) {
 
 function setHistoryView(mode) {
   historyViewMode = mode;
+  historyPage     = 1;
   document.getElementById('hv-list').classList.toggle('active', mode === 'list');
   document.getElementById('hv-grid').classList.toggle('active', mode === 'grid');
   renderHistory();
@@ -1785,10 +1835,16 @@ function setBrowseView(mode) {
 
 function setHistoryTagFilter(tag) {
   historyTagFilter = tag;
+  historyPage      = 1;
   const bar   = document.getElementById('history-tag-bar');
   const label = document.getElementById('history-tag-label');
   if (bar) bar.style.display = tag ? '' : 'none';
   if (label) label.textContent = tag ?? '';
+  renderHistory();
+}
+
+function loadMoreHistory() {
+  historyPage++;
   renderHistory();
 }
 
@@ -1818,6 +1874,7 @@ function renderHistory() {
   }
 
   const base = historyFilter === 'all' ? history.length : history.filter(h => (h.source ?? 'daily') === historyFilter).length;
+  const showing = Math.min(historyPage * HISTORY_PAGE_SIZE, filtered.length);
   const totalLabel = historyTagFilter
     ? `${filtered.length} of ${base} picks`
     : (historyFilter === 'all'
@@ -1856,7 +1913,8 @@ function renderHistory() {
   }
 
   // ── List view ──
-  grid.innerHTML = filtered.map(h => {
+  const paginated = filtered.slice(0, historyPage * HISTORY_PAGE_SIZE);
+  grid.innerHTML = paginated.map(h => {
     const source         = h.source ?? 'daily';
     const displayDateStr = h.pickedDate ?? h.requestedAt;
     const isEditDate     = activeEdit?.requestedAt === h.requestedAt && activeEdit?.field === 'date';
@@ -1939,6 +1997,17 @@ function renderHistory() {
       </div>`;
   }).join('');
 
+  // Load-more button when there are more entries than the current page shows
+  if (filtered.length > historyPage * HISTORY_PAGE_SIZE) {
+    const remaining = filtered.length - historyPage * HISTORY_PAGE_SIZE;
+    grid.innerHTML += `
+      <div style="text-align:center; padding:24px 0 8px;">
+        <button class="press-row-btn" onclick="loadMoreHistory()" style="font-size:0.72rem; padding:10px 28px;">
+          Load more — ${remaining} remaining
+        </button>
+      </div>`;
+  }
+
   // Upgrade thumbnails to HD images stored in IndexedDB
   initHistoryImageLazyLoad();
 }
@@ -1981,9 +2050,9 @@ function initHistoryImageLazyLoad() {
   targets.forEach(el => observer.observe(el));
 }
 
-function removeFromHistory(requestedAt) {
+async function removeFromHistory(requestedAt) {
   history = history.filter(h => h.requestedAt !== requestedAt);
-  saveJSON(STORAGE.HISTORY, history);
+  await deleteHistoryEntry(requestedAt);
   renderHistory();
   const el = document.getElementById('s-history');
   if (el) el.textContent = history.length ? `${history.length} picks` : 'None';
@@ -2021,22 +2090,22 @@ function cancelEdit() {
   renderHistory();
 }
 
-function saveDate(requestedAt, value) {
+async function saveDate(requestedAt, value) {
   if (!value) { cancelEdit(); return; }
   const idx = history.findIndex(h => h.requestedAt === requestedAt);
   if (idx >= 0) {
     history[idx].pickedDate = value; // stored as "YYYY-MM-DD"
-    saveJSON(STORAGE.HISTORY, history.slice(0, 1000));
+    await saveHistoryEntry(history[idx]);
   }
   activeEdit = null;
   renderHistory();
 }
 
-function saveNote(requestedAt, value) {
+async function saveNote(requestedAt, value) {
   const idx = history.findIndex(h => h.requestedAt === requestedAt);
   if (idx >= 0) {
     history[idx].note = value.trim();
-    saveJSON(STORAGE.HISTORY, history.slice(0, 1000));
+    await saveHistoryEntry(history[idx]);
   }
   activeEdit = null;
   renderHistory();
@@ -2173,7 +2242,7 @@ function addToHistory(id) {
     requestedAt: new Date().toISOString(),
     source:      'user',
   });
-  saveJSON(STORAGE.HISTORY, history.slice(0, 1000));
+  saveHistoryEntry(history[0]); // fire-and-forget
   filterBrowse(); // refresh button states in place
 }
 
@@ -2455,7 +2524,7 @@ async function publishEntry(requestedAt) {
     const idx  = history.findIndex(h => h.requestedAt === requestedAt);
     if (idx >= 0) {
       history[idx].wpPostId = data.id;
-      saveJSON(STORAGE.HISTORY, history.slice(0, 1000));
+      await saveHistoryEntry(history[idx]);
     }
     renderHistory();
   } catch(e) {
@@ -2478,7 +2547,7 @@ async function unpublishEntry(requestedAt) {
     const idx = history.findIndex(h => h.requestedAt === requestedAt);
     if (idx >= 0) {
       delete history[idx].wpPostId;
-      saveJSON(STORAGE.HISTORY, history.slice(0, 1000));
+      await saveHistoryEntry(history[idx]);
     }
     renderHistory();
   } catch(e) {
@@ -2506,7 +2575,8 @@ async function importFromWordPress() {
     let linked   = 0; // already local but wpPostId was missing — now linked
     let skipped  = 0; // already fully in sync
 
-    const toAdd = [];
+    const toAdd         = [];
+    const linkedEntries = []; // local entries that gained a wpPostId
 
     for (const e of wpEntries) {
       const key   = e.digfree_id ?? e.cratedig_id;  // accept both (v1 compat)
@@ -2514,7 +2584,7 @@ async function importFromWordPress() {
 
       if (local) {
         // Already present locally — just wire up wpPostId if it's missing
-        if (!local.wpPostId && e.id) { local.wpPostId = e.id; linked++; }
+        if (!local.wpPostId && e.id) { local.wpPostId = e.id; linkedEntries.push(local); linked++; }
         else skipped++;
         continue;
       }
@@ -2570,7 +2640,7 @@ async function importFromWordPress() {
           const db = (b.pickedDate || b.requestedAt || '').slice(0, 10);
           return db.localeCompare(da); // newest first
         });
-      saveJSON(STORAGE.HISTORY, history.slice(0, 1000));
+      await Promise.all([...toAdd, ...linkedEntries].map(e => saveHistoryEntry(e)));
       renderSettings();
     }
 
