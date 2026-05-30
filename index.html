@@ -961,11 +961,15 @@ async function migrateHistoryToIndexedDB() {
   if (!db) return;
   const lsHistory = loadJSON(HISTORY_LS_KEY);
   if (!lsHistory?.length) return;
-  const existing = await idbGetAll(db, 'history');
-  if (existing.length > 0) return; // already migrated
-  await Promise.all(lsHistory.map(e => idbPut(db, 'history', e)));
-  localStorage.removeItem(HISTORY_LS_KEY);
-  showToast(`History migrated — ${lsHistory.length} picks moved to expanded storage ✓`);
+  // Merge rather than skip — handles partial migrations and recovery cases
+  const existing    = await idbGetAll(db, 'history');
+  const existingKeys = new Set(existing.map(e => e.requestedAt));
+  const toMigrate   = lsHistory.filter(e => !existingKeys.has(e.requestedAt));
+  if (toMigrate.length) {
+    await Promise.all(toMigrate.map(e => idbPut(db, 'history', e)));
+    showToast(`History migrated — ${toMigrate.length} picks moved to expanded storage ✓`);
+  }
+  localStorage.removeItem(HISTORY_LS_KEY); // always clear LS once processed
 }
 
 // ── AI COMMENTARY CACHE ──
@@ -2592,16 +2596,21 @@ async function importFromWordPress() {
       // Try to recover the Discogs release ID: first from stored discogs_url,
       // then by artist+title match in the local collection (case-insensitive).
       let discogsId = null;
+      let collMatch = null;
       if (e.discogs_url) {
         const m = String(e.discogs_url).match(/\/release\/(\d+)/);
         if (m) discogsId = parseInt(m[1], 10);
       }
       if (!discogsId) {
         const needle = (s) => (s || '').toLowerCase().trim();
-        const collMatch = collection.find(r =>
+        collMatch = collection.find(r =>
           needle(r.artist) === needle(e.artist) && needle(r.title) === needle(e.title)
-        );
+        ) ?? null;
         discogsId = collMatch?.id ?? null;
+      }
+      // When discogsId came from the URL, still find collMatch for rating/tracklist
+      if (discogsId && !collMatch) {
+        collMatch = collection.find(r => r.id === discogsId) ?? null;
       }
 
       // Normalise pickedDate to YYYY-MM-DD (WP may store an ISO timestamp)
